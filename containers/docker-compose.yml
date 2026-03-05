@@ -1,0 +1,106 @@
+
+
+services:
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    volumes:
+      - ./n8n_container/n8n_data:/home/node/.n8n
+    depends_on:
+      - soca
+    networks:
+      - net
+
+  soca:
+    build:
+      context: ./soca_container
+    container_name: soca_runner
+    volumes:
+      - ./soca_container/outputs:/app/outputs
+    networks:
+      - net
+    ports:
+      - "8001:8000"
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    
+  rsfc:
+    build:
+      context: ./rsfc_container
+    container_name: rsfc_runner
+    volumes:
+      - ./rsfc_container/outputs:/app/outputs
+    networks:
+      - net
+    ports:
+      - "8002:8000"
+    depends_on:
+      - postgres
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+    - "5672:5672"
+    - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password123
+    networks:
+    - net
+
+
+  worker:
+    build:
+      context: ./rsfc_container
+    command: python -u -m rsfc_runner.worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - net
+    volumes:
+      - ./rsfc_container/outputs:/app/outputs
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
+
+  postgres:
+    image: postgres:16
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rsfc"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    container_name: postgres_rsfc
+    environment:
+      POSTGRES_USER: rsfc
+      POSTGRES_PASSWORD: rsfc
+      POSTGRES_DB: jobs
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - net
+    ports:
+      - "5432:5432"
+
+
+volumes:
+  postgres_data:
+
+networks:
+  net:
+    driver: bridge

@@ -1,0 +1,63 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Software-Quality-Observatory-Orchestrator
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Sergio
+    family-names: Zaballos Herrera
+    name-particle: Sergio
+    email: s.zaballosh@gmail.com
+    orcid: 'https://orcid.org/0009-0000-3795-2767'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.18868921
+  - type: url
+    value: >-
+      https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG-
+    description: Github URL
+repository-code: >-
+  https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG-
+url: 'https://github.com/'
+repository: 'https://zenodo.org/records/18868922'
+abstract: >-
+  This project presents the design and implementation of a
+  Software Quality Observatory Orchestrator, a system that
+  automates the analysis and evaluation of research software
+  repositories. The platform integrates tools from the
+  research software ecosystem, including SOCA for repository
+  discovery and metadata extraction and RSFC (Research
+  Software Fitness Criteria) for assessing software quality
+  indicators.
+
+
+  The system is implemented through a containerized
+  architecture using Docker, while workflow orchestration is
+  managed with n8n, enabling reproducible and automated
+  execution of the analysis pipeline. The orchestrator
+  retrieves repositories, processes them through the
+  evaluation tools, and collects the resulting quality
+  metrics.
+
+
+  The resulting framework provides a scalable and modular
+  approach for evaluating large collections of research
+  software, contributing to improved software quality
+  assessment, reproducibility, and automation in research
+  software engineering and open science.
+keywords:
+  - workflow orchestration
+  - research software
+  - software quality assessment
+  - research software engineering
+  - n8n
+  - reproducible workflows
+  - software quality metrics
+license: Apache-2.0
+commit: 6a77aece0370dc677960497eef3e2efba78a0360
+version: 0.4.0
+date-released: '2026-03-05'

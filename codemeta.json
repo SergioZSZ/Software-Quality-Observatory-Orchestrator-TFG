@@ -1,0 +1,61 @@
+{
+    "@context": "https://w3id.org/codemeta/3.0",
+    "applicationCategory": "Software quality research",
+    "codeRepository": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG",
+    "contributor": {
+        "email": "s.zaballosh@gmail.com",
+        "familyName": "Zaballos Herrera",
+        "givenName": "Sergio",
+        "@id": "https://orcid.org/0009-0000-3795-2767",
+        "@type": "Person"
+    },
+    "dateCreated": "2026-03-04",
+    "dateModified": "2026-03-04",
+    "datePublished": "2026-03-05",
+    "description": "This project presents the design and implementation of a\n  Software Quality Observatory Orchestrator, a system that\n  automates the analysis and evaluation of research software\n  repositories. The platform integrates tools from the\n  research software ecosystem, including SOCA for repository\n  discovery and metadata extraction and RSFC (Research\n  Software Fitness Criteria) for assessing software quality\n  indicators.\n\n\n  The system is implemented through a containerized\n  architecture using Docker, while workflow orchestration is\n  managed with n8n, enabling reproducible and automated\n  execution of the analysis pipeline. The orchestrator\n  retrieves repositories, processes them through the\n  evaluation tools, and collects the resulting quality\n  metrics.\n\n\n  The resulting framework provides a scalable and modular\n  approach for evaluating large collections of research\n  software, contributing to improved software quality\n  assessment, reproducibility, and automation in research\n  software engineering and open science.",
+    "downloadUrl": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG",
+    "identifier": "10.5281/zenodo.18868921",
+    "keywords": [
+        "workflow orchestration",
+        "research software",
+        "software quality assessment",
+        "research software engineering",
+        "n8n",
+        "reproducible workflows",
+        "software quality metrics",
+        "Docker"
+    ],
+    "license": "https://spdx.org/licenses/Apache-2.0",
+    "name": "Software-Quality-Observatory-Orchestrator",
+    "operatingSystem": [
+        "Linux",
+        "Windows",
+        "macOS"
+    ],
+    "programmingLanguage": "Python 3",
+    "relatedLink": [
+        "https://github.com/oeg-upm/soca",
+        "https://github.com/oeg-upm/soca",
+        "https://github.com/KnowledgeCaptureAndDiscovery/somef/tree/master"
+    ],
+    "releaseNotes": "Initial release of the Software Quality Observatory Orchestrator.\n\nThis version provides a containerized architecture for orchestrating\nsoftware quality assessment workflows using SOCA and RSFC.\n\nMain features:\n- Automated repository retrieval\n- Integration with RSFC for quality assessment\n- Workflow orchestration using n8n\n- Docker-based deployment",
+    "runtimePlatform": "Docker",
+    "softwareRequirements": [
+        {
+            "name": "Docker",
+            "version": "20+"
+        },
+        {
+            "name": "Python",
+            "version": "3.11"
+        },
+        {
+            "name": "n8n",
+            "version": "latest"
+        }
+    ],
+    "version": "0.4.0",
+    "developmentStatus": "active",
+    "issueTracker": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/issues",
+    "@type": "SoftwareSourceCode"
+}
