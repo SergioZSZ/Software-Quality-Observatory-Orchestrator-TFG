@@ -14,7 +14,7 @@
     "datePublished": "2026-03-05",
     "description": "This project presents the design and implementation of a\n  Software Quality Observatory Orchestrator, a system that\n  automates the analysis and evaluation of research software\n  repositories. The platform integrates tools from the\n  research software ecosystem, including SOCA for repository\n  discovery and metadata extraction and RSFC (Research\n  Software Fitness Criteria) for assessing software quality\n  indicators.\n\n\n  The system is implemented through a containerized\n  architecture using Docker, while workflow orchestration is\n  managed with n8n, enabling reproducible and automated\n  execution of the analysis pipeline. The orchestrator\n  retrieves repositories, processes them through the\n  evaluation tools, and collects the resulting quality\n  metrics.\n\n\n  The resulting framework provides a scalable and modular\n  approach for evaluating large collections of research\n  software, contributing to improved software quality\n  assessment, reproducibility, and automation in research\n  software engineering and open science.",
     "downloadUrl": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG",
-    "identifier": "10.5281/zenodo.18868921",
+    "identifier": "10.5281/zenodo.18879858",
     "keywords": [
         "workflow orchestration",
         "research software",
@@ -54,7 +54,7 @@
             "version": "latest"
         }
     ],
-    "version": "0.4.0",
+    "version": "0.4.2",
     "developmentStatus": "active",
     "issueTracker": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/issues",
     "@type": "SoftwareSourceCode"
