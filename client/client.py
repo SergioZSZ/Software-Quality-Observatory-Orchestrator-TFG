@@ -51,4 +51,4 @@ def main():
     print(f"\nTiempo total de ejecución: {total:.2f} segundos")
         
 if __name__ == "__main__":
-    main()
+    main()        

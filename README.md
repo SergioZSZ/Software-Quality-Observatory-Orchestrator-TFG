@@ -67,16 +67,19 @@ Se ha:
 - Adaptado su ejecución vía API
 - Encapsulado en un contenedor Docker
 - Configurado volúmenes para persistencia de resultados
+- Orquestado mediante lanzamiento de jobs a RabbitMQ la generación del portal software
+- Implementado lanzamiento de un worker para procesar el job usando la cola de trabajo de RabbitMQ
 
 Salida generada:
 
+- Fetch de los repositorios y envío a n8n
 - Repositorios descargados
 - Metadatos estructurados
 - Portal web del catálogo
 
 ### 3.1.2. Endpoints de soca_container
 
-- `funcions/fetch`
+- `funcions/run`
     - Argumentos necesarios: 
         1. `target`: Nombre del usuario/organización de GitHub
         2. `type`: Declaración del tipo de `target`, usuario-> `user`, organización->`org`
@@ -84,21 +87,40 @@ Salida generada:
     - Utilidades:
         - Configuración de `SOMEF` y `SOCA`
         - Fetch de repositorio del `target` dado
-    
+        - Publicación de job a cola de trabajo de RabbitMQ con el target dado
+        - Generación de status.json guardando el estado del job
+
     - Response:
         - `json` con los repositorios de la organización
 
-- `funcions/portal`
-    - Argumentos necesarios:
+
+- `funcions/status/{target}`
+    - Argumentos necesarios: 
         1. `target`: Nombre del usuario/organización de GitHub
     
     - Utilidades:
-        1. Extracción de metadatos de los repositorios recogidos en el `/functions/fetch`
-        2. Generación del portal software a partir de los metadatos
+        - Comprobación del fichero status.json
+    
+    - Response:
+        - Contenido del fichero status.json
+
+### 3.3 worker_rsfc container
+El contenedor worker se encarga de la extracción de metadatos de los repositorios obtenidos en el fetch y generación del portal de manera asíncrona con el resto del workflow.
+
+Mientras que soca_container actúa como API encargada publicar en una cola de trabajo en RabbitMQ con el usuario/organización del cual se va a general el portal software.
+
+Cada worker ejecuta el módulo `python -u -m soca_runner.worker` que se dedica a:
+
+1. Recibe un job de RabbitMQ (con el target)
+2. Cambia fichero status.json a "running"
+2. Extrae los metadatos de dicho target
+3. Genera el portal software del target
+4. Cambia fichero status.json a "completed" o "error"
+4. Responde a RabbitMQ dando el job por finalizado
 
 
 
-### 3.2.1 Dockerización de RSFC
+### 3.3.1 Dockerización de RSFC
 
 Se ha:
 
@@ -114,7 +136,7 @@ Salida generada:
 - Generación de indicadores de calidad en formato `json`
 
 
-### 3.2.2. Endpoints rsfc_container
+### 3.3.2. Endpoints rsfc_container
 
 - `funcions/run`
     - Argumentos necesarios:
@@ -138,12 +160,12 @@ Salida generada:
 
 
 
-### 3.3 worker container
+### 3.4 worker_rsfc container
 El contenedor worker se encarga del procesamiento asíncrono de los jobs generados por rsfc_container.
 
 Mientras que rsfc_container actúa como API encargada de registrar los jobs, los workers se encargan de consumir dichos jobs desde la base de datos y ejecutar el análisis con RSFC.
 
-Cada worker ejecuta el módulo `python -u -m rsfc_runner.worker` que implementa un proceso en bucle que:
+Cada worker ejecuta el módulo `python -u -m rsfc_runner.worker` que se encarga de recibir los jobs publicados en RabbitMQ que:
 
 1. Recibe un job de RabbitMQ
 2. Cambia los jobs con estado queued a estado a running
@@ -157,7 +179,7 @@ El sistema permite escalar horizontalmente el número de workers mediante docker
 
 **NOTA: ATENCION A LA SECCION MEJORAS POR PROBLEMA CON ESTA IMPLEMENTACION**
 
-### 3.4 Flujo actual(container n8n)
+### 3.5 Flujo actual(container n8n)
 
 Mediante `n8n` se ha orquestado un workflow que realiza una petición http a las APIs dockerizadas para generar los diversos datos correspondientes a cada entrada del flujo:
 
@@ -201,10 +223,11 @@ Herramientas usadadas en el proyecto:
    - SOCA: https://github.com/oeg-upm/soca/
    - RSFC: https://github.com/oeg-upm/rsfc/
    - SOMEF: https://github.com/KnowledgeCaptureAndDiscovery/somef
+   - DASHVERSE: https://github.com/EVERSE-ResearchSoftware/DashVERSE
 
 ### 4.2 Despliegue y ejecución
 
-1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker=N`, siendo N el nº de workers a lanzar(recomendable 4 por saturación de GitHubAPI)
+1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker=N`, siendo N el nº de workers a lanzar(recomendable máximo 4 por saturación de GitHubAPI)
 2. Acceder a n8n mediante el navegador en http://localhost:5678
 3. En el primer acceso:
     1. Crear cuenta de usuario en n8n
@@ -219,26 +242,28 @@ el programa ejecutado los repositorios procesados o los errores.
 ### Ejemplo de uso
 1. Desde el directorio `/containers` en la terminal: `docker compose up -d --scale worker=4`
 2. Activar el workflow como comentado antes de n8n en el nodo `WebHook` al princpio del workflow
-3. Desde el directorio `/client` en la terminal: `python client.py`
+3. Desde el directorio `/client` en la terminal: `poetry run python .\client.py`
 4. Rellenar campos:
     - Introduce el usuario u organización: SergioZSZ
     - Introduce el tipo (user/org): user
 5. Cuando se procesen los metadatos se guardará un `.json` en el directorio de `/client` con los indicadores/error generado.
 
-## 5. Ausentes y por mejorar
+## 5. Issues
 
-### 5.1 Ausente
 
+- Actualizar diagrama de flujo con las nuevas funcionalidades añadidas (workers, rabbitmq, bbdd)
+- Actualizar proyecto para que somef se ejecute solo 1 vez 
 - Codificación y Dockerización de `dashverse_container` e implementar sus funcionalidades
 - Integración en el workflow de `dashverse_container` y obtención de urls a dashboards
 - Generación del portal software mediante `soca_container` con urls a dashboards
-- Integrar la versión mas reciente de SOMEF en SOCA + modificar SOCA con los cambios que se deban debido a la integración para que el pipeline siga funcionando
-- Mejorar los metadatos mostrados en el catálogo generado por SOCA
+- Actualizar somef en soca y mejorar los metadatos mostrados
+- FAIRificar los repositorios mejorando los checks de metadatos
+- (Si da tiempo) automatizar sugerencias para mejorar los repositorios
 
-## 5.2 Posibles mejoras
+
 - Actualmente el rendimiento del sistema está condicionado por las limitaciones externas de la API de GitHub:
     - 5000 requests/hora por token 
-    - Si hay muchas peticiones en poco tiempo, como puede pasar con el contenedor RSFC, GitHubAPI devuelve `error 403 rate limit`, habiendo superado el rate limit que ofrece por un tiempo
+    - Si hay muchas peticiones en poco tiempo a un repositorio/user/org, como puede pasar con el contenedor RSFC, GitHubAPI devuelve `error 403 rate limit`, habiendo superado el rate limit que ofrece por un tiempo
 por lo que organizaciones o usuarios con muchos repositorios pueden dar errores. Debido a ello se recomienda el uso de 4 workers al ejecutar el proyecto y se ha establecido un sleep de 8 a 10 segundos antes de ejecutar RSFC para no recibir ese error. Hay una versión del proyecto que falta por probar consistente en procesar secuencialmente los repositorios en vez de con un sistema de cola dinámico, pero tarda bastante más en procesarlos
 
 - Se podría realizar una implementación para encontrar repositorios ya fetcheados/extraídos para no tener que volver a llamar a GitHubAPI y usar los metadatos/indicadores ya extraídos

@@ -9,5 +9,3 @@ app.include_router(router=functions.router, prefix=("/functions"), tags=["/funct
 @app.get("/isactive")
 async def isactive():
     return {"state":True}
-
-

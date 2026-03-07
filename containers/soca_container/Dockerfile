@@ -25,6 +25,11 @@ RUN python -m nltk.downloader wordnet omw-1.4
 # resto cod
 COPY . .
 
+# configuracion de somef y soca
+COPY initial_configs.sh /initial_configs.sh
+RUN chmod +x /initial_configs.sh
+
+ENTRYPOINT ["/initial_configs.sh"]
 
 EXPOSE 8000
 

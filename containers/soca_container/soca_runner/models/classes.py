@@ -7,6 +7,7 @@ class Args(BaseModel):
 
 class SocaResponse(BaseModel):
     status: str
+    target: str
     response: list | None = None
     err: str | None
     
@@ -18,4 +19,8 @@ class FetchResponse(BaseModel):
 class PortalResponse(BaseModel):
     status: dict
 
-    
+
+class StatusResponse(BaseModel):
+    target: str
+    status: str
+    detail : dict | None = None

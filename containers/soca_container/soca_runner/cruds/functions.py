@@ -48,23 +48,8 @@ def soca_conf_fetch(dir_base: str, target: str, type: str, token: str | None = N
     repos_file = os.path.abspath(os.path.join(dir_base,"outputs",target,"repos.txt"))
 
     # mandatos soca
-    conf_soca = ["soca","configure"]    
-    conf_somef = ["somef","configure"]
     fetch = ["soca", "fetch", "-i", target, "-o", repos_file, f"--{type}"]
 
-        # respuesta de somef dependiendo de token
-    if token:
-        conf_somef_input = f"{token}\n\n\n\n\n\n"
-    else:
-        conf_somef_input = f"\n\n\n\n\n\n"
-    
-    result_conf_somef = run_command(conf_somef, input = conf_somef_input)
-    if result_conf_somef["status"]=="error":
-        return FetchResponse(status=result_conf_somef)
-    
-    result_conf_soca =run_command(conf_soca, input="\n\n\nmytoken\n\n")
-    if result_conf_soca["status"]=="error":
-        return FetchResponse(status=result_conf_soca)
     
     result_fetch = run_command(fetch)
     if result_fetch["status"]=="error":

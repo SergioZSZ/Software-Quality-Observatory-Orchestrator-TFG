@@ -9,8 +9,8 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        624,
-        -320
+        608,
+        -304
       ],
       "id": "d62ce63a-82aa-4708-b2e0-3f0c85016512",
       "name": "Split Out"
@@ -22,8 +22,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        800,
-        -272
+        784,
+        -256
       ],
       "id": "c88c2a9b-8e41-4e67-9de0-9a4cb8a364f8",
       "name": "Loop Over Items",
@@ -79,8 +79,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        976,
-        -64
+        960,
+        -48
       ],
       "id": "5085b6a7-c650-4e49-ae9f-ca01c16f00da",
       "name": "Request RSFC",
@@ -173,30 +173,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -80,
-        -288
+        -96,
+        -240
       ],
       "id": "2f245d42-9540-4adc-9fbe-a3ed1e4693f6",
       "name": "If fetched"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://soca:8000/functions/fetch",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n\"target\": \"{{ $json.body.input}}\",\n\"type\": \"{{ $json.body.type }}\"\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        -272,
-        -288
-      ],
-      "id": "cdfac47a-260f-4dc3-b36e-f9f98bbdfea6",
-      "name": "Request Soca Fetch",
-      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -254,8 +235,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        464,
-        -320
+        448,
+        -304
       ],
       "id": "34bb8982-5d21-44a1-9467-e2db13750215",
       "name": "Merge"
@@ -298,8 +279,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1632,
-        -352
+        1616,
+        -336
       ],
       "id": "2fca9729-66e3-402d-8920-c2cd6caf20de",
       "name": "Respond to Webhook"
@@ -327,8 +308,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -160,
-        96
+        48,
+        192
       ],
       "id": "2b0b5a76-a060-43bf-bdf9-02421ad7eebc",
       "name": "Respond to Webhook2"
@@ -355,8 +336,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2016,
-        176
+        2000,
+        192
       ],
       "id": "2a5166dc-09e5-49ac-a2c9-357ad661c305",
       "name": "Respond to Webhook4"
@@ -377,8 +358,8 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        992,
-        -320
+        976,
+        -304
       ],
       "id": "7f535cc3-2f67-4cd1-a740-d054f252aef7",
       "name": "Aggregate"
@@ -390,8 +371,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1472,
-        -112
+        1456,
+        -96
       ],
       "id": "e28db273-e219-4171-ba04-3a32da2cf787",
       "name": "Wait1",
@@ -405,8 +386,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1648,
-        -112
+        1632,
+        -96
       ],
       "id": "0f825267-bee6-475b-b791-c62919803747",
       "name": "Request RSFC status",
@@ -460,8 +441,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1536,
-        112
+        1520,
+        128
       ],
       "id": "499d7f3d-1a71-4959-a34a-d8a00cfb01f1",
       "name": "If running"
@@ -494,8 +475,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1744,
-        160
+        1728,
+        176
       ],
       "id": "511be30d-d701-498c-b727-7465efe151f2",
       "name": "If"
@@ -507,8 +488,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1344,
-        -320
+        1328,
+        -304
       ],
       "id": "18c19d9b-2c0e-48d0-87bf-eb447d0affcf",
       "name": "Loop Over Items1",
@@ -523,11 +504,211 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1152,
-        -320
+        1136,
+        -304
       ],
       "id": "63e4183d-2e6a-46e7-aeda-62c7bfe66d31",
       "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://soca:8000/functions/run",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"target\": \"{{ $json.body.input}}\",\n\"type\": \"{{ $json.body.type }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -288,
+        -288
+      ],
+      "id": "cdfac47a-260f-4dc3-b36e-f9f98bbdfea6",
+      "name": "Request SOCA",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "=http://soca:8000/functions/status/{{ $json.target }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"target\": \"{{ $json.body.input}}\",\n\"type\": \"{{ $json.body.type }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -176,
+        176
+      ],
+      "id": "5562bfec-a358-4053-b712-a1fb0af2baf5",
+      "name": "Soca status",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        48
+      ],
+      "id": "e4bd27c1-972f-4df5-b44e-4a7d264a9c33",
+      "name": "Wait",
+      "webhookId": "0243a0c2-f9ab-442d-bbb7-79247828a93c",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        112,
+        512
+      ],
+      "id": "d8af76bf-6379-434d-b4ba-908f39db5fb4",
+      "name": "Respond to Webhook5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3e4d3f31-3b29-4732-8779-ca8762c9ecf7",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "running",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "f094be73-f2f5-494a-ae18-6288bb03bf53",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "queued",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -288,
+        448
+      ],
+      "id": "00db0cae-b39e-4784-bb0a-88f7c64e507a",
+      "name": "If running1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2a4d75db-1101-4e14-a4e7-498ea9085788",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -80,
+        400
+      ],
+      "id": "c12780f2-d11a-4f36-9af9-ca769ce1f4cd",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        336,
+        512
+      ],
+      "id": "7c3005f5-51b8-49e1-b130-dddf65d3caa9",
+      "name": "Stop and Error",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        240
+      ],
+      "id": "51920bcb-11ca-4d29-8fe7-5398bcf3cdf6",
+      "name": "Stop and Error1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        608,
+        160
+      ],
+      "id": "cd4d77c8-199f-48f7-9455-58d31d5b71e1",
+      "name": "Stop and Error2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2176,
+        192
+      ],
+      "id": "131af723-9459-4775-ba14-068c0f3d719c",
+      "name": "Stop and Error3",
+      "alwaysOutputData": true
     }
   ],
   "pinData": {},
@@ -618,22 +799,16 @@
             "node": "Merge",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
           }
         ],
         [
           {
             "node": "Respond to Webhook2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Request Soca Fetch": {
-      "main": [
-        [
-          {
-            "node": "If fetched",
             "type": "main",
             "index": 0
           }
@@ -700,7 +875,7 @@
       "main": [
         [
           {
-            "node": "Request Soca Fetch",
+            "node": "Request SOCA",
             "type": "main",
             "index": 0
           }
@@ -725,7 +900,13 @@
     },
     "Respond to Webhook4": {
       "main": [
-        []
+        [
+          {
+            "node": "Stop and Error3",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Wait1": {
@@ -814,6 +995,102 @@
           }
         ]
       ]
+    },
+    "Request SOCA": {
+      "main": [
+        [
+          {
+            "node": "If fetched",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Soca status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If running1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Respond to Webhook5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Soca status": {
+      "main": [
+        [
+          {
+            "node": "If running1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook5": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook3": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -822,7 +1099,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "9b12e00e-b750-482a-907e-fef605eb4414",
+  "versionId": "6384faa3-e59d-40b7-9411-21df41c1c36a",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f45b158e00151191c95740af556f2f681ce1591dd6d42b0ac1ed54c4ea66283f"

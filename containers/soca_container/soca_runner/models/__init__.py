@@ -1,1 +1,1 @@
-from .classes import Args, SocaResponse, FetchResponse, PortalResponse
+from .classes import Args, SocaResponse, FetchResponse, PortalResponse, StatusResponse

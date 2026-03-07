@@ -1,6 +1,8 @@
 # VSCode
 .vscode/
 
+# jsons generated
+client/**.json
 
 # Environment variables
 .env

@@ -26,6 +26,25 @@ services:
       - "8001:8000"
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
+
+  worker_soca:
+    build:
+      context: ./soca_container
+    command: python -u -m soca_runner.worker
+    volumes:
+      - ./soca_container/outputs:/app/outputs
+    networks:
+      - net
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
     
   rsfc:
     build:
@@ -59,7 +78,7 @@ services:
     - net
 
 
-  worker:
+  worker_rsfc:
     build:
       context: ./rsfc_container
     command: python -u -m rsfc_runner.worker
