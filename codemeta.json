@@ -54,7 +54,7 @@
             "version": "latest"
         }
     ],
-    "version": "0.5.0",
+    "version": "0.6.0",
     "developmentStatus": "active",
     "issueTracker": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/issues",
     "@type": "SoftwareSourceCode"

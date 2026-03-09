@@ -13,12 +13,19 @@ RUN poetry config virtualenvs.create false
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-root
 
-# descarga de paquetes nltk (stopwords, lemmatizzer)
-RUN python -m nltk.downloader wordnet
-RUN python -m nltk.downloader wordnet omw-1.4
 
-# cod
-COPY . .
+# rsfc 
+COPY rsfc-main ./rsfc-main
+RUN pip install -e ./rsfc-main
+
+
+# instalacion de nltk para somef de soca
+RUN pip install nltk
+RUN python -m nltk.downloader wordnet
+RUN python -m nltk.downloader omw-1.4
+
+# resto del runner
+COPY rsfc_runner ./rsfc_runner
 
 
 EXPOSE 8000

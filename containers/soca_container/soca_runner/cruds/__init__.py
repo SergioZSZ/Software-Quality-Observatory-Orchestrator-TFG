@@ -1,1 +1,1 @@
-from .functions import soca_conf_fetch, soca_extract_portal
+from .functions import soca_fetch, soca_extract, soca_portal

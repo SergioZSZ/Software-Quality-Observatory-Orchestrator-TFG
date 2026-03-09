@@ -42,10 +42,13 @@ def list_repos(repos_file: str)->list[str]:
 
 
 
-def soca_conf_fetch(dir_base: str, target: str, type: str, token: str | None = None)-> FetchResponse:
+def soca_fetch(dir_base: str, target: str, type: str, token: str | None = None)-> FetchResponse:
+    # dirs
+    target_dir = os.path.join(dir_base,"outputs","soca",target)
+    os.makedirs(target_dir , exist_ok=True)
     
     # ficheror repos
-    repos_file = os.path.abspath(os.path.join(dir_base,"outputs",target,"repos.txt"))
+    repos_file = os.path.abspath(os.path.join(target_dir,"repos.txt"))
 
     # mandatos soca
     fetch = ["soca", "fetch", "-i", target, "-o", repos_file, f"--{type}"]
@@ -69,23 +72,14 @@ def soca_conf_fetch(dir_base: str, target: str, type: str, token: str | None = N
 
 
 
-def soca_extract_portal(dir_base: str, target: str)-> PortalResponse:
+def soca_extract(dir_base: str, target: str, url: str)-> PortalResponse:
     # directorios a usar
-    repos_file = os.path.abspath(os.path.join(dir_base,"outputs",target,"repos.txt"))
-    dir_metadata = os.path.abspath(os.path.join(dir_base,"outputs",target,"metadata"))
-    dir_portal = os.path.abspath(os.path.join(dir_base,"outputs",target,"portal"))
+    target_dir = os.path.join(dir_base,"outputs","soca",target)
+    dir_metadata = os.path.abspath(os.path.join(target_dir,"metadata"))
     
-    if os.path.getsize(repos_file) == 0:
-        return PortalResponse(status={
-            "status": "error",
-            "returncode": 1,
-            "stdout": "",
-            "stderr": "No se generó el fichero con los repositorios o está vacío"
-        })
     
-    # mandatos soca
-    extract = ["soca", "extract", "-i", repos_file, "-o", dir_metadata]
-    portal = ["soca", "portal", "-i", dir_metadata, "-o", dir_portal]
+    # mandato soca
+    extract = ["soca", "extract-1-repo", "-i", url, "-o", dir_metadata]
     
     # mandatos a orquestar
     
@@ -93,6 +87,23 @@ def soca_extract_portal(dir_base: str, target: str)-> PortalResponse:
     if result_extract["status"]=="error":
         return PortalResponse(status=result_extract) 
 
+    return PortalResponse(status={"status":"success", "returncode":0})
+
+
+
+
+
+def soca_portal(dir_base: str, target: str)-> PortalResponse:
+    # directorios a usar
+    target_dir = os.path.join(dir_base,"outputs","soca",target)
+    dir_metadata = os.path.abspath(os.path.join(target_dir,"metadata"))
+    dir_portal = os.path.abspath(os.path.join(target_dir,"portal"))
+    
+    
+    # mandato soca
+    portal = ["soca", "portal", "-i", dir_metadata, "-o", dir_portal]
+    
+    # mandato 
     result_portal =run_command(portal)
     if result_portal["status"]=="error":
         return PortalResponse(status=result_portal)

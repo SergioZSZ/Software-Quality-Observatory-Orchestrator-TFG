@@ -1,6 +1,6 @@
 import json, pika, time, uuid
 
-from ..config import RABBITMQ_HOST, QUEUE_NAME,RABBITMQ_USER, RABBITMQ_PASSWORD
+from ..config import RABBITMQ_HOST, QUEUE_NAME,RABBITMQ_USER, RABBITMQ_PASSWORD, RATE_LIMIT_QUEUE
 
 
 # intentos de conexion a rabbit hasta que se pueda conectar
@@ -13,7 +13,9 @@ def rabbit_connect():
                 pika.ConnectionParameters(
                     host=RABBITMQ_HOST,
                     credentials=credentials,
-                    heartbeat = 1200
+                    heartbeat = 7200,
+                    blocked_connection_timeout=7200
+
                 )
             )
             print("RabbitMQ conexion set")
@@ -31,9 +33,9 @@ def publish_job(job_id: uuid.UUID, repo_url: str):
     connection = rabbit_connect()
     channel = connection.channel()
     
-    # creamos/aseguramos que la cola existe y sea persistente (durable)
+    # creamos/aseguramos que las colas (jobs y rate limit)
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
-    
+    channel.queue_declare(queue=RATE_LIMIT_QUEUE, durable=True, arguments={"x-max-length": 1})
     # publicamos mensaje
     message = {
         "job_id": str(job_id),

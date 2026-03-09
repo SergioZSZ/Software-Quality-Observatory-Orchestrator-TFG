@@ -17,17 +17,18 @@ RUN poetry install --no-root
 COPY soca ./soca
 RUN pip install -e ./soca
 
+# configuracion de somef y soca
+COPY initial_configs.sh /initial_configs.sh
+RUN chmod +x /initial_configs.sh
 
 # descarga de paquetes nltk (stopwords lemmatizer...)
 RUN python -m nltk.downloader wordnet
 RUN python -m nltk.downloader wordnet omw-1.4
 
 # resto cod
-COPY . .
+COPY soca_runner ./soca_runner
 
-# configuracion de somef y soca
-COPY initial_configs.sh /initial_configs.sh
-RUN chmod +x /initial_configs.sh
+
 
 ENTRYPOINT ["/initial_configs.sh"]
 

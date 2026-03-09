@@ -9,8 +9,8 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        608,
-        -304
+        1472,
+        -336
       ],
       "id": "d62ce63a-82aa-4708-b2e0-3f0c85016512",
       "name": "Split Out"
@@ -22,8 +22,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        784,
-        -256
+        1648,
+        -288
       ],
       "id": "c88c2a9b-8e41-4e67-9de0-9a4cb8a364f8",
       "name": "Loop Over Items",
@@ -49,8 +49,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -32,
-        -624
+        -448,
+        -688
       ],
       "id": "6c39e516-bdd8-4817-8ac1-ecb31c16331c",
       "name": "HTTP Request2",
@@ -79,8 +79,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        960,
-        -48
+        1824,
+        -80
       ],
       "id": "5085b6a7-c650-4e49-ae9f-ca01c16f00da",
       "name": "Request RSFC",
@@ -189,8 +189,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        176,
-        -224
+        960,
+        -208
       ],
       "id": "9efe375e-9eb7-4f35-8d47-c1a06357233a",
       "name": "Request RSFC isactive"
@@ -222,8 +222,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        192,
-        0
+        1056,
+        -32
       ],
       "id": "781b6c36-be7a-4c00-9c5d-8aa8d0b2cb48",
       "name": "If RSFC active"
@@ -235,8 +235,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        448,
-        -304
+        1312,
+        -336
       ],
       "id": "34bb8982-5d21-44a1-9467-e2db13750215",
       "name": "Merge"
@@ -279,8 +279,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1616,
-        -336
+        2480,
+        -368
       ],
       "id": "2fca9729-66e3-402d-8920-c2cd6caf20de",
       "name": "Respond to Webhook"
@@ -308,8 +308,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        48,
-        192
+        256,
+        80
       ],
       "id": "2b0b5a76-a060-43bf-bdf9-02421ad7eebc",
       "name": "Respond to Webhook2"
@@ -322,8 +322,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        384,
-        112
+        1264,
+        224
       ],
       "id": "2bec330f-5ff7-41eb-876d-c9ca2e244536",
       "name": "Respond to Webhook3"
@@ -336,8 +336,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2000,
-        192
+        2864,
+        160
       ],
       "id": "2a5166dc-09e5-49ac-a2c9-357ad661c305",
       "name": "Respond to Webhook4"
@@ -358,8 +358,8 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        976,
-        -304
+        1840,
+        -336
       ],
       "id": "7f535cc3-2f67-4cd1-a740-d054f252aef7",
       "name": "Aggregate"
@@ -371,8 +371,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1456,
-        -96
+        2320,
+        -128
       ],
       "id": "e28db273-e219-4171-ba04-3a32da2cf787",
       "name": "Wait1",
@@ -386,8 +386,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1632,
-        -96
+        2496,
+        -128
       ],
       "id": "0f825267-bee6-475b-b791-c62919803747",
       "name": "Request RSFC status",
@@ -441,8 +441,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1520,
-        128
+        2384,
+        96
       ],
       "id": "499d7f3d-1a71-4959-a34a-d8a00cfb01f1",
       "name": "If running"
@@ -475,8 +475,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1728,
-        176
+        2592,
+        144
       ],
       "id": "511be30d-d701-498c-b727-7465efe151f2",
       "name": "If"
@@ -488,8 +488,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1328,
-        -304
+        2192,
+        -336
       ],
       "id": "18c19d9b-2c0e-48d0-87bf-eb447d0affcf",
       "name": "Loop Over Items1",
@@ -504,8 +504,8 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1136,
-        -304
+        2000,
+        -336
       ],
       "id": "63e4183d-2e6a-46e7-aeda-62c7bfe66d31",
       "name": "Split Out1"
@@ -531,31 +531,13 @@
     },
     {
       "parameters": {
-        "url": "=http://soca:8000/functions/status/{{ $json.target }}",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n\"target\": \"{{ $json.body.input}}\",\n\"type\": \"{{ $json.body.type }}\"\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        -176,
-        176
-      ],
-      "id": "5562bfec-a358-4053-b712-a1fb0af2baf5",
-      "name": "Soca status",
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
         "amount": 3
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -304,
-        48
+        176,
+        320
       ],
       "id": "e4bd27c1-972f-4df5-b44e-4a7d264a9c33",
       "name": "Wait",
@@ -570,8 +552,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        112,
-        512
+        560,
+        912
       ],
       "id": "d8af76bf-6379-434d-b4ba-908f39db5fb4",
       "name": "Respond to Webhook5"
@@ -614,8 +596,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -288,
-        448
+        192,
+        720
       ],
       "id": "00db0cae-b39e-4784-bb0a-88f7c64e507a",
       "name": "If running1"
@@ -648,8 +630,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -80,
-        400
+        400,
+        672
       ],
       "id": "c12780f2-d11a-4f36-9af9-ca769ce1f4cd",
       "name": "If1"
@@ -661,8 +643,8 @@
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        336,
-        512
+        800,
+        896
       ],
       "id": "7c3005f5-51b8-49e1-b130-dddf65d3caa9",
       "name": "Stop and Error",
@@ -689,8 +671,8 @@
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        608,
-        160
+        1472,
+        208
       ],
       "id": "cd4d77c8-199f-48f7-9455-58d31d5b71e1",
       "name": "Stop and Error2",
@@ -703,11 +685,168 @@
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        2176,
-        192
+        3040,
+        160
       ],
       "id": "131af723-9459-4775-ba14-068c0f3d719c",
       "name": "Stop and Error3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "=http://soca:8000/functions/status-metadata/{{ $json.target }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"target\": \"{{ $json.body.input}}\",\n\"type\": \"{{ $json.body.type }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        304,
+        448
+      ],
+      "id": "5562bfec-a358-4053-b712-a1fb0af2baf5",
+      "name": "Soca metadata status",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        656
+      ],
+      "id": "5e05c53d-a552-4027-a4d4-cc4e0da75d1b",
+      "name": "Wait2",
+      "webhookId": "0243a0c2-f9ab-442d-bbb7-79247828a93c",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "=http://soca:8000/functions/status-portal/{{ $json.target }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"target\": \"{{ $json.body.input}}\",\n\"type\": \"{{ $json.body.type }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        880,
+        624
+      ],
+      "id": "4d0f6af6-26f2-4c16-a3c2-d62d6d18bc0b",
+      "name": "Soca portal status",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3e4d3f31-3b29-4732-8779-ca8762c9ecf7",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "running",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "f094be73-f2f5-494a-ae18-6288bb03bf53",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "queued",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1104,
+        640
+      ],
+      "id": "378aeecc-580d-4017-a413-64faf12b71fe",
+      "name": "If running2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2a4d75db-1101-4e14-a4e7-498ea9085788",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1360,
+        768
+      ],
+      "id": "f74bffa8-025e-4f40-acc0-e46d5dca2337",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1520,
+        992
+      ],
+      "id": "8e6602dc-a69c-4c35-9052-f53fcb717374",
+      "name": "Respond to Webhook6"
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        992
+      ],
+      "id": "075d9a85-6e01-4957-978b-0691be8a0560",
+      "name": "Stop and Error4",
       "alwaysOutputData": true
     }
   ],
@@ -791,17 +930,12 @@
       "main": [
         [
           {
-            "node": "Request RSFC isactive",
+            "node": "Wait",
             "type": "main",
             "index": 0
           },
           {
             "node": "Merge",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -1011,7 +1145,7 @@
       "main": [
         [
           {
-            "node": "Soca status",
+            "node": "Soca metadata status",
             "type": "main",
             "index": 0
           }
@@ -1038,21 +1172,21 @@
     },
     "If1": {
       "main": [
-        [],
         [
           {
-            "node": "Respond to Webhook5",
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Request RSFC isactive",
             "type": "main",
             "index": 0
           }
-        ]
-      ]
-    },
-    "Soca status": {
-      "main": [
+        ],
         [
           {
-            "node": "If running1",
+            "node": "Respond to Webhook5",
             "type": "main",
             "index": 0
           }
@@ -1091,6 +1225,80 @@
           }
         ]
       ]
+    },
+    "Soca metadata status": {
+      "main": [
+        [
+          {
+            "node": "If running1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Soca portal status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Soca portal status": {
+      "main": [
+        [
+          {
+            "node": "If running2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If running2": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Respond to Webhook6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook6": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -1099,7 +1307,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "6384faa3-e59d-40b7-9411-21df41c1c36a",
+  "versionId": "09c48fb2-889d-4616-b40e-19aae47eeb30",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "f45b158e00151191c95740af556f2f681ce1591dd6d42b0ac1ed54c4ea66283f"

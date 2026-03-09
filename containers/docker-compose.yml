@@ -19,7 +19,7 @@ services:
       context: ./soca_container
     container_name: soca_runner
     volumes:
-      - ./soca_container/outputs:/app/outputs
+      - ./outputs:/app/outputs
     networks:
       - net
     ports:
@@ -36,7 +36,7 @@ services:
       context: ./soca_container
     command: python -u -m soca_runner.worker
     volumes:
-      - ./soca_container/outputs:/app/outputs
+      - ./outputs:/app/outputs
     networks:
       - net
     environment:
@@ -51,7 +51,7 @@ services:
       context: ./rsfc_container
     container_name: rsfc_runner
     volumes:
-      - ./rsfc_container/outputs:/app/outputs
+      - ./outputs:/app/outputs
     networks:
       - net
     ports:
@@ -88,13 +88,26 @@ services:
     networks:
       - net
     volumes:
-      - ./rsfc_container/outputs:/app/outputs
+      - ./outputs:/app/outputs
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       - DATABASE_URL=${DATABASE_URL}
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
+  rate_limiter:
+    build:
+      context: ./rsfc_container
+    command: python -m rsfc_runner.rabbitmq.rate_limiter
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+    networks:
+      - net
 
 
   postgres:

@@ -12,7 +12,10 @@ def rabbit_connect():
             connection = pika.BlockingConnection(
                 pika.ConnectionParameters(
                     host=RABBITMQ_HOST,
-                    credentials=credentials
+                    credentials=credentials,
+                    heartbeat=7200,
+                    blocked_connection_timeout=7200
+
                 )
             )
             print("RabbitMQ conexion set")
@@ -24,18 +27,19 @@ def rabbit_connect():
             
             
             
-def publish_job(target: str):
+def publish_job(target: str, work_type: str, repo_url: str | None = None):
     
     # definicion de credenciales, conexion a rabbit de manera síncrona y abrir canal
     connection = rabbit_connect()
     channel = connection.channel()
     
-    # creamos/aseguramos que la cola existe y sea persistente (durable)
+    # creamos/aseguramos que las colas existe y sea persistente (durable)
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
-    
     # publicamos mensaje
     message = {
-        "target": target
+        "target": target,
+        "work_type": work_type,
+        "repo_url": repo_url
     }
     
     # publicamos mensaje (delivery mode 2 = mensaje queno se pierda y sea persistente)

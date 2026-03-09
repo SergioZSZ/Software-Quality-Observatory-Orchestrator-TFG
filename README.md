@@ -85,26 +85,35 @@ Salida generada:
         2. `type`: Declaración del tipo de `target`, usuario-> `user`, organización->`org`
     
     - Utilidades:
-        - Configuración de `SOMEF` y `SOCA`
         - Fetch de repositorio del `target` dado
-        - Publicación de job a cola de trabajo de RabbitMQ con el target dado
-        - Generación de status.json guardando el estado del job
+        - Publicación de jobs a cola de trabajo de RabbitMQ para extraer metadatos de repos fetcheados y de la generación del portal
+        - Generación de ficheros status.json guardando el estado de la extracción de metadatos y generación del portal
 
     - Response:
         - `json` con los repositorios de la organización
 
 
-- `funcions/status/{target}`
+- `funcions/status-metadata/{target}`
     - Argumentos necesarios: 
         1. `target`: Nombre del usuario/organización de GitHub
     
     - Utilidades:
-        - Comprobación del fichero status.json
+        - Comprobación del fichero status.json de extracción de metadatos del target dado
     
     - Response:
         - Contenido del fichero status.json
 
-### 3.3 worker_rsfc container
+- `funcions/status-portal/{target}`
+    - Argumentos necesarios: 
+        1. `target`: Nombre del usuario/organización de GitHub
+    
+    - Utilidades:
+        - Comprobación del fichero status.json de generación del portal software del target dado
+    
+    - Response:
+        - Contenido del fichero status.json
+
+### 3.3 worker_soca container
 El contenedor worker se encarga de la extracción de metadatos de los repositorios obtenidos en el fetch y generación del portal de manera asíncrona con el resto del workflow.
 
 Mientras que soca_container actúa como API encargada publicar en una cola de trabajo en RabbitMQ con el usuario/organización del cual se va a general el portal software.
@@ -112,13 +121,12 @@ Mientras que soca_container actúa como API encargada publicar en una cola de tr
 Cada worker ejecuta el módulo `python -u -m soca_runner.worker` que se dedica a:
 
 1. Recibe un job de RabbitMQ (con el target)
-2. Cambia fichero status.json a "running"
-2. Extrae los metadatos de dicho target
-3. Genera el portal software del target
-4. Cambia fichero status.json a "completed" o "error"
-4. Responde a RabbitMQ dando el job por finalizado
+2. Cambia ficheros status.json a "running"
+3. Se extraen metadatos de los repos obtenidos en el fetch por workers asíncronos
+4. Genera el portal software del target tras la extracción de metadatos de todos los repositorios
+5. Cambia ficheros status.json a "completed" o "error"
 
-
+El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_soca=N`` siendo N el número de workers que se levantarán.
 
 ### 3.3.1 Dockerización de RSFC
 
@@ -172,38 +180,28 @@ Cada worker ejecuta el módulo `python -u -m rsfc_runner.worker` que se encarga 
 4. Ejecuta la evaluación del repositorio mediante rsfc
 5. Guarda los resultados generados en la bbdd
 6. Actualiza el estado del job a success, error u evaluating
-7. Duerme de 5 a 8 segundos para no saturar GitHubAPI (rate limit)
+7. Espera a tener token para procesar siguiente trabajo (github rate limit)
 8. Responde a RabbitMQ habiendo procesado el job para recibir otro
 
-El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker=N`` siendo N el número de workers que se levantarán.
+El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_rsfc=N`` siendo N el número de workers que se levantarán.
+
+
+### 3.5 worker_rsfc container
+El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitMQ de tamaño 1. Los workers RSFC se esperarán a obtener un token de la cola para procesar los jobs para no saturar de peticiones GitHubAPI y no sobrepasar el RateLimit.
 
 **NOTA: ATENCION A LA SECCION MEJORAS POR PROBLEMA CON ESTA IMPLEMENTACION**
 
-### 3.5 Flujo actual(container n8n)
+### 3.6 Flujo actual(container n8n)
 
 Mediante `n8n` se ha orquestado un workflow que realiza una petición http a las APIs dockerizadas para generar los diversos datos correspondientes a cada entrada del flujo:
 
-- Verificación de que los contenedores SOCA y RSFC estén activos
-- Petición http a soca_container para realizar el fetch 
-- Split de n8n de los repositorios obtenidos 
-- Realización de httpRequests síncronos a `rsfc_container` de los repositorios obtenidos, obteniendo el id del job que se lanzó para procesar ese repositorio
-- Revisión de estado de jobs para gestión de error/success y obtención posterior de indicadores de calidad
+1. Verificación de que los contenedores SOCA y RSFC estén activos
+2. Petición http a soca_container para realizar el fetch 
+3. Generación en paralelo del flujo del portal software de los repositorios obtenidos en el fetch
+4. Split de n8n de los repositorios obtenidos 
+5. Realización de httpRequests síncronos a `rsfc_container` de los repositorios obtenidos, obteniendo el id del job que se lanzó para procesar ese repositorio
+6. Revisión de estado de jobs para gestión de error/success y obtención posterior de indicadores de calidad
 
-
-
-```
-GitHub (usuario/organización)
-        ↓
-SOCA fetch
-        ↓
-Lista de repositorios
-        ↓
-Iteración repositorio a repositorio
-        ↓
-RSFC evaluación
-        ↓
-Generación de indicadores de calidad
-```
 
 ## 4. Activación del entorno y ejemplo de uso
 **PREVIA:** Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
@@ -227,7 +225,7 @@ Herramientas usadadas en el proyecto:
 
 ### 4.2 Despliegue y ejecución
 
-1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker=N`, siendo N el nº de workers a lanzar(recomendable máximo 4 por saturación de GitHubAPI)
+1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar(recomendable máximo 5 de cada)
 2. Acceder a n8n mediante el navegador en http://localhost:5678
 3. En el primer acceso:
     1. Crear cuenta de usuario en n8n
@@ -246,7 +244,7 @@ el programa ejecutado los repositorios procesados o los errores.
 4. Rellenar campos:
     - Introduce el usuario u organización: SergioZSZ
     - Introduce el tipo (user/org): user
-5. Cuando se procesen los metadatos se guardará un `.json` en el directorio de `/client` con los indicadores/error generado.
+5. Cuando se procesen los metadatos se guardará un `.json` en el directorio de `/client` con los indicadores/error generado y los ficheros generados durante el proceso en `/containers/outputs`.
 
 ## 5. Issues
 

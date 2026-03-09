@@ -8,7 +8,6 @@ authors = [
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11, <=3.13"
 dependencies = [
-    "rsfc (>=0.1.2,<0.2.0)",
     "fastapi (>=0.134.0,<0.135.0)",
     "uvicorn (>=0.41.0,<0.42.0)",
     "sqlalchemy (>=2.0.48,<3.0.0)",

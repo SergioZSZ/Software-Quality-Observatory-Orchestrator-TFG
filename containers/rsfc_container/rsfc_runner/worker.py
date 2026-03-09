@@ -2,15 +2,20 @@ import time, os, json, random, pika, uuid
 
 from .database import SessionLocal, Job
 from .cruds import rfsc_runner
-from .config import BASE_DIR, QUEUE_NAME, TOKEN
+from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE
 from .rabbitmq import rabbit_connect
 
+# 
+def wait_for_token(channel):
 
+    method, properties, body = channel.basic_get(queue=RATE_LIMIT_QUEUE)
 
-# intento de conexion a rabbit
+    while method is None:
+        time.sleep(0.5)
+        method, properties, body = channel.basic_get(queue=RATE_LIMIT_QUEUE)
 
+    channel.basic_ack(method.delivery_tag)
 
-            
             
             
 #llamada a rsfc_runner y cambios de estado de la bbdd
@@ -19,7 +24,6 @@ def run_in_background(job_id, repo_url, base_dir, token):
     db = SessionLocal()
     try:
         #cogemos el job por su id si existe y cambiamos estado a running
-        time.sleep(1)
         job = db.get(Job, job_id)
         if not job:
             return
@@ -43,13 +47,6 @@ def run_in_background(job_id, repo_url, base_dir, token):
                     time.sleep(30)
                     return run_in_background(job_id, repo_url, base_dir, token) 
         
-    
-            # detectar rate limit, si no es guardamos estado del error
-            if "rate limit exceeded" in response.status["stderr"].lower():
-                
-                print(f"Rate limit hit for {repo_url}, retrying in 60s...", flush=True)
-                time.sleep(random.uniform(120,180))
-                return run_in_background(job_id, repo_url, base_dir, token)
             
             job.status = "error"
             job.detail = {"error": response.status}
@@ -93,7 +90,7 @@ def run_in_background(job_id, repo_url, base_dir, token):
             db.refresh(job)
             db.close()
             
-            print(f"Job {job_id} failed")
+            print(f"Job {job_id} failed: ", str(e))
             
     finally:
         db.close()
@@ -106,19 +103,21 @@ def process_message(ch, method, properties, body):
     try:
         
         # cargamos mensaje y cambiamos job de string a uuid
-        message = json.loads(body)
+        message = json.loads(body.decode())
         job_id = uuid.UUID(message["job_id"])
         repo_url = message["repo_url"]
 
+        start = time.time()
         print(f"Received job {job_id}", flush=True)
 
         # procesamos mensaje
+        wait_for_token(ch)
         run_in_background(job_id, repo_url, BASE_DIR, TOKEN)
 
-        print(f"Job {job_id} finished", flush=True)
+        total_time = time.time() - start
+        print(f"Job {job_id} completed in: {total_time:.2f}s", flush=True)
         
         # evitar saturar github api 
-        time.sleep(random.uniform(5,8))
         
         #confirmacion de mensaje pocesado para eliminarlo de la cola
         ch.basic_ack(delivery_tag=method.delivery_tag)
@@ -128,7 +127,7 @@ def process_message(ch, method, properties, body):
     except Exception as e:
         # si falla lo metemos en la cola (faltaría revisar si el error es para meter en cola)
         print(f"[{job_id}] failed, requeueing:", e)
-        ch.basic_ack(delivery_tag=method.delivery_tag, requeue=True)
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
 
@@ -145,6 +144,7 @@ def worker():
     
     # verificación de la cola
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
+    channel.queue_declare(queue=RATE_LIMIT_QUEUE, durable=True, arguments={"x-max-length": 1})
 
     # worker recibe 1 trabajo y recibe el siguiente al terminar
     channel.basic_qos(prefetch_count=1)

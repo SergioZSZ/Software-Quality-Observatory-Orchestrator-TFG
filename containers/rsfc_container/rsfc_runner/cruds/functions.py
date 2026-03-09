@@ -13,7 +13,11 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None):
             cwd= personal_dir,
             timeout= 3600
         )
-
+        
+        #print("STDOUT:", result.stdout, flush=True)
+        #print("STDERR:", result.stderr, flush=True)
+        #print("RETURN CODE:", result.returncode, flush=True)
+    
         return {
             "status": "success",
             "stdout": result.stdout,
@@ -22,7 +26,11 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None):
         }
 
     except subprocess.CalledProcessError as e:
-
+       
+        print("STDOUT:", e.stdout, flush=True)
+        print("STDERR:", e.stderr, flush=True)
+        print("RETURN CODE:", e.returncode, flush=True)
+        
         return {
             "status": "error",
             "returncode": -1,
@@ -34,12 +42,13 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None):
 def gen_dir(base_dir, repo_url: str) -> str:
     #guardamos ultima parte de la url
     repo_name = repo_url.rstrip("/").split("/")[-1]
+    repo_owner = repo_url.rstrip("/").split("/")[-2]
     
     #creacion direcorios personal del procesamiento
-    outputs_dir = os.path.join(base_dir,"outputs")
+    outputs_dir = os.path.join(base_dir,"outputs","rsfc")
     os.makedirs(outputs_dir, exist_ok=True)
 
-    personal_out = os.path.join(outputs_dir,repo_name)
+    personal_out = os.path.join(outputs_dir,repo_owner,repo_name)
     os.makedirs(personal_out, exist_ok=True)
     
     return personal_out
@@ -68,12 +77,12 @@ def rfsc_runner(base_dir: str, repo_url: str, token: str | None = None) -> RunRe
 
         # detectar rate limit
         if "rate limit" in stderr:
-            result["status"]=="evaluating"
+            result["status"]="evaluating"
             return RunResponse(status=result)
 
         # detectar timeout
         if "timeout" in stderr or "read timed out" in stderr:
-            result["status"]=="evaluating"
+            result["status"]="evaluating"
             return RunResponse(status=result)
 
         # cualquier otro error

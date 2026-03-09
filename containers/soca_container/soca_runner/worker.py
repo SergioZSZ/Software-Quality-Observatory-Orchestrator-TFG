@@ -1,82 +1,190 @@
-import time, os, json, random, pika, uuid
+import time, os, json, random, pika, uuid, portalocker
 
-from .rabbitmq.client import rabbit_connect
-from .cruds.functions import soca_extract_portal
+from .rabbitmq.client import rabbit_connect, publish_job
+from .cruds.functions import soca_extract, soca_portal
 
-from .config import QUEUE_NAME, BASE_DIR
+from .config import QUEUE_NAME, BASE_DIR, RATE_LIMIT_QUEUE
+
+
+###### Auxiliares
+
+### lock update
+def update_status_file(path, update_fn, target:str | None = None, response:dict | None= None):
+    # apertura y lockeo del archivo json para que otros workers no sobrescriban
+    with portalocker.Lock(path, 'r+', timeout=10) as f:
+        # lectura y actualización a usar
+        data = json.load(f)
+        
+        # caso set running
+        if not target and not response:
+            update_fn(data)
+    
+        #caso intento generar portal
+        elif target and response:
+            update_fn(data,target,response)
+        
+        # caso set error y completed
+        else:
+            update_fn(data, response)
+
+        # volver al inicio del archivo y truncarlo para no dejar residuos al final y update json
+        f.seek(0)
+        f.truncate()
+        json.dump(data, f)
+        f.flush() # mandar los datos directamente (no guardar en buffer)
+
+## funciones para lock update
+# set locks
+def set_running(data):
+    if data["status"] == "queued":
+        data["status"] = "running"
+
+def set_error(data, response):
+    data["status"] = "error"
+    data["detail"] = response.status
+    
+def set_completed(data,response):
+    data["status"] = "completed"
+    data["detail"] = response.status
+        
+# lanzamiento portal lock
+def launch_portal(data,target,response):
+
+
+    metadata_dir = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata")
+    processed = len([f for f in os.listdir(metadata_dir) if f.endswith(".json")])
+    # si todos procesados
+    if processed == data["repo_count"] and not data.get("portal_launched", False):
+
+        data["portal_launched"] = True
+        data["status"] = "completed"
+        data["detail"] = response.status
+
+        print("All repos processed. Launching portal generation", flush=True)
+        publish_job(target, "portal_generation")
 
 
 
-# carga del mensaje de la cola y envío a background
+
+
+
+# evitar github
+def wait_for_token(channel):
+
+    method, properties, body = channel.basic_get(queue=RATE_LIMIT_QUEUE)
+
+    while method is None:
+        time.sleep(1)
+        method, properties, body = channel.basic_get(queue=RATE_LIMIT_QUEUE)
+
+    channel.basic_ack(method.delivery_tag)
+    
+    
+### logica interna del worker
+
+# extraccion de metadata
+def handle_extract_metadata(target, repo_url, status_file_path):
+
+    repo_name = repo_url.rstrip("/").split("/")[-1]
+    
+
+    start = time.time()
+
+    # actualizar estado a running
+    update_status_file(status_file_path, set_running)
+
+    # ejecutar extracción
+    response = soca_extract(BASE_DIR, target, repo_url)
+
+    # caso error
+    if response.status["status"] == "error":
+        update_status_file(status_file_path, set_error, response = response)
+
+        print(f"        [{target} - {repo_name}]extract_metadata failed:", response.status, flush=True)
+        return
+
+    total_time = time.time() - start
+    print(f"        [{target} - {repo_name}] Metadata extracted in {total_time:.2f}s", flush=True)
+
+    # comprobar si lanzar portal y lanzarlo 
+    update_status_file(status_file_path, launch_portal, target=target, response=response)
+
+
+
+
+
+# generacion de portal
+def handle_portal_generation(target,status_file_path):
+
+
+    start = time.time()
+
+    # actualizar estado a running
+    update_status_file(status_file_path, set_running)
+
+    # generacion del portal
+    response = soca_portal(BASE_DIR, target)
+
+    # errores 
+    if response.status["status"] == "error":
+        update_status_file(status_file_path,set_error, response=response)
+
+        print("     portal_generation failed:", response.status, flush=True)
+        return
+
+    # success
+    total_time = time.time() - start
+    print(f"        Portal generated in {total_time:.2f}s", flush=True)
+
+    update_status_file(status_file_path,set_completed, response=response)
+        
+        
+        
+        
+        
+### logica externa del worker
+
 def process_message(ch, method, properties, body):
     try:
-        # cargamos mensaje y cambiamos job de string a uuid
+        
+        # cargamos mensaje y el tipo de work
         message = json.loads(body.decode())
 
         target = message["target"]
+        work_type = message["work_type"]
 
-        status_file_path = os.path.join(BASE_DIR,"outputs", target,"status.json")
-
-        # actualizar estado json a running
-        with open(status_file_path, "r") as f:
-            data = json.load(f)
-            
-        data["status"] = "running"
+        #wait for token(github ratelimit) 
+        wait_for_token(ch)
         
-        with open(status_file_path, "w") as f:
-            json.dump(data, f)
-            
-            
-        print(f"Received job {target}", flush=True)
+        # division de tipo de trabajo
+        if work_type == "extract_metadata":
+            repo_url = message["repo_url"]
+            repo_name = repo_url.rstrip("/").split("/")[-1]
 
-        # procesamos mensaje
-        response = soca_extract_portal(BASE_DIR, target)
-            
-        
-        if response.status["status"] == "error":
-            
-        # actualizar estado json a error + detail
-                
-            data["status"] = "error"
-            data["detail"] = response.status
-            
-            with open(status_file_path, "w") as f:
-                json.dump(data, f)
-            
-            print("Portal generation failed:", response.status, flush=True)
-            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
-            return
+            print(f"({work_type}) Received job [{target} - {repo_name}]", flush=True)
 
-    
-        data["status"] = "completed"
-        data["detail"] = response.status
+            status_file_path = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata_status.json")
             
-        with open(status_file_path, "w") as f:
-            json.dump(data, f)
+            handle_extract_metadata(target, repo_url, status_file_path)
+            ch.basic_ack(delivery_tag=method.delivery_tag)
 
-        print(f"Job {target} completed", flush=True)
-        
-        #confirmacion de mensaje pocesado para eliminarlo de la cola
-        ch.basic_ack(delivery_tag=method.delivery_tag)
-        
+        elif work_type == "portal_generation":
+            
+            print(f"({work_type}) Received job [{target}]", flush=True)
+
+            status_file_path = os.path.join(BASE_DIR, "outputs", "soca", target, "portal_status.json")
+
+            handle_portal_generation(target,status_file_path)
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+
+        else:
+            print(f"Unknown job type: {work_type}", flush=True)
+
+
+
     except Exception as e:
-
         print("Worker error:", e, flush=True)
-
-        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
-
-        
-        '''
-        # si queremos requeue usar requeue y exception 
-        ch.basic_ack(delivery_tag=method.delivery_tag, requeue = True)
-
-    except Exception as e:
-        # si falla lo metemos en la cola (faltaría revisar si el error es para meter en cola)
-        print(f"[{repos_path}] failed, requeueing:", e)
-        
-        ch.basic_ack(delivery_tag=method.delivery_tag, requeue=True)
-        '''
-        
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
         
         
@@ -92,6 +200,7 @@ def worker():
     
     # verificación de la cola
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
+    channel.queue_declare(queue=RATE_LIMIT_QUEUE, durable=True, arguments={"x-max-length": 1})
 
     # worker recibe 1 trabajo y recibe el siguiente al terminar
     channel.basic_qos(prefetch_count=1)
