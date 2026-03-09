@@ -25,13 +25,13 @@ def rabbit_connect():
             print("RabbitMQ not ready, retrying in 5s...", flush=True)
             time.sleep(5)
             
-            
+# definicion de credenciales, conexion a rabbit de manera síncrona y abrir canal
+connection = rabbit_connect()
+channel = connection.channel()      
             
 def publish_job(job_id: uuid.UUID, repo_url: str):
     
-    # definicion de credenciales, conexion a rabbit de manera síncrona y abrir canal
-    connection = rabbit_connect()
-    channel = connection.channel()
+
     
     # creamos/aseguramos que las colas (jobs y rate limit)
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
@@ -46,5 +46,5 @@ def publish_job(job_id: uuid.UUID, repo_url: str):
     channel.basic_publish(exchange="", routing_key=QUEUE_NAME, body=json.dumps(message),
                             properties = pika.BasicProperties(delivery_mode=2))
     
-    channel.close()
-    connection.close()
+    #channel.close()
+    #connection.close()

@@ -73,12 +73,15 @@ async def get_status_metadata(target: str):
     os.makedirs(os.path.join(BASE_DIR,"outputs","soca",target), exist_ok=True)
     
     status_file_path = os.path.join(BASE_DIR,"outputs","soca",target,"metadata_status.json")
+    try:
+        with open(status_file_path, "r") as f:
+                    data = json.load(f)
     
-    with open(status_file_path, "r") as f:
-                data = json.load(f)
-    
-    return StatusResponse(target = data["target"], status = data["status"], detail = data["detail"])
+        return StatusResponse(target = data["target"], status = data["status"], detail = data["detail"])        
 
+    # intento de lectura mientras esta lockeado
+    except json.JSONDecodeError:
+        return StatusResponse(target = target, status = "running")        
 
 
 @router.get("/status-portal/{target}",response_model=StatusResponse)

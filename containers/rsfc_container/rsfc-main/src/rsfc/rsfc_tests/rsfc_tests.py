@@ -8,6 +8,7 @@ from rsfc.utils import rsfc_helpers
 ################################################### FRSM_01 ###################################################
 
 def test_id_presence_and_resolves(somef_data):
+    output = "false"    # bug de no poder acceder al valor local de la variable
     if 'identifier' in somef_data:
         for item in somef_data['identifier']:
             if item['source']:
