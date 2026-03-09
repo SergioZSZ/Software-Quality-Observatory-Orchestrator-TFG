@@ -59,8 +59,10 @@ class GithubHarvester:
         return repo_type
     
     
+    # modificado para usar la session del init con token
     def get_repo_default_branch(self):
-        res = requests.get(self.api_url)
+        #res = requests.session.get(self.api_url)
+        res = self.session.get(self.api_url)
         res.raise_for_status()
         data = res.json()
         return data.get("default_branch", "main")

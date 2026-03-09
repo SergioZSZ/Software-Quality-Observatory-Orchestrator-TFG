@@ -10,3 +10,4 @@ RABBITMQ_USER = os.getenv("RABBITMQ_USER")
 RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD")
 QUEUE_NAME = "soca_jobs"
 RATE_LIMIT_QUEUE = "github_rate_limit_rsfc"
+RATE_LIMIT_SOCA_ENABLED = os.getenv("RATE_LIMIT_SOCA_ENABLED", "false").lower() == "true"

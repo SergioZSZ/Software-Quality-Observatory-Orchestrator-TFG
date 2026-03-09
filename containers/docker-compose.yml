@@ -96,7 +96,7 @@ services:
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
 
-  rate_limiter:
+  rate_limiter_rsfc:
     build:
       context: ./rsfc_container
     command: python -m rsfc_runner.rabbitmq.rate_limiter
@@ -106,6 +106,22 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RATE_LIMIT_RSFC_ENABLED=${RATE_LIMIT_RSFC_ENABLED}
+
+    networks:
+      - net
+
+  rate_limiter_soca:
+    build:
+      context: ./soca_container
+    command: python -m soca_runner.rabbitmq.rate_limiter
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RATE_LIMIT_SOCA_ENABLED=${RATE_LIMIT_SOCA_ENABLED}
     networks:
       - net
 

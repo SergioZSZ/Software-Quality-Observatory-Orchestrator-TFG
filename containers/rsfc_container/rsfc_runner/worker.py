@@ -2,7 +2,7 @@ import time, os, json, random, pika, uuid
 
 from .database import SessionLocal, Job
 from .cruds import rfsc_runner
-from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE
+from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE, RATE_LIMIT_RSFC_ENABLED
 from .rabbitmq import rabbit_connect
 
 # 
@@ -110,8 +110,10 @@ def process_message(ch, method, properties, body):
         start = time.time()
         print(f"Received job {job_id}", flush=True)
 
-        # procesamos mensaje
-        wait_for_token(ch)
+        # procesamos mensaje si limit
+        if RATE_LIMIT_RSFC_ENABLED:
+            wait_for_token(ch)
+            
         run_in_background(job_id, repo_url, BASE_DIR, TOKEN)
 
         total_time = time.time() - start

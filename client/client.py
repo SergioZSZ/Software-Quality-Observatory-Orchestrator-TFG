@@ -24,7 +24,8 @@ def main():
         "type": type
     }
 
-
+    # tiempo de espera por si no se levanto soca api (modificar a request a soca api)
+    #time.sleep(5)
     try:
         start = time.perf_counter() 
         

@@ -3,7 +3,7 @@ import contextlib
 import json
 from somef import somef_cli
 import subprocess
-import os, glob, json
+import os, json, glob
 
 class SomefHarvester:
     
@@ -27,13 +27,16 @@ class SomefHarvester:
         # patrón de búsqueda de JSON generado por SOCA
         pattern = f"/app/outputs/soca/{repo_owner}/metadata/{repo_owner}_{repo_name}_*.json"
         files = glob.glob(pattern)
+        
+        files = glob.glob(pattern)
 
+        # coge el más reciente en caso de haber varios, si solo hay 1 da igual
         if files:
-            # coger el JSON más reciente
-            latest_file = max(files, key=os.path.getmtime)
-            print(f"Using existing SOMEF metadata for {latest_file}")
+            file = max(files, key=os.path.getmtime)  
+            
+            print(f"Using existing SOMEF metadata for {file}")
 
-            with open(latest_file) as f:
+            with open(file) as f:
                 self.somef_data = json.load(f)
 
         else:

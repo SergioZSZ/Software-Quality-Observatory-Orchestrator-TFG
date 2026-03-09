@@ -3,7 +3,7 @@ import time, os, json, random, pika, uuid, portalocker
 from .rabbitmq.client import rabbit_connect, publish_job
 from .cruds.functions import soca_extract, soca_portal
 
-from .config import QUEUE_NAME, BASE_DIR, RATE_LIMIT_QUEUE
+from .config import QUEUE_NAME, BASE_DIR, RATE_LIMIT_QUEUE, RATE_LIMIT_SOCA_ENABLED
 
 
 ###### Auxiliares
@@ -68,7 +68,7 @@ def launch_portal(data,target,response):
 
 
 
-# evitar github
+# evitar github si activado rate limit
 def wait_for_token(channel):
 
     method, properties, body = channel.basic_get(queue=RATE_LIMIT_QUEUE)
@@ -100,11 +100,11 @@ def handle_extract_metadata(target, repo_url, status_file_path):
     if response.status["status"] == "error":
         update_status_file(status_file_path, set_error, response = response)
 
-        print(f"        [{target} - {repo_name}]extract_metadata failed:", response.status, flush=True)
+        print(f"    [{target} - {repo_name}]extract_metadata failed:", response.status, flush=True)
         return
 
     total_time = time.time() - start
-    print(f"        [{target} - {repo_name}] Metadata extracted in {total_time:.2f}s", flush=True)
+    print(f"    [{target} - {repo_name}] Metadata extracted in {total_time:.2f}s", flush=True)
 
     # comprobar si lanzar portal y lanzarlo 
     update_status_file(status_file_path, launch_portal, target=target, response=response)
@@ -129,12 +129,12 @@ def handle_portal_generation(target,status_file_path):
     if response.status["status"] == "error":
         update_status_file(status_file_path,set_error, response=response)
 
-        print("     portal_generation failed:", response.status, flush=True)
+        print("    portal_generation failed:", response.status, flush=True)
         return
 
     # success
     total_time = time.time() - start
-    print(f"        Portal generated in {total_time:.2f}s", flush=True)
+    print(f"    Portal generated in {total_time:.2f}s", flush=True)
 
     update_status_file(status_file_path,set_completed, response=response)
         
@@ -153,8 +153,9 @@ def process_message(ch, method, properties, body):
         target = message["target"]
         work_type = message["work_type"]
 
-        #wait for token(github ratelimit) 
-        wait_for_token(ch)
+        #wait for token(github ratelimit si activado)
+        if RATE_LIMIT_SOCA_ENABLED:
+            wait_for_token(ch)
         
         # division de tipo de trabajo
         if work_type == "extract_metadata":

@@ -18,7 +18,7 @@ import pprint
 def extract_1_repo(repo_url, output, use_inspect4py, verbose, keep):
 
     if not os.path.exists(output):
-        os.makedirs(output)
+        os.makedirs(output, exist_ok=True)
     
     # intenta clonar o excepcion de que no pudo
     try:

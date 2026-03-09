@@ -23,14 +23,18 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 
 ## 2. Arquitectura actual
 ---
-| Componente       | Rol                    |
-| ---------------- | ---------------------- |
-| n8n              | Orquestación           |
-| soca_container   | extracción de repos    |
-| rsfc_container   | creación/status de jobs|
-| postgres         | base de datos          |
-| rabbitmq         | message broker         |
-| worker_container | procesamiento paralelo |
+| Componente       | Rol                                    |
+| ---------------- | -------------------------------------- |
+| n8n              | Orquestación                           |
+| soca_container   | extracción/status metadatos y repos    |
+| rsfc_container   | creación/status de jobs                |
+| postgres         | base de datos                          |
+| rabbitmq         | message broker                         |
+| worker_rsfc      | procesamiento jobs indicadores         |
+| worker_soca      | procesamiento jobs metadatos/portal    |
+| rate_limiter_rsfc| limitador tokens githubAPI worker_rsfc |
+| rate_limiter_soca| limitador tokens githubAPI worker_soca |
+
 
 ---
 
@@ -209,8 +213,9 @@ Mediante `n8n` se ha orquestado un workflow que realiza una petición http a las
    - `DATABASE_URL` siguiendo el formato `DATABASE_URL=postgresql://usuario:password@host:puerto/database` siendo el usuario, password y database configurados en el environment del docker-compose.yml, host=postgres y puerto expuesto (default 5432)
    - `RABBITMQ_USER` usuario de RabbitMQ del docker compose
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ del docker compose
+   - ``RATE_LIMIT_SOCA_ENABLED`` y `RATE_LIMIT_SOCA_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI(con workers de soca no hace falta debido a que realiza 1 petición/repo, de rsfc si ya que realiza 7 aprox)
 
-    ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`. Este se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI 
+    ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`. Este se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error)
 
 ### 4.1 Requisitos
     
@@ -225,7 +230,7 @@ Herramientas usadadas en el proyecto:
 
 ### 4.2 Despliegue y ejecución
 
-1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar(recomendable máximo 5 de cada)
+1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar(8 soca workers y 3 rsfc workers)
 2. Acceder a n8n mediante el navegador en http://localhost:5678
 3. En el primer acceso:
     1. Crear cuenta de usuario en n8n
