@@ -254,22 +254,18 @@ el programa ejecutado los repositorios procesados o los errores.
 ## 5. Issues
 
 
-- Actualizar diagrama de flujo con las nuevas funcionalidades añadidas (workers, rabbitmq, bbdd)
+
+- Codificar que la publicación de jobs rsfcs se realice nada más extraer los datos del repo (reduciendo así enormemente el tiempo del workflow)
+- Actualizar diagrama de flujo con las nuevas funcionalidades añadidas (workers, rabbitmq, bbdd, limmiters)
 - Actualizar proyecto para que somef se ejecute solo 1 vez 
 - Codificación y Dockerización de `dashverse_container` e implementar sus funcionalidades
 - Integración en el workflow de `dashverse_container` y obtención de urls a dashboards
-- Generación del portal software mediante `soca_container` con urls a dashboards
-- Actualizar somef en soca y mejorar los metadatos mostrados
+- Añadir URL dashverse a repositorios del portal software
+- Actualizar somef en soca y mejorar los metadatos mostrados(somef actualizado ya hecho en el setup.cfg de soca)
 - FAIRificar los repositorios mejorando los checks de metadatos
-- (Si da tiempo) automatizar sugerencias para mejorar los repositorios
+- (Si da tiempo) automatizar sugerencias para mejorar los repositoros
 
 
-- Actualmente el rendimiento del sistema está condicionado por las limitaciones externas de la API de GitHub:
-    - 5000 requests/hora por token 
-    - Si hay muchas peticiones en poco tiempo a un repositorio/user/org, como puede pasar con el contenedor RSFC, GitHubAPI devuelve `error 403 rate limit`, habiendo superado el rate limit que ofrece por un tiempo
-por lo que organizaciones o usuarios con muchos repositorios pueden dar errores. Debido a ello se recomienda el uso de 4 workers al ejecutar el proyecto y se ha establecido un sleep de 8 a 10 segundos antes de ejecutar RSFC para no recibir ese error. Hay una versión del proyecto que falta por probar consistente en procesar secuencialmente los repositorios en vez de con un sistema de cola dinámico, pero tarda bastante más en procesarlos
-
-- Se podría realizar una implementación para encontrar repositorios ya fetcheados/extraídos para no tener que volver a llamar a GitHubAPI y usar los metadatos/indicadores ya extraídos
 
 
 
