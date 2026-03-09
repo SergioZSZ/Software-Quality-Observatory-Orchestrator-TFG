@@ -54,14 +54,14 @@ def launch_portal(data,target,response):
     metadata_dir = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata")
     processed = len([f for f in os.listdir(metadata_dir) if f.endswith(".json")])
     # si todos procesados
-    if processed == data["repo_count"] and not data.get("portal_launched", False):
+    if processed == data["repo_count"]:
+        if not data.get("portal_launched", False):
+            data["portal_launched"] = True
+            data["status"] = "completed"
+            data["detail"] = response.status
 
-        data["portal_launched"] = True
-        data["status"] = "completed"
-        data["detail"] = response.status
-
-        print("All repos processed. Launching portal generation", flush=True)
-        publish_job(target, "portal_generation")
+            print("All repos processed. Launching portal generation", flush=True)
+            publish_job(target, "portal_generation")
 
 
 
