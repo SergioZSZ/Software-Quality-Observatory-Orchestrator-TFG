@@ -8,7 +8,10 @@ from rsfc.utils import rsfc_helpers
 ################################################### FRSM_01 ###################################################
 
 def test_id_presence_and_resolves(somef_data):
-    output = "false"    # bug de no poder acceder al valor local de la variable
+    # bug de variables  no inicializadas y en test de algunos repos error por ello
+    output = "false"    
+    evidence = constants.EVIDENCE_NO_IDENTIFIER_FOUND
+    suggest = constants.SUGGEST_NO_IDENTIFIER
     if 'identifier' in somef_data:
         for item in somef_data['identifier']:
             if item['source']:
@@ -735,7 +738,7 @@ def test_metadata_record_in_zenodo_or_software_heritage(somef_data): #CAMBIAR
 def test_is_github_repository(repo_url):
 
     if 'github.com' in repo_url or 'gitlab.com' in repo_url:
-        response = requests.head(repo_url, allow_redirects=True, timeout=5)
+        response = requests.head(repo_url, allow_redirects=True, timeout=30) # subido a 30 timeout
         if response.status_code == 200:
             output = "true"
             evidence = constants.EVIDENCE_IS_IN_GITHUB_OR_GITLAB

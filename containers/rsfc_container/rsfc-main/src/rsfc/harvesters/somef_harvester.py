@@ -8,7 +8,6 @@ import os, json, glob
 class SomefHarvester:
     
     
-    #constructor propio(si existen metadatos del repo ya que no lo vuelva a descargar)
     '''
     #constructor antiguo
     
@@ -28,8 +27,6 @@ class SomefHarvester:
         pattern = f"/app/outputs/soca/{repo_owner}/metadata/{repo_owner}_{repo_name}_*.json"
         files = glob.glob(pattern)
         
-        files = glob.glob(pattern)
-
         # coge el más reciente en caso de haber varios, si solo hay 1 da igual
         if files:
             file = max(files, key=os.path.getmtime)  

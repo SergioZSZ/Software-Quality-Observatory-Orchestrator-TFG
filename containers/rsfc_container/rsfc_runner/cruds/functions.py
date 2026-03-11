@@ -1,8 +1,9 @@
 import os, subprocess
 from ..models import RunResponse
+from rsfc_runner.config import RETRYABLE_ERRORS
 
 # funcion para ejecutar subprocessos
-def run_command(personal_dir: str,cmd: list[str], input: str | None = None):
+def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> dict:
     try:
         result=subprocess.run(
             cmd,
@@ -26,10 +27,15 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None):
         }
 
     except subprocess.CalledProcessError as e:
-       
-        print("STDOUT:", e.stdout, flush=True)
-        print("STDERR:", e.stderr, flush=True)
-        print("RETURN CODE:", e.returncode, flush=True)
+
+        error_text = f"{e.stdout}\n{e.stderr}"
+        retryable = any(err in error_text for err in RETRYABLE_ERRORS)
+
+        # solo imprimimos si NO es retryable
+        if not retryable:
+            print("STDOUT:", e.stdout, flush=True)
+            print("STDERR:", e.stderr, flush=True)
+            print("RETURN CODE:", e.returncode, flush=True)
         
         return {
             "status": "error",

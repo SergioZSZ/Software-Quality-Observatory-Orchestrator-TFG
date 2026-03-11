@@ -230,7 +230,9 @@ Herramientas usadadas en el proyecto:
 
 ### 4.2 Despliegue y ejecución
 
-1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar(8 soca workers y 3 rsfc workers)
+1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar
+
+        - Configuración usada en desarrollo RSFC worker = 4 | SOCA worker = 10
 2. Acceder a n8n mediante el navegador en http://localhost:5678
 3. En el primer acceso:
     1. Crear cuenta de usuario en n8n
@@ -251,11 +253,37 @@ el programa ejecutado los repositorios procesados o los errores.
     - Introduce el tipo (user/org): user
 5. Cuando se procesen los metadatos se guardará un `.json` en el directorio de `/client` con los indicadores/error generado y los ficheros generados durante el proceso en `/containers/outputs`.
 
-## 5. Issues
+## 5. Evaluación del paralelismo en los workers
+## 5.1 Hardware usado en las pruebas
+
+| Componente        | Especificación                  |
+| ----------------- | ------------------------------- |
+| Equipo            | Lenovo 20WNS30L13               |
+| CPU               | Intel Core i7-1185G7 (11th Gen) |
+| Núcleos           | 4 cores / 8 threads             |
+| Frecuencia        | ~3.0 GHz                        |
+| RAM               | 16 GB                           |
+| Sistema Operativo | Windows 11 Pro 64 bits          |
+| DirectX           | DirectX 12                      |
+
+## 5.2 Rendimientos con distintos workers
+
+Organización: oeg-upm (369 repos)
+
+Tipo worker  |   N workers|  tiempo de procesamiento  |
+-------------|------------|---------------------------|
+worker_soca  |  12        | 45 min                    |
+worker_rsfc  |   5        | 40 min                    |
+
+**IN PROGRESS**
 
 
 
-- Codificar que la publicación de jobs rsfcs se realice nada más extraer los datos del repo (reduciendo así enormemente el tiempo del workflow)
+## 6. Issues
+
+
+
+- Paralelización procesamientos SOCA y RSFC: Codificar que la publicación de jobs rsfcs se realice nada más extraer los datos del repo(reduciendo así enormemente el tiempo del workflow) 
 - Actualizar diagrama de flujo con las nuevas funcionalidades añadidas (workers, rabbitmq, bbdd, limmiters)
 - Actualizar proyecto para que somef se ejecute solo 1 vez 
 - Codificación y Dockerización de `dashverse_container` e implementar sus funcionalidades

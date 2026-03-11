@@ -1,1 +1,1 @@
-from .client import publish_job
+from .client import publish_job, rabbit_connect

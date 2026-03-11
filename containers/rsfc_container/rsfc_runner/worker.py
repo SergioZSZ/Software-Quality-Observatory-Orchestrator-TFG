@@ -2,59 +2,81 @@ import time, os, json, random, pika, uuid
 
 from .database import SessionLocal, Job
 from .cruds import rfsc_runner
-from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE, RATE_LIMIT_RSFC_ENABLED
+from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE, RATE_LIMIT_RSFC_ENABLED, RETRYABLE_ERRORS
 from .rabbitmq import rabbit_connect
+from datetime import datetime
+from sqlalchemy import func
 
-# 
+MAX_RETRIES = 3
+
+
+def timestamp(msg):
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+    
+
+
 def wait_for_token(channel):
 
-    method, properties, body = channel.basic_get(queue=RATE_LIMIT_QUEUE)
-
-    while method is None:
-        time.sleep(0.5)
+    # esperamos a que haya token
+    while True:
         method, properties, body = channel.basic_get(queue=RATE_LIMIT_QUEUE)
 
-    channel.basic_ack(method.delivery_tag)
+        if method:
+            channel.basic_ack(method.delivery_tag)
+            return
+
+        time.sleep(0.5)
 
             
             
 #llamada a rsfc_runner y cambios de estado de la bbdd
-def run_in_background(job_id, repo_url, base_dir, token):
+def rsfc_indicators_generation(job_id, repo_url, base_dir, token, retries):
     # creamos sesion db
     db = SessionLocal()
     try:
         #cogemos el job por su id si existe y cambiamos estado a running
         job = db.get(Job, job_id)
         if not job:
+            timestamp(f"\n\n\n (RSFC)[{job_id}] ERROR: job does not exist \n\n\n")
             return
         
         job.status = "running"
         db.commit()
         
-        # ejecutamos rsfc_runner por cada worker
-        response = rfsc_runner(base_dir, str(repo_url), token)
+        while retries < MAX_RETRIES:
+            # ejecutamos rsfc_runner por cada worker
+            response = rfsc_runner(base_dir, str(repo_url), token)
+            error_text = str(response.status)
+            retryable = any(err in error_text for err in RETRYABLE_ERRORS)
+            #si no error rompemos retries o si es error no 
+            if response.status["status"] == "success" or not retryable :
+                break
 
-        # si error devolvemos logs
+            # si es de los errores marcados para retry (conexion o timeout) lo intentamos 3 veces como max
+            if retryable:
+                retries += 1
+                if retries <= MAX_RETRIES:
+                    timestamp(f"[{job_id}] retry {retries}/{MAX_RETRIES} due to network error")
+                    time.sleep(10*retries)
+                    continue
+                else:
+                    timestamp(f"[{job_id}] max retries reached")
+                    break
+            else:
+                break
+            
+        # si es error distinto a los volver a intentar
         if response.status["status"] == "error":
             
-            print("*******************************************************************************************\n",response.status,"*******************************************************************************************\n")
 
-            # si timeout de rsfc intentarlo una vez mas
-            if "ReadTimeout" in response.status["stderr"]:
-                if job.retries < 1:
-                    job.retries += 1
-                    db.commit()
-                    time.sleep(30)
-                    return run_in_background(job_id, repo_url, base_dir, token) 
-        
-            
+            timestamp(f"\n\n\n*******************************************************************************************\n{response.status}*******************************************************************************************\n\n\n")
+
             job.status = "error"
             job.detail = {"error": response.status}
             
-            print(response.status, flush=True)
             
             db.commit()
-            return
+            return  
 
         #buscamos indicadores generados 
         indicators = os.path.join(response.personal_dir, "rsfc_output","rsfc_assessment.json")
@@ -63,7 +85,7 @@ def run_in_background(job_id, repo_url, base_dir, token):
             job.status = "error"
             job.detail = {"error": response.status}
             
-            print(response.status, flush=True)
+            timestamp(response.status)
             db.commit()
             return
         
@@ -76,21 +98,21 @@ def run_in_background(job_id, repo_url, base_dir, token):
         job.detail = data
         job.result_path = indicators
         db.commit()
-                
+        
+        completed = db.query(func.count(Job.id)).filter(Job.status == "success").scalar()
+        total_jobs = db.query(func.count(Job.id)).scalar()
+        timestamp(f"[RSFC] Progress: {completed}/{total_jobs} repos processed")
     # excepciones posibles
     except Exception as e:
         
-        print(f"error id {job_id}: {str(e)}")
         job = db.get(Job, job_id)
 
         if job:
             job.status = "error"
             job.detail = {"error": str(e)}
             db.commit()
-            db.refresh(job)
-            db.close()
             
-            print(f"Job {job_id} failed: ", str(e))
+            timestamp(f"\n\n\nJob {job_id} failed: {str(e)}\n\n\n")
             
     finally:
         db.close()
@@ -108,16 +130,17 @@ def process_message(ch, method, properties, body):
         repo_url = message["repo_url"]
 
         start = time.time()
-        print(f"Received job {job_id}", flush=True)
+        timestamp(f"Received job {job_id}")
 
-        # procesamos mensaje si limit
+        # procesamos mensaje pero nates  limit
         if RATE_LIMIT_RSFC_ENABLED:
             wait_for_token(ch)
             
-        run_in_background(job_id, repo_url, BASE_DIR, TOKEN)
+        rsfc_indicators_generation(job_id, repo_url, BASE_DIR, TOKEN, 0)
 
         total_time = time.time() - start
-        print(f"Job {job_id} completed in: {total_time:.2f}s", flush=True)
+        
+        timestamp(f"Job {job_id} completed in: {total_time:.2f}s")
         
         # evitar saturar github api 
         
@@ -128,7 +151,7 @@ def process_message(ch, method, properties, body):
         
     except Exception as e:
         # si falla lo metemos en la cola (faltaría revisar si el error es para meter en cola)
-        print(f"[{job_id}] failed, requeueing:", e)
+        timestamp(f"\n\n\n[{job_id}] failed: {str(e)}\n\n\n")
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
@@ -138,7 +161,7 @@ def process_message(ch, method, properties, body):
 
 # establecimiento de conexion con cola y escucha
 def worker():
-    print("** WORKER STARTED **", flush=True)
+    timestamp("** WORKER STARTED **")
     
     # definicion de credenciales, la conexion, credenciales y apertura de canal
     connection = rabbit_connect()
@@ -154,7 +177,7 @@ def worker():
     # escuchar cola queue procesando por callback dado
     channel.basic_consume( queue=QUEUE_NAME, on_message_callback=process_message)
     
-    print("Waiting for jobs...", flush=True)
+    timestamp("Waiting for jobs...")
 
     channel.start_consuming()
             

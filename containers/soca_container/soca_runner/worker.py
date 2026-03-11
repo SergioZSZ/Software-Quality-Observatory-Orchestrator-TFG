@@ -4,12 +4,18 @@ from .rabbitmq.client import rabbit_connect, publish_job
 from .cruds.functions import soca_extract, soca_portal
 
 from .config import QUEUE_NAME, BASE_DIR, RATE_LIMIT_QUEUE, RATE_LIMIT_SOCA_ENABLED
+from datetime import datetime
+
+
+def timestamp(msg):
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+    
 
 
 ###### Auxiliares
 
 ### lock update
-def update_status_file(path, update_fn, target:str | None = None, response:dict | None= None):
+def update_status_file(path, update_fn, target:str| None = None, response:dict | None= None):
     # apertura y lockeo del archivo json para que otros workers no sobrescriban
     with portalocker.Lock(path, 'r+', timeout=10) as f:
         # lectura y actualización a usar
@@ -30,7 +36,7 @@ def update_status_file(path, update_fn, target:str | None = None, response:dict 
         # volver al inicio del archivo y truncarlo para no dejar residuos al final y update json
         f.seek(0)
         f.truncate()
-        json.dump(data, f)
+        json.dump(data, f, indent=2)
         f.flush() # mandar los datos directamente (no guardar en buffer)
 
 ## funciones para lock update
@@ -46,21 +52,25 @@ def set_error(data, response):
 def set_completed(data,response):
     data["status"] = "completed"
     data["detail"] = response.status
+
         
 # lanzamiento portal lock
 def launch_portal(data,target,response):
 
-
+    data["repos_processed"] += 1 
+    
+    timestamp(f"[{target}] Progress: {data['repos_processed']}/{data['repo_count']}")
+    
     metadata_dir = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata")
-    processed = len([f for f in os.listdir(metadata_dir) if f.endswith(".json")])
+    
     # si todos procesados
-    if processed == data["repo_count"]:
+    if data["repos_processed"] == data["repo_count"]:
         if not data.get("portal_launched", False):
             data["portal_launched"] = True
             data["status"] = "completed"
             data["detail"] = response.status
 
-            print("All repos processed. Launching portal generation", flush=True)
+            timestamp(f"All repos processed. Launching portal generation")
             publish_job(target, "portal_generation")
 
 
@@ -71,20 +81,23 @@ def launch_portal(data,target,response):
 # evitar github si activado rate limit
 def wait_for_token(channel):
 
-    method, properties, body = channel.basic_get(queue=RATE_LIMIT_QUEUE)
-
-    while method is None:
-        time.sleep(1)
+    # esperamos a que haya token
+    while True:
         method, properties, body = channel.basic_get(queue=RATE_LIMIT_QUEUE)
 
-    channel.basic_ack(method.delivery_tag)
+        if method:
+            channel.basic_ack(method.delivery_tag)
+            return
+
+        time.sleep(0.5)
+
     
     
 ### logica interna del worker
 
 # extraccion de metadata
 def handle_extract_metadata(target, repo_url, status_file_path):
-
+    
     repo_name = repo_url.rstrip("/").split("/")[-1]
     
 
@@ -100,11 +113,11 @@ def handle_extract_metadata(target, repo_url, status_file_path):
     if response.status["status"] == "error":
         update_status_file(status_file_path, set_error, response = response)
 
-        print(f"    [{target} - {repo_name}]extract_metadata failed:", response.status, flush=True)
+        timestamp(f"    [{target} - {repo_name}]extract_metadata failed: {response.status}")
         return
 
     total_time = time.time() - start
-    print(f"    [{target} - {repo_name}] Metadata extracted in {total_time:.2f}s", flush=True)
+    timestamp(f"[{target} - {repo_name}]  Metadata extracted in {total_time:.2f}s ")
 
     # comprobar si lanzar portal y lanzarlo 
     update_status_file(status_file_path, launch_portal, target=target, response=response)
@@ -129,12 +142,12 @@ def handle_portal_generation(target,status_file_path):
     if response.status["status"] == "error":
         update_status_file(status_file_path,set_error, response=response)
 
-        print("    portal_generation failed:", response.status, flush=True)
+        timestamp(f"    portal_generation failed: {response.status}")
         return
 
     # success
     total_time = time.time() - start
-    print(f"    Portal generated in {total_time:.2f}s", flush=True)
+    timestamp(f"    Portal generated")
 
     update_status_file(status_file_path,set_completed, response=response)
         
@@ -162,7 +175,7 @@ def process_message(ch, method, properties, body):
             repo_url = message["repo_url"]
             repo_name = repo_url.rstrip("/").split("/")[-1]
 
-            print(f"({work_type}) Received job [{target} - {repo_name}]", flush=True)
+            timestamp(f"({work_type}) Received job [{target} - {repo_name}]")
 
             status_file_path = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata_status.json")
             
@@ -171,7 +184,7 @@ def process_message(ch, method, properties, body):
 
         elif work_type == "portal_generation":
             
-            print(f"({work_type}) Received job [{target}]", flush=True)
+            timestamp(f"({work_type}) Received job [{target}]")
 
             status_file_path = os.path.join(BASE_DIR, "outputs", "soca", target, "portal_status.json")
 
@@ -179,12 +192,12 @@ def process_message(ch, method, properties, body):
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
         else:
-            print(f"Unknown job type: {work_type}", flush=True)
+            timestamp(f"Unknown job type: {work_type}")
 
 
 
     except Exception as e:
-        print("Worker error:", e, flush=True)
+        timestamp(f"\n\nWorker error: {str(e)}\n\n")
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
         
@@ -193,7 +206,7 @@ def process_message(ch, method, properties, body):
         
         
 def worker():
-    print("** WORKER STARTED **", flush=True)
+    timestamp("** WORKER STARTED **")
     
     # definicion de credenciales, la conexion, credenciales y apertura de canal
     connection = rabbit_connect()
@@ -209,7 +222,7 @@ def worker():
     # escuchar cola queue procesando por callback dado
     channel.basic_consume( queue=QUEUE_NAME, on_message_callback=process_message)
     
-    print("Waiting for jobs...", flush=True)
+    timestamp("Waiting for jobs...")
 
     channel.start_consuming()
     

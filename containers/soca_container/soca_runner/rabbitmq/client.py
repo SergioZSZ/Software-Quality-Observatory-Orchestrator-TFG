@@ -26,14 +26,13 @@ def rabbit_connect():
             time.sleep(5)
             
 
-# definicion de credenciales, conexion a rabbit de manera síncrona y abrir canal
+# conexion a rabbit de manera blocked y abrir canal
 connection = rabbit_connect()
 channel = connection.channel() 
             
 def publish_job(target: str, work_type: str, repo_url: str | None = None):
     
 
-    
     # creamos/aseguramos que las colas existe y sea persistente (durable)
     channel.queue_declare(queue=QUEUE_NAME, durable=True)
     # publicamos mensaje

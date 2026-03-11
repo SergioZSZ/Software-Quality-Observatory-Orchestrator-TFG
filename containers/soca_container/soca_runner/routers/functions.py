@@ -25,12 +25,13 @@ async def run_soca(request: Args):
             "status": "queued",
             "detail": None,
             "repo_count": len(response_fetch.repos),
+            "repos_processed": 0,
             "portal_launched": False
         }
         portal_status = {
             "target": request.target,
             "status": "queued",
-            "detail": None
+            "detail": None,
         }
         
         #creacion ficheros status
@@ -38,10 +39,10 @@ async def run_soca(request: Args):
         portal_status_file = os.path.join(BASE_DIR,"outputs","soca",request.target,"portal_status.json")
 
         with open(metadata_status_file,"w") as f:
-            json.dump(metadata_status,f)
+            json.dump(metadata_status,f, indent=2)
             
         with open(portal_status_file,"w") as f:
-            json.dump(portal_status,f)
+            json.dump(portal_status,f, indent=2)
             
         # truncado carpeta del target por metadatos anticuados guardados
         metadata_dir = os.path.join(BASE_DIR, "outputs", "soca", request.target,"metadata")
@@ -84,16 +85,20 @@ async def get_status_metadata(target: str):
         return StatusResponse(target = target, status = "running")        
 
 
+
+
 @router.get("/status-portal/{target}",response_model=StatusResponse)
 async def get_status_portal(target: str):
     
     os.makedirs(os.path.join(BASE_DIR,"outputs","soca",target), exist_ok=True)
 
     status_file_path = os.path.join(BASE_DIR,"outputs","soca",target,"portal_status.json")
+    try:
+        with open(status_file_path, "r") as f:
+                    data = json.load(f)
     
-    with open(status_file_path, "r") as f:
-                data = json.load(f)
-    
-    return StatusResponse(target = data["target"], status = data["status"], detail = data["detail"])
-    
+        return StatusResponse(target = data["target"], status = data["status"], detail = data["detail"])
+
+    except json.JSONDecodeError:
+        return StatusResponse(target = target, status = "running")     
     

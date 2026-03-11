@@ -2,6 +2,7 @@ import time, pika
 from ..config import RATE_LIMIT_QUEUE, RATE_LIMIT_SOCA_ENABLED
 from ..rabbitmq import rabbit_connect
 
+# NO ES NECESARIO, de primeras deactivated
 
 def token_generator():
     if RATE_LIMIT_SOCA_ENABLED:

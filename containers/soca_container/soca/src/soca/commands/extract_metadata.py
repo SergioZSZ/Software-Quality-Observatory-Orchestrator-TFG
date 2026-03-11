@@ -15,7 +15,7 @@ import pprint
 
 
 # extracción de 1 repo para diversos workers
-def extract_1_repo(repo_url, output, use_inspect4py, verbose, keep):
+def extract_1_repo(repo_url, output, verbose):
 
     if not os.path.exists(output):
         os.makedirs(output, exist_ok=True)
@@ -55,6 +55,8 @@ def extract_1_repo(repo_url, output, use_inspect4py, verbose, keep):
         
         
         
+
+
 
         
 
