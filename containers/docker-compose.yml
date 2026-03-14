@@ -3,33 +3,42 @@
 services:
 
   n8n:
-    image: docker.n8n.io/n8nio/n8n
+    build: ./n8n_container
     container_name: n8n
+    user: root
     ports:
       - "5678:5678"
     volumes:
       - ./n8n_container/n8n_data:/home/node/.n8n
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .//outputs:/root/.n8n-files
     depends_on:
-      - soca
+      - rabbitmq
     networks:
       - net
-
-  soca:
-    build:
-      context: ./soca_container
-    container_name: soca_runner
-    volumes:
-      - ./outputs:/app/outputs
-    networks:
-      - net
-    ports:
-      - "8001:8000"
+    group_add:
+      - "998"
     environment:
+      # *** Privadas ***
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - DATABASE_URL=${DATABASE_URL}
+      - OUTPUTS=${OUTPUTS}
+      # *** General ***
+      - GENERIC_TIMEZONE=Europe/Madrid
+      - TZ=Europe/Madrid
+      - NODE_ENV=production
+      # *** Settings ***
+      - N8N_SECURE_COOKIE=false
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_RUNNERS_ENABLED=true
+      - NODES_EXCLUDE=[]
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - N8N_USER_FOLDER=/home/node/.n8n
+      # *** RabbitMQ ***
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-
+      - RATE_LIMIT_RSFC_ENABLED=${RATE_LIMIT_RSFC_ENABLED}
 
   worker_soca:
     build:
@@ -46,24 +55,7 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
 
     
-  rsfc:
-    build:
-      context: ./rsfc_container
-    container_name: rsfc_runner
-    volumes:
-      - ./outputs:/app/outputs
-    networks:
-      - net
-    ports:
-      - "8002:8000"
-    depends_on:
-      - postgres
-    environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - DATABASE_URL=${DATABASE_URL}
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -97,6 +89,7 @@ services:
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
 
+
   rate_limiter_rsfc:
     build:
       context: ./rsfc_container
@@ -104,6 +97,7 @@ services:
     depends_on:
       - rabbitmq
     environment:
+      - DATABASE_URL=${DATABASE_URL}  
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
@@ -139,16 +133,14 @@ services:
       POSTGRES_USER: rsfc
       POSTGRES_PASSWORD: rsfc
       POSTGRES_DB: jobs
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+
     networks:
       - net
     ports:
       - "5432:5432"
 
 
-volumes:
-  postgres_data:
+
 
 networks:
   net:

@@ -27,9 +27,9 @@ RUN python -m nltk.downloader omw-1.4
 # resto del runner
 COPY rsfc_runner ./rsfc_runner
 
+RUN chmod +x /app/rsfc_runner/database/init_db.sh
 
-EXPOSE 8000
+ENTRYPOINT ["/app/rsfc_runner/database/init_db.sh"]
 
-CMD ["sh", "-c", "python -m rsfc_runner.init_db && uvicorn rsfc_runner.main:app --host 0.0.0.0 --port 8000"]
-
+CMD ["python","-m","rsfc_runner.main"]
 

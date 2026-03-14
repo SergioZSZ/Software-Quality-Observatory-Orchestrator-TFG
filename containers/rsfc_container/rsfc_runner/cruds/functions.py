@@ -76,22 +76,9 @@ def rfsc_runner(base_dir: str, repo_url: str, token: str | None = None) -> RunRe
     result = run_command(personal_dir, cmd)
     
     
-    # comprobacion de errores(evaluating para rate limit y timeout)
+    # comprobacion de errores(evaluating para rate limit y timeout) en worker
     if result["status"] == "error":
 
-        stderr = (result.get("stderr") or "").lower()
-
-        # detectar rate limit
-        if "rate limit" in stderr:
-            result["status"]="evaluating"
-            return RunResponse(status=result)
-
-        # detectar timeout
-        if "timeout" in stderr or "read timed out" in stderr:
-            result["status"]="evaluating"
-            return RunResponse(status=result)
-
-        # cualquier otro error
         return RunResponse(status=result)
 
     return RunResponse(personal_dir=personal_dir, status=result)

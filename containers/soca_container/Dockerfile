@@ -32,9 +32,7 @@ COPY soca_runner ./soca_runner
 
 ENTRYPOINT ["/initial_configs.sh"]
 
-EXPOSE 8000
-
-CMD ["uvicorn", "soca_runner.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python","-m","soca_runner.main"]
 
 
 

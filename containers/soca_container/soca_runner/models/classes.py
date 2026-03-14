@@ -1,9 +1,5 @@
 from pydantic import BaseModel
 
-class Args(BaseModel):
-    target: str
-    type: str
-    
 
 class SocaResponse(BaseModel):
     status: str
@@ -18,9 +14,3 @@ class FetchResponse(BaseModel):
 
 class PortalResponse(BaseModel):
     status: dict
-
-
-class StatusResponse(BaseModel):
-    target: str
-    status: str
-    detail : dict | None = None

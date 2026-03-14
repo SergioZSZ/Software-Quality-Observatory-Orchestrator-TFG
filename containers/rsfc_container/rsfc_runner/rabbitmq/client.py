@@ -1,4 +1,4 @@
-import json, pika, time, uuid
+import json, pika, time
 
 from ..config import RABBITMQ_HOST, QUEUE_NAME,RABBITMQ_USER, RABBITMQ_PASSWORD, RATE_LIMIT_QUEUE
 
@@ -19,6 +19,10 @@ def rabbit_connect():
                 )
             )
             print("RabbitMQ conexion set")
+            channel = connection.channel()
+            channel.queue_declare(queue=QUEUE_NAME, durable=True)
+            channel.queue_declare(queue=RATE_LIMIT_QUEUE, durable=True, arguments={"x-max-length": 1})
+           
             return connection
 
         except pika.exceptions.AMQPConnectionError:
@@ -29,17 +33,13 @@ def rabbit_connect():
 connection = rabbit_connect()
 channel = connection.channel()      
             
-def publish_job(job_id: uuid.UUID, repo_url: str):
+def publish_job(job_id: str, repo_url: str, target: str):
     
-
-    
-    # creamos/aseguramos que las colas (jobs y rate limit)
-    channel.queue_declare(queue=QUEUE_NAME, durable=True)
-    channel.queue_declare(queue=RATE_LIMIT_QUEUE, durable=True, arguments={"x-max-length": 1})
     # publicamos mensaje
     message = {
-        "job_id": str(job_id),
-        "repo_url": repo_url
+        "job_id": job_id,
+        "repo_url": repo_url,
+        "target": target
     }
     
     # publicamos mensaje (delivery mode 2 = mensaje queno se pierda y sea persistente)

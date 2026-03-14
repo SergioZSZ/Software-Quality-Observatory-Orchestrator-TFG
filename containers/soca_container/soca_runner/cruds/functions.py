@@ -42,13 +42,14 @@ def list_repos(repos_file: str)->list[str]:
 
 
 
-def soca_fetch(dir_base: str, target: str, type: str, token: str | None = None)-> FetchResponse:
+def soca_fetch(dir_base: str, target: str, type: str)-> FetchResponse:
     # dirs
     target_dir = os.path.join(dir_base,"outputs","soca",target)
     os.makedirs(target_dir , exist_ok=True)
     
     # ficheror repos
-    repos_file = os.path.abspath(os.path.join(target_dir,"repos.txt"))
+    repos_file = os.path.abspath(os.path.join(target_dir,"repos.tx"))
+    print("saving repos file in:", repos_file)
 
     # mandatos soca
     fetch = ["soca", "fetch", "-i", target, "-o", repos_file, f"--{type}"]

@@ -208,7 +208,7 @@ class GithubHarvester:
 
         if self.repo_type == "GITHUB":
             tree_url = f"{self.api_url}/git/trees/HEAD?recursive=1"
-            resp = self.session.get(tree_url,headers={'Accept': 'application/vnd.github.v3+json'})
+            resp = self.session.get(tree_url,headers={'Accept': 'application/vnd.github.v3+json'}, timeout=60)  # subido timeout por error de rep grande
             if resp.status_code == 200:
                 test_evidences = resp.json().get("tree", [])
 

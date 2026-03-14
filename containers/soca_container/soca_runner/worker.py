@@ -1,6 +1,6 @@
-import time, os, json, random, pika, uuid, portalocker
+import time, os, json, portalocker
 
-from .rabbitmq.client import rabbit_connect, publish_job
+from .rabbitmq.client import rabbit_connect, publish_job, publish_event, publish_repo_done
 from .cruds.functions import soca_extract, soca_portal
 
 from .config import QUEUE_NAME, BASE_DIR, RATE_LIMIT_QUEUE, RATE_LIMIT_SOCA_ENABLED
@@ -65,12 +65,17 @@ def launch_portal(data,target,response):
     
     # si todos procesados
     if data["repos_processed"] == data["repo_count"]:
+        timestamp(f"All repos processed. Communicating with RSFC")
+        # evento para empezar rsfc
+        
+        publish_event(target)
+        
         if not data.get("portal_launched", False):
             data["portal_launched"] = True
             data["status"] = "completed"
             data["detail"] = response.status
 
-            timestamp(f"All repos processed. Launching portal generation")
+            timestamp(f"Launching portal generation")
             publish_job(target, "portal_generation")
 
 
@@ -212,9 +217,6 @@ def worker():
     connection = rabbit_connect()
     channel = connection.channel()
     
-    # verificación de la cola
-    channel.queue_declare(queue=QUEUE_NAME, durable=True)
-    channel.queue_declare(queue=RATE_LIMIT_QUEUE, durable=True, arguments={"x-max-length": 1})
 
     # worker recibe 1 trabajo y recibe el siguiente al terminar
     channel.basic_qos(prefetch_count=1)
