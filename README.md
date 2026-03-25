@@ -21,7 +21,7 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 
 
 
-## 2. Arquitectura actual
+## 2. Arquitectura del sistema
 ---
 | Componente       | Rol                                    |
 | ---------------- | -------------------------------------- |
@@ -34,9 +34,14 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 | worker_soca      | procesamiento jobs metadatos/portal    |
 | rate_limiter_rsfc| limitador tokens githubAPI worker_rsfc |
 | rate_limiter_soca| limitador tokens githubAPI worker_soca |
+| DashVerse        | observatorio de evaluación             |
 
 
 ---
+
+
+![Diagrama de flujo del sistema](images/flujo_SQOO.png)
+
 
 ### Arquitectura basada en contenedores Docker
 
@@ -203,11 +208,43 @@ Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarad
 | Sistema Operativo | Windows 11 Pro 64 bits          |
 | DirectX           | DirectX 12                      |
 
-## 5.2 Rendimientos con distintos workers
+## 5.2 Rendimientos
+Se comparó el rendimiento del sistema utilizando la configuración de workers considerada óptima para el hardware disponible durante el desarrollo frente al tiempo total secuencial estimado.
+
+Este tiempo secuencial se calculó como el sumatorio de los tiempos individuales de procesamiento de cada repositorio, tanto en la fase de extracción de metadatos (SOCA) como en la fase de evaluación de calidad (RSFC). De este modo, se obtiene una aproximación del tiempo total que habría requerido la ejecución en un escenario completamente secuencial.
+
+La comparación entre ambos enfoques permite evaluar el grado de paralelización alcanzado por el sistema, así como cuantificar la mejora en términos de reducción del tiempo total de ejecución.
+
+### Organización FAIR2ADAPT
+#### datos:
+- 27 repositorios
+#### Tabla
+| Métrica                          | Tiempo   |
+|----------------------------------|----------|
+| SOCA (10 workers)                | 1m 20s   |
+| RSFC (4 workers)                 | 3m 30s   |
+|                                  |          |
+| SOCA secuencial (total)          | 11m 50s  |
+| RSFC secuencial (total)          | 13m 20s  |
 
 
-**IN PROGRESS**
+### Organización oeg-upm
+#### datos:
+- 376 repositorios
+| Métrica                          | Tiempo     |
+|----------------------------------|------------|
+| SOCA (10 workers)                | 36m 57s    |
+| RSFC (4 workers)                 | 50m 02s    |
+|                                  |            |
+| SOCA secuencial (total)          | 5h 47m 22s |
+| RSFC secuencial (total)          | 3h 19m 20s |
 
+
+#### Conclusiones
+| Organización | Tiempo paralelo | Tiempo secuencial | Speedup |
+|-------------|-----------------|-------------------|---------|
+| FAIR2ADAPT  | 4m 50s          | 25m 10s           | 5.21x   |
+| OEG-UPM     | 1h 26m 59s      | 9h 06m 42s        | 6.28x   |
 
 
 ## 6. Issues
@@ -217,8 +254,6 @@ Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarad
 - Paralelización procesamientos SOCA y RSFC: Codificar que la publicación de jobs rsfcs se realice nada más extraer los datos del repo(reduciendo así enormemente el tiempo del workflow) 
 - Actualizar diagrama de flujo con las nuevas funcionalidades añadidas (workers, rabbitmq, bbdd, limmiters)
 - Actualizar proyecto para que somef se ejecute solo 1 vez 
-- Codificación y Dockerización de `dashverse_container` e implementar sus funcionalidades
-- Integración en el workflow de `dashverse_container` y obtención de urls a dashboards
 - Añadir URL dashverse a repositorios del portal software
 - Actualizar somef en soca y mejorar los metadatos mostrados(somef actualizado ya hecho en el setup.cfg de soca)
 - FAIRificar los repositorios mejorando los checks de metadatos
