@@ -42,8 +42,8 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 
 ![Diagrama de flujo del sistema](images/flujo_SQOO.png)
 
-
-### Arquitectura basada en contenedores Docker
+---
+### 2.1 Arquitectura basada en contenedores Docker
 
 El sistema está desacoplado en contenedores independientes:
 
@@ -65,7 +65,7 @@ Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 - Escalabilidad
 
 
-
+---
 ## 3. Estado actual del desarrollo
 ### 3.1.1 Dockerización de SOCA
 
@@ -98,7 +98,7 @@ Cada worker ejecuta el módulo `python -u -m soca_runner.worker` que se dedica a
 3. Se extraen metadatos de los repos obtenidos en el fetch por workers paralelos
 4. Genera el portal software del target tras la extracción de metadatos de todos los repositorios
 5. Cambia ficheros status.json a "completed" o "error"
-6. Envío de mensaje a RabbitMQ de finalizada extracción de metadatos
+6. Envío de mensaje a RabbitMQ de finalizada extracción de metadatos para la ejecución del workflow de RSFC
 
 El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_soca=N`` siendo N el número de workers que se levantarán.
 
@@ -117,7 +117,6 @@ Se ha:
 Salida generada:
 - Generación de indicadores de calidad de cada repositorio en formato `json`
 
-
 ### 3.4 worker_rsfc container
 El contenedor worker se encarga del procesamiento asíncrono de los jobs generados por rsfc_container.
 
@@ -132,6 +131,7 @@ Cada worker ejecuta el módulo `python -u -m rsfc_runner.worker` que se encarga 
 6. Actualiza el estado del job a success, error
 7. Espera a tener token para procesar siguiente trabajo (github rate limit)
 8. Responde a RabbitMQ habiendo procesado el job para recibir otro
+9. Publicación de evento para lanzar workflow de DashVerse en n8n al acabar todos los jobs
 
 El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_rsfc=N`` siendo N el número de workers que se levantarán.
 
@@ -139,6 +139,9 @@ El sistema permite escalar horizontalmente el número de workers mediante docker
 ### 3.5 rate_limiter_rsfc container
 El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitMQ de tamaño 1. Los workers RSFC se esperarán a obtener un token de la cola para procesar los jobs para no saturar de peticiones GitHubAPI y no sobrepasar el RateLimit.
 
+
+### 3.6 DashVerse Service
+*In_Progress*
 
 ### 3.6 Flujo actual(container n8n)
 
@@ -148,9 +151,12 @@ Mediante `n8n` se han orquestado 2 workflows para la ejecución del flujo:
 
 2. rsfc_worfklow: Se activa mediante un nodo `RabbitMQ Trigger` configurado para actuar cuando la cola `soca_events` recibe el evento `soca_extracted`. Entonces se leen y transforman los enlaces del archivo `repos.txt` generados en el fetch para enviárselos a `rsfc_container` para que publique los jobs de dichos repositorios. **DEBE ESTAR EN ESTADO PUBLISH**
 
-Ambos workflow se encuentran en `/containers/n8n_container/workflow`
+3. dashboard_workflow: *In_Progress*
+
+Los workflow se encuentran en `/containers/n8n_container/workflow`
 
 
+---
 
 ## 4. Activación del entorno y ejemplo de uso
 **PREVIA:** Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
@@ -181,6 +187,8 @@ Herramientas usadadas en el proyecto:
 
 ### 4.2 Despliegue y ejecución
 
+*In_Progress (falta despliegue dashverse)*
+
 1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar
 
         - Configuración usada en desarrollo RSFC worker = 5 | SOCA worker = 10
@@ -194,6 +202,7 @@ Herramientas usadadas en el proyecto:
 
 Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes.
 
+---
 
 ## 5. Evaluación del paralelismo en los workers
 ## 5.1 Hardware usado en las pruebas
@@ -246,10 +255,8 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 | FAIR2ADAPT  | 4m 50s          | 25m 10s           | 5.21x   |
 | OEG-UPM     | 1h 26m 59s      | 9h 06m 42s        | 6.28x   |
 
-
+---
 ## 6. Issues
-
-
 
 - Paralelización procesamientos SOCA y RSFC: Codificar que la publicación de jobs rsfcs se realice nada más extraer los datos del repo(reduciendo así enormemente el tiempo del workflow) 
 - Actualizar diagrama de flujo con las nuevas funcionalidades añadidas (workers, rabbitmq, bbdd, limmiters)
