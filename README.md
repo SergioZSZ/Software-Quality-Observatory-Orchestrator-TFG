@@ -67,7 +67,7 @@ Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 
 ---
 ## 3. Estado actual del desarrollo
-### 3.1.1 Dockerización de SOCA
+### 3.1 Dockerización de SOCA
 
 Se ha:
 
@@ -86,7 +86,7 @@ Salida generada:
 - Portal web del catálogo
 
 
-### 3.3 worker_soca container
+### 3.2 worker_soca container
 El contenedor worker se encarga de la extracción de metadatos de los repositorios obtenidos en el fetch y generación del portal de manera asíncrona con el resto del workflow.
 
 Mientras que soca_container publica en una cola de trabajo en RabbitMQ con el usuario/organización del cual se va a general el portal software.
@@ -102,7 +102,7 @@ Cada worker ejecuta el módulo `python -u -m soca_runner.worker` que se dedica a
 
 El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_soca=N`` siendo N el número de workers que se levantarán.
 
-### 3.3.1 Dockerización de RSFC
+### 3.3 Dockerización de RSFC
 
 Se ha:
 
@@ -164,7 +164,7 @@ Los workflow se encuentran en `/containers/n8n_container/workflow`
    - `DATABASE_URL` siguiendo el formato `DATABASE_URL=postgresql://usuario:password@host:puerto/database` siendo el usuario, password y database configurados en el environment del docker-compose.yml, host=postgres y puerto expuesto (default 5432)
    - `RABBITMQ_USER` usuario de RabbitMQ del docker compose
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ del docker compose
-   - ``RATE_LIMIT_SOCA_ENABLED`` y `RATE_LIMIT_SOCA_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI(con workers de soca no hace falta debido a que realiza 1 petición/repo, de rsfc si ya que realiza 7 aprox)
+   - ``RATE_LIMIT_SOCA_ENABLED`` y `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI(con workers de soca no hace falta debido a que realiza 1 petición/repo, de rsfc si ya que realiza 7 aprox)
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
 
     ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS`. El token se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error)
@@ -254,6 +254,17 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 |-------------|-----------------|-------------------|---------|
 | FAIR2ADAPT  | 4m 50s          | 25m 10s           | 5.21x   |
 | OEG-UPM     | 1h 26m 59s      | 9h 06m 42s        | 6.28x   |
+
+Los resultados obtenidos muestran un speedup significativo en ambos escenarios evaluados.
+
+Se observa que:
+- El sistema escala mejor en cargas grandes (oeg-upm), donde el paralelismo se aprovecha más eficientemente.
+- El speedup no es lineal debido a:
+  - Overhead de coordinación entre workers
+  - Limitaciones de la GitHub API (rate limiting)
+  - Latencias de red y operaciones de I/O
+
+A pesar de ello, se consigue una reducción sustancial del tiempo total de ejecución, validando la arquitectura distribuida propuesta.
 
 ---
 ## 6. Issues
