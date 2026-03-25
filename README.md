@@ -1,4 +1,4 @@
-**STILL IN PROCESS**
+**🚧🚧 STILL IN PROCESS 🚧🚧**
 
 
 # TFG – Orquestación automatizada de evaluación de software y generación de catálogo
@@ -141,7 +141,7 @@ El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitM
 
 
 ### 3.6 DashVerse Service
-*In_Progress*
+🚧🚧 *In_Progress* 🚧🚧
 
 ### 3.6 Flujo actual(container n8n)
 
@@ -151,7 +151,7 @@ Mediante `n8n` se han orquestado 2 workflows para la ejecución del flujo:
 
 2. rsfc_worfklow: Se activa mediante un nodo `RabbitMQ Trigger` configurado para actuar cuando la cola `soca_events` recibe el evento `soca_extracted`. Entonces se leen y transforman los enlaces del archivo `repos.txt` generados en el fetch para enviárselos a `rsfc_container` para que publique los jobs de dichos repositorios. **DEBE ESTAR EN ESTADO PUBLISH**
 
-3. dashboard_workflow: *In_Progress*
+3. dashboard_workflow: 🚧🚧 *In_Progress* 🚧🚧
 
 Los workflow se encuentran en `/containers/n8n_container/workflow`
 
@@ -187,7 +187,7 @@ Herramientas usadadas en el proyecto:
 
 ### 4.2 Despliegue y ejecución
 
-*In_Progress (falta despliegue dashverse)*
+🚧🚧 *In_Progress (falta despliegue dashverse)* 🚧🚧
 
 1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar
 
