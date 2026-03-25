@@ -4,9 +4,6 @@
 - modificdo github harvester linea 211 subido timeout a 60
 - aumentado max retries a 5 de worker rsfc por problemas de red
 
-
-###################
-
 - creado imagenes de soca y rsfc heavy, para que docker compose vaya mas rapido (modificando docker y docker compose con ellas)
 - modificado .githubatributes para que los .sh sean siempre `lf`
 - añadida nueva cola de eventos rsfc_events para trigger de workflow dashverse
