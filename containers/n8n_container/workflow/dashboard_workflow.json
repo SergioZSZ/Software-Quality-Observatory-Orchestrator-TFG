@@ -1,0 +1,423 @@
+{
+  "name": "dashboard_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/rsfc/{{ $json.target }}/{{ $json.repos_names }}/rsfc_output/rsfc_assessment.json",
+        "options": {
+          "fileExtension": ".json"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        544,
+        -128
+      ],
+      "id": "494ad48f-e890-4843-8afc-c8ac48abab38",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "queue": "rsfc_events",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rabbitmqTrigger",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -128
+      ],
+      "id": "35cd134a-d8c7-41cf-a509-fd703cb86e3a",
+      "name": "RabbitMQ Trigger",
+      "credentials": {
+        "rabbitmq": {
+          "id": "Gu1h8bUNV13Vwh2z",
+          "name": "RabbitMQ account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = JSON.parse($json.content);\n\nreturn [\n  {\n    json: data\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        -128
+      ],
+      "id": "07103235-c879-4ff7-9679-6c2684133ce3",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "repos_names",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "target",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -128
+      ],
+      "id": "6fb7f8ce-cb51-42f5-9cec-3a759417b859",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "assessment",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        816,
+        -128
+      ],
+      "id": "24508cbd-8b49-4282-bc10-4ef81c981c57",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/assessment_checks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates, return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2128,
+        -80
+      ],
+      "id": "5043f646-c969-4057-acb8-fe555c74e5da",
+      "name": "Post assessments_checks"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n \"context\": \"{{$json.assessment['@context']}}\",\n \"type\": \"{{$json.assessment['@type']}}\",\n \"name\": \"{{$json.assessment.name}}\",\n \"description\": \"{{$json.assessment.description}}\",\n \"date_created\": \"{{$json.assessment.dateCreated}}\",\n \"license_uri\": \"{{$json.assessment.license['@id']}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        112
+      ],
+      "id": "5022d2f7-8831-4bc4-8e02-f383eca80d9b",
+      "name": "Edit Fields for assessment"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"assessment_id\": {{$json[\"id\"]}},\n  \"type\": \"software\",\n  \"name\": {{$json[\"assessment\"][\"assessedSoftware\"][\"name\"]}},\n  \"version\": {{$json[\"assessment\"][\"assessedSoftware\"][\"softwareVersion\"] || null}},\n  \"url\": {{$json[\"assessment\"][\"assessedSoftware\"][\"url\"]}},\n  \"identifier_uri\": {{$json[\"assessment\"][\"assessedSoftware\"][\"url\"]}}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        -336
+      ],
+      "id": "a07ee606-c3c6-4360-a5d3-0fd2ebdb188c",
+      "name": "Edit Fields for assessment_software"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/assessment_software",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates, return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1952,
+        -336
+      ],
+      "id": "8d7cf840-dae0-4cf6-b988-3bc7c0af3770",
+      "name": "Post assessment_software"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1584,
+        -336
+      ],
+      "id": "d9986df7-991a-4977-9c4e-b4b114840fb2",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/assessments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates, return=representation"
+            },
+            {
+              "name": "Prefer"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1312,
+        112
+      ],
+      "id": "3d47452b-398c-4a2a-9892-2dcaa5f43703",
+      "name": "Post assessments"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "=={{\n{\n  assessment_id: $json[\"id\"],\n\n  type: $json[\"assessment.checks\"][\"@type\"],\n\n  indicator_uri: $json[\"assessment.checks\"][\"assessesIndicator\"][\"@id\"],\n\n  checking_software_name: $json[\"assessment.checks\"][\"checkingSoftware\"][\"name\"],\n\n  checking_software_version: $json[\"assessment.checks\"][\"checkingSoftware\"][\"softwareVersion\"],\n\n  checking_software_uri: $json[\"assessment.checks\"][\"checkingSoftware\"][\"@id\"],\n\n  process: $json[\"assessment.checks\"][\"process\"],\n\n  status_uri: $json[\"assessment.checks\"][\"status\"][\"@id\"],\n\n  output: $json[\"assessment.checks\"][\"output\"],\n\n  evidence: $json[\"assessment.checks\"][\"evidence\"]\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1952,
+        -80
+      ],
+      "id": "762e8537-7f12-4417-94a8-fd220108f789",
+      "name": "Edit Fields for assessment_cheks"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "assessment.checks",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -80
+      ],
+      "id": "b75df5b1-5341-4cf5-8bc0-a89cb10314b8",
+      "name": "Split Out checks"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1584,
+        -80
+      ],
+      "id": "f93d52ba-b6bc-4cda-abbf-d3beee10bb7f",
+      "name": "Merge1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RabbitMQ Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields for assessment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields for assessment": {
+      "main": [
+        [
+          {
+            "node": "Post assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields for assessment_software": {
+      "main": [
+        [
+          {
+            "node": "Post assessment_software",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post assessments": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields for assessment_software",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out checks": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields for assessment_cheks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields for assessment_cheks": {
+      "main": [
+        [
+          {
+            "node": "Post assessments_checks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Split Out checks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c8dbe920-54bb-4842-b440-fc72c63da1a3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
+  },
+  "id": "UtecOZOn4bmTpzQR",
+  "tags": []
+}

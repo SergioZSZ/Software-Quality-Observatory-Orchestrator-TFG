@@ -54,7 +54,7 @@ def publish_job(target: str, work_type: str, repo_url: str | None = None):
    # channel.close()
    # connection.close()
    
-import json
+
 
 def publish_event(target):
     

@@ -3,11 +3,11 @@ import time, os, json
 from .database import SessionLocal, Job
 from .cruds import rfsc_runner
 from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE, RATE_LIMIT_RSFC_ENABLED, RETRYABLE_ERRORS
-from .rabbitmq import rabbit_connect
+from .rabbitmq import rabbit_connect, publish_event
 from datetime import datetime
 from sqlalchemy import func
 
-MAX_RETRIES = 5
+MAX_RETRIES = 7
 
 
 def timestamp(msg):
@@ -57,7 +57,7 @@ def rsfc_indicators_generation(job_id,target, repo_url, base_dir, token, retries
                 retries += 1
                 if retries < MAX_RETRIES:
                     timestamp(f"[{job_id}] retry {retries}/{MAX_RETRIES} due to network error")
-                    time.sleep(60*retries)
+                    time.sleep(2 ** retries * 30)
                     continue
                 else:
                     timestamp(f"[{job_id}] max retries reached")
@@ -76,7 +76,10 @@ def rsfc_indicators_generation(job_id,target, repo_url, base_dir, token, retries
             
             
             db.commit()
-            return  
+            
+            if retryable:
+                return True
+            return False
 
         #buscamos indicadores generados 
         indicators = os.path.join(response.personal_dir, "rsfc_output","rsfc_assessment.json")
@@ -87,7 +90,7 @@ def rsfc_indicators_generation(job_id,target, repo_url, base_dir, token, retries
             
             timestamp(response.status)
             db.commit()
-            return
+            return False
         
         # cargamos indicadores
         with open(indicators) as f:
@@ -102,6 +105,15 @@ def rsfc_indicators_generation(job_id,target, repo_url, base_dir, token, retries
         completed = db.query(func.count(Job.id)).filter(Job.target == target, Job.status == "success").scalar()
         total_jobs = db.query(func.count(Job.id)).filter(Job.target == target).scalar()
         timestamp(f"[RSFC] {target} Progress: {completed}/{total_jobs} repos processed")
+        
+        
+        # caso completado empieza dashverse
+        if completed == total_jobs:
+            timestamp(f"[{target}] All repos processed, sending message to DashVERSE")
+            publish_event(target)
+        
+        return False
+            
     # excepciones posibles
     except Exception as e:
         
@@ -137,7 +149,7 @@ def process_message(ch, method, properties, body):
         if RATE_LIMIT_RSFC_ENABLED:
             wait_for_token(ch)
             
-        rsfc_indicators_generation(job_id, target, repo_url, BASE_DIR, TOKEN, 0)
+        requeue = rsfc_indicators_generation(job_id, target, repo_url, BASE_DIR, TOKEN, 0)
 
         total_time = time.time() - start
         
@@ -146,7 +158,12 @@ def process_message(ch, method, properties, body):
         # evitar saturar github api 
         
         #confirmacion de mensaje pocesado para eliminarlo de la cola
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+        if requeue:
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+        
+        else:
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+        
 
 
         

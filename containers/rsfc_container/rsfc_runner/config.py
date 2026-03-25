@@ -14,6 +14,7 @@ RABBITMQ_USER = os.getenv("RABBITMQ_USER")
 RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD")
 QUEUE_NAME = "rsfc_jobs"
 RATE_LIMIT_QUEUE = "github_rate_limit_rsfc"
+QUEUE_EVENT = "rsfc_events"
 RATE_LIMIT_RSFC_ENABLED = os.getenv("RATE_LIMIT_RSFC_ENABLED", "true").lower() == "true"
 
 RETRYABLE_ERRORS = [

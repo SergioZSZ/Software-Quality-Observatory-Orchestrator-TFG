@@ -8,7 +8,8 @@ RUN set -ex; \
     python3 python3-venv python3-pip
 
 COPY requirements.txt .
-
+# añadida para instalar requirements
+RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt
 # Copy your Python scripts and submodules
 COPY *.py .
 COPY everse_db ./everse_db

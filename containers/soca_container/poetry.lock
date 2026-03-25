@@ -265,5 +265,5 @@ typing-extensions = ">=4.12.0"
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.11,<=3.13"
-content-hash = "be7112545f571701e01b6a414bb9b5ff8064c577eb659b0ae361888ef8f997a5"
+python-versions = ">=3.11,<3.13"
+content-hash = "3f5761e24ff37fa535b2da0abfdb4d22d2d1e7824222b93a02a1f99c822abe71"

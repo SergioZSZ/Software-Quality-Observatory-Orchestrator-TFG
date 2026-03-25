@@ -1,7 +1,7 @@
 import json, pika, time
 
-from ..config import RABBITMQ_HOST, QUEUE_NAME,RABBITMQ_USER, RABBITMQ_PASSWORD, RATE_LIMIT_QUEUE
-
+from ..config import RABBITMQ_HOST, QUEUE_NAME,RABBITMQ_USER, RABBITMQ_PASSWORD, RATE_LIMIT_QUEUE,QUEUE_EVENT
+from ..database import SessionLocal, Job
 
 # intentos de conexion a rabbit hasta que se pueda conectar
 def rabbit_connect():
@@ -21,8 +21,9 @@ def rabbit_connect():
             print("RabbitMQ conexion set")
             channel = connection.channel()
             channel.queue_declare(queue=QUEUE_NAME, durable=True)
+            channel.queue_declare(queue= QUEUE_EVENT, durable=True)
             channel.queue_declare(queue=RATE_LIMIT_QUEUE, durable=True, arguments={"x-max-length": 1})
-           
+
             return connection
 
         except pika.exceptions.AMQPConnectionError:
@@ -48,3 +49,27 @@ def publish_job(job_id: str, repo_url: str, target: str):
     
     #channel.close()
     #connection.close()
+    
+
+def publish_event(target:str):
+    
+    # sacamos nombres de los repos success del target
+    db = SessionLocal()
+    repos_urls = db.query(Job.repo_url).filter(Job.target==target).all()
+    repos_names = []
+    for (repo_url,) in repos_urls:
+        repos_names.append(repo_url.rstrip("/").split("/")[-1])
+        
+        
+    # publicamos mensaje evento
+    message = {
+        "event": "rsfc_finished",
+        "target": target,
+        "repos_names": repos_names
+    }
+    
+    # publicamos mensaje (delivery mode 2 = mensaje queno se pierda y sea persistente)
+    channel.basic_publish(exchange="", routing_key=QUEUE_EVENT, body=json.dumps(message),
+                            properties = pika.BasicProperties(delivery_mode=2))
+    
+    db.close()

@@ -1,1 +1,1 @@
-from .client import rabbit_connect
+from .client import rabbit_connect, publish_event

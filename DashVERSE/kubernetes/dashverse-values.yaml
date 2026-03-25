@@ -244,7 +244,7 @@ configOverridesFiles: {}
 configMountPath: "/app/pythonpath"
 
 extraConfigMountPath: "/app/configs"
-
+# eliminada para usar la version que he puesto en l 935 bitnami/redis:7.0.10-debian-11-r4:
 image:
   repository: apachesuperset.docker.scarf.sh/apache/superset
   tag: ~
@@ -390,9 +390,9 @@ supersetNode:
     httpGet:
       path: /health
       port: http
-    initialDelaySeconds: 15
+    initialDelaySeconds: 120 # antes 15
     timeoutSeconds: 1
-    failureThreshold: 60
+    failureThreshold: 120 # antes 60
     periodSeconds: 5
     successThreshold: 1
   livenessProbe:
@@ -408,7 +408,7 @@ supersetNode:
     httpGet:
       path: /health
       port: http
-    initialDelaySeconds: 15
+    initialDelaySeconds: 180 # antes 15
     timeoutSeconds: 1
     failureThreshold: 3
     periodSeconds: 15
@@ -912,6 +912,11 @@ redis:
   ## Set architecture to standalone/replication
   architecture: standalone
   ##
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: latest
   ## Auth configuration:
   ##
   auth:

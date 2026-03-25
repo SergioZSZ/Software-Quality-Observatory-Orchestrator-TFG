@@ -2,6 +2,7 @@
 
 services:
 
+# *** Gestión del wokflow ***
   n8n:
     build: ./n8n_container
     container_name: n8n
@@ -39,23 +40,7 @@ services:
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - RATE_LIMIT_RSFC_ENABLED=${RATE_LIMIT_RSFC_ENABLED}
-
-  worker_soca:
-    build:
-      context: ./soca_container
-    command: python -u -m soca_runner.worker
-    volumes:
-      - ./outputs:/app/outputs
-    networks:
-      - net
-    environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-
-    
-
+      
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -70,10 +55,39 @@ services:
     networks:
     - net
 
+# *** SOCA ***
+  worker_soca:
+    image: soca-heavy
+    command: python -u -m soca_runner.worker
+    volumes:
+      - ./outputs:/app/outputs
+    networks:
+      - net
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
+
+  rate_limiter_soca:
+    image: soca-heavy
+    command: python -m soca_runner.rabbitmq.rate_limiter
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RATE_LIMIT_SOCA_ENABLED=${RATE_LIMIT_SOCA_ENABLED}
+    networks:
+      - net
+
+
+# *** RSFC ***
 
   worker_rsfc:
-    build:
-      context: ./rsfc_container
+    image: rsfc-heavy
     command: python -u -m rsfc_runner.worker
     depends_on:
       postgres:
@@ -91,8 +105,7 @@ services:
 
 
   rate_limiter_rsfc:
-    build:
-      context: ./rsfc_container
+    image: rsfc-heavy
     command: python -m rsfc_runner.rabbitmq.rate_limiter
     depends_on:
       - rabbitmq
@@ -106,19 +119,6 @@ services:
     networks:
       - net
 
-  rate_limiter_soca:
-    build:
-      context: ./soca_container
-    command: python -m soca_runner.rabbitmq.rate_limiter
-    depends_on:
-      - rabbitmq
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-      - RATE_LIMIT_SOCA_ENABLED=${RATE_LIMIT_SOCA_ENABLED}
-    networks:
-      - net
 
 
   postgres:
