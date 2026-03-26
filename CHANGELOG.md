@@ -1,49 +1,65 @@
-- quitados apis por execute commands de docker (en vez de endpoints se ejecuta el main de cada container)
-- modificado workflows a 2, uno para rsfc y otro para soca
-- modificdo github harvester linea 211 subido timeout a 60
-- aumentado max retries a 5 de worker rsfc por problemas de red
-
-- creado imagenes de soca y rsfc heavy, para que docker compose vaya mas rapido (modificando docker y docker compose con ellas)
-- modificado .githubatributes para que los .sh sean siempre `lf`
-- añadida nueva cola de eventos rsfc_events para trigger de workflow dashverse
-- añadido nueva función `publish_event(target: str)` en rsfc para el envío de event a rsfc_events
-con el target y sus repositorios
-- subido a 7 retries los problemas de red y cambiado backoff lineal a exponencial
-- generado workflow dashverse en n8n
-
-
-
 ############################################
 
-- Modificado soca_container:
-    1. Eliminada cola events, conexión y declaración a ella y todo lo relacionado con publish event soca
-    2. eliminado file locker y archivos de status
-    3. añadida generacion de failed_repo.json si hay error al procesar 
-    4. añadido script genportal.py para generación del portal mediante execute command en n8n
+## **SOCA_CONTAINER**
 
-- Modificado rsfc_container:
-    1. Eliminada cola events, conexión y declaración a ella y todo lo relacionado con publish event rsfc
-    2. Eliminada BBDD rsfc_runner, obsoleta (logs orquestados por jsons de assessments o failed en el target)
-    3. Añadida funcion de que si un repositorio falla, genere un failed_assessments.json en el directorio donde debería ir el rsfc_assessments.json
-    4. Añadido truncamiento de directorios del target en rsfc_container para eliminar indicadores obsoletos
+- Eliminada cola `events`, conexión y declaración asociada, así como todo el sistema de publicación de eventos de SOCA  
+- Eliminado file locker y archivos de status  
+- Añadida generación de `failed_repo.json` en caso de error durante el procesamiento  
+- Añadido script `genportal.py` para la generación del portal mediante `execute command` en n8n  
+- Sustitución de llamadas a APIs por ejecución directa mediante `docker execute command` (se ejecuta el main del contenedor en lugar de endpoints)  
 
-- Modificado n8n:
-    - Fusionado todos los workflows anteriores en SQOO_workflow con 3 fases:
-        1. Fetch de soca + publish jobs soca && wait hasta generación de metadatos de cada repo
-        2. publish jobs rsfc && wait a que terminen de procesar los assessments
-        3. envío de assessments a DashVERSE
+---
 
+## **RSFC_CONTAINER**
 
-- Actualizado somef, modificando los siguientes ficheros para ello:
-    - soca:
-        - setup.cfg -> somef=0.10.0
+- Eliminada cola `events`, conexión y declaración asociada, así como todo el sistema de publicación de eventos de RSFC  
+- Eliminada BBDD `rsfc_runner` (obsoleta, sustituida por logs en JSON generados por assessments o fallos por target)  
+- Añadida generación de `failed_assessments.json` cuando un repositorio falla  
+- Añadido truncamiento de directorios del target para evitar indicadores obsoletos  
+- Aumentado número máximo de reintentos del worker RSFC a **5** debido a problemas de red  
+- Incrementado a **7 retries** en escenarios de red inestable y cambio de estrategia de backoff de lineal a exponencial  
+- Añadida nueva cola de eventos `rsfc_events` para integración con workflows externos  
+- Añadida nueva función `publish_event(target: str)` para el envío de eventos a `rsfc_events` incluyendo el target y sus repositorios  
+- Sustitución de llamadas a APIs por ejecución directa mediante `docker execute command`  
 
-    - rsfc-main:
-        - pyproject.toml:
-            - somef = 0.10.0
-            - python subido >=3.11
-            - scikit-learn ahora >= 1.5.0
-            - pytest ahora >= 7.4.4
-            - imbalanced-learn >= 0.11.0
-        
-        - generado nuevo requirements.txt
+---
+
+## **N8N**
+
+- Fusionados los workflows previos en un único workflow `SQOO_workflow` estructurado en 3 fases:
+    1. Fetch de SOCA + publicación de jobs y espera activa hasta la generación de metadatos por repositorio  
+    2. Publicación de jobs RSFC y espera activa hasta la generación de assessments  
+    3. Envío de assessments a DashVERSE  
+
+---
+
+## **ACTUALIZACIONES Y MEJORAS GENERALES**
+
+- Actualizado **somef** a versión `0.10.0`:
+    - `soca/setup.cfg`
+    - `rsfc-main/pyproject.toml`
+
+- Cambios en `rsfc-main/pyproject.toml`:
+    - Python actualizado a `>= 3.11`  
+    - `scikit-learn` actualizado a `>= 1.5.0`  
+    - `pytest` actualizado a `>= 7.4.4`  
+    - `imbalanced-learn` actualizado a `>= 0.11.0`  
+
+- Generado nuevo `requirements.txt`  
+
+- Modificado `github harvester` (línea 211):
+    - Incrementado timeout a **60 segundos**  
+
+- Creación de imágenes Docker optimizadas:
+    - `soca-heavy`
+    - `rsfc-heavy`  
+    → Mejora significativa en tiempos de ejecución en `docker-compose`  
+
+- Modificado `.gitattributes`:
+    - Forzado uso de `LF` en archivos `.sh`  
+
+- Generado workflow específico de DashVERSE en n8n  
+
+---
+
+############################################
