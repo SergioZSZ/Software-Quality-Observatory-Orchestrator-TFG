@@ -1,86 +1,35 @@
-import time, os, json, portalocker
+import time, os, json
 
-from .rabbitmq.client import rabbit_connect, publish_job, publish_event, publish_repo_done
+from .rabbitmq.client import rabbit_connect, publish_job
 from .cruds.functions import soca_extract, soca_portal
 
 from .config import QUEUE_NAME, BASE_DIR, RATE_LIMIT_QUEUE, RATE_LIMIT_SOCA_ENABLED
 from datetime import datetime
 
 
-def timestamp(msg):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+
     
 
 
 ###### Auxiliares
 
-### lock update
-def update_status_file(path, update_fn, target:str| None = None, response:dict | None= None):
-    # apertura y lockeo del archivo json para que otros workers no sobrescriban
-    with portalocker.Lock(path, 'r+', timeout=10) as f:
-        # lectura y actualización a usar
-        data = json.load(f)
-        
-        # caso set running
-        if not target and not response:
-            update_fn(data)
+def timestamp(msg):
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
     
-        #caso intento generar portal
-        elif target and response:
-            update_fn(data,target,response)
-        
-        # caso set error y completed
-        else:
-            update_fn(data, response)
-
-        # volver al inicio del archivo y truncarlo para no dejar residuos al final y update json
-        f.seek(0)
-        f.truncate()
-        json.dump(data, f, indent=2)
-        f.flush() # mandar los datos directamente (no guardar en buffer)
-
-## funciones para lock update
-# set locks
-def set_running(data):
-    if data["status"] == "queued":
-        data["status"] = "running"
-
-def set_error(data, response):
-    data["status"] = "error"
-    data["detail"] = response.status
     
-def set_completed(data,response):
-    data["status"] = "completed"
-    data["detail"] = response.status
+def get_repo_count(target):
+    repos_file = os.path.join(BASE_DIR, "outputs", "soca", target, "repos.txt")
 
-        
-# lanzamiento portal lock
-def launch_portal(data,target,response):
-
-    data["repos_processed"] += 1 
+    with open(repos_file, "r") as f:
+        return len([line for line in f if line.strip()])
     
-    timestamp(f"[{target}] Progress: {data['repos_processed']}/{data['repo_count']}")
     
-    metadata_dir = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata")
-    
-    # si todos procesados
-    if data["repos_processed"] == data["repo_count"]:
-        timestamp(f"All repos processed. Communicating with RSFC")
-        # evento para empezar rsfc
-        
-        publish_event(target)
-        
-        if not data.get("portal_launched", False):
-            data["portal_launched"] = True
-            data["status"] = "completed"
-            data["detail"] = response.status
 
-            timestamp(f"Launching portal generation")
-            publish_job(target, "portal_generation")
-
-
-
-
+def count_processed(metadata_dir):
+    return len([
+        f for f in os.listdir(metadata_dir)
+        if f.endswith(".json")
+    ])
 
 
 # evitar github si activado rate limit
@@ -98,64 +47,48 @@ def wait_for_token(channel):
 
     
     
+    
 ### logica interna del worker
 
 # extraccion de metadata
-def handle_extract_metadata(target, repo_url, status_file_path):
+def handle_extract_metadata(target, repo_url):
     
     repo_name = repo_url.rstrip("/").split("/")[-1]
-    
+    target_dir = os.path.join(BASE_DIR, "outputs", "soca", target)
+
 
     start = time.time()
-
-    # actualizar estado a running
-    update_status_file(status_file_path, set_running)
 
     # ejecutar extracción
     response = soca_extract(BASE_DIR, target, repo_url)
 
-    # caso error
+    # caso error, genera carpeta con fichero status error
     if response.status["status"] == "error":
-        update_status_file(status_file_path, set_error, response = response)
-
         timestamp(f"    [{target} - {repo_name}]extract_metadata failed: {response.status}")
-        return
-
-    total_time = time.time() - start
-    timestamp(f"[{target} - {repo_name}]  Metadata extracted in {total_time:.2f}s ")
-
-    # comprobar si lanzar portal y lanzarlo 
-    update_status_file(status_file_path, launch_portal, target=target, response=response)
-
-
-
-
-
-# generacion de portal
-def handle_portal_generation(target,status_file_path):
-
-
-    start = time.time()
-
-    # actualizar estado a running
-    update_status_file(status_file_path, set_running)
-
-    # generacion del portal
-    response = soca_portal(BASE_DIR, target)
-
-    # errores 
-    if response.status["status"] == "error":
-        update_status_file(status_file_path,set_error, response=response)
-
-        timestamp(f"    portal_generation failed: {response.status}")
-        return
-
-    # success
-    total_time = time.time() - start
-    timestamp(f"    Portal generated")
-
-    update_status_file(status_file_path,set_completed, response=response)
         
+        metadata_dir = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata")
+        os.makedirs(metadata_dir,exist_ok=True)
+        
+        failed_file = os.path.join(metadata_dir, f"failed_{repo_name}.json")
+        with open(failed_file, "w") as f:
+            json.dump({"detail": response.status}, f, indent=2)
+            
+    else:
+
+        total_time = time.time() - start
+        timestamp(f"[{target} - {repo_name}]  Metadata extracted in {total_time:.2f}s ")
+
+    # conteo de repos procesados
+    metadata_dir = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata")
+    
+    processed = count_processed(metadata_dir)
+
+    repo_count = get_repo_count(target)
+    timestamp(f"[SOCA] {target} Progress: {processed}/{repo_count} repos processed")
+
+    # si todo procesado genera fichero ok
+    if processed == repo_count:
+        timestamp(f"[{target}] All repos processed")
         
         
         
@@ -181,19 +114,8 @@ def process_message(ch, method, properties, body):
             repo_name = repo_url.rstrip("/").split("/")[-1]
 
             timestamp(f"({work_type}) Received job [{target} - {repo_name}]")
-
-            status_file_path = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata_status.json")
             
-            handle_extract_metadata(target, repo_url, status_file_path)
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-
-        elif work_type == "portal_generation":
-            
-            timestamp(f"({work_type}) Received job [{target}]")
-
-            status_file_path = os.path.join(BASE_DIR, "outputs", "soca", target, "portal_status.json")
-
-            handle_portal_generation(target,status_file_path)
+            handle_extract_metadata(target, repo_url)
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
         else:

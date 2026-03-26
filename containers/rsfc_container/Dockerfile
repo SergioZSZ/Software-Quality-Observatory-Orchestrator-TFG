@@ -27,9 +27,6 @@ RUN python -m nltk.downloader omw-1.4
 # resto del runner
 COPY rsfc_runner ./rsfc_runner
 
-RUN chmod +x /app/rsfc_runner/database/init_db.sh
-
-ENTRYPOINT ["/app/rsfc_runner/database/init_db.sh"]
 
 CMD ["python","-m","rsfc_runner.main"]
 

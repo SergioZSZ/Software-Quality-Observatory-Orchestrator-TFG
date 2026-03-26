@@ -1,0 +1,28 @@
+from .rabbitmq import publish_job
+from .models import PortalResponse
+import os
+from soca_runner.config import BASE_DIR, TARGET
+from .cruds import soca_portal
+def genportal():
+    
+
+    
+    print("** Soca portal gen started **")
+    
+    try:
+        #service 
+
+        response_fetch = soca_portal(BASE_DIR, TARGET)
+        
+        if response_fetch.status["status"]=="error":
+            print(f"Soca Portal Error: {response_fetch.status}")
+            raise
+            
+
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        raise
+
+if __name__=="__main__":
+    genportal()

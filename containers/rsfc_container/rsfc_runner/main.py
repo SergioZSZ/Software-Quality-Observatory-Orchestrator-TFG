@@ -1,19 +1,27 @@
-from .database import SessionLocal
 from .rabbitmq.client import publish_job
-from .database import Job
-
-import json,os
+import json,os, shutil
+from .config import BASE_DIR, INPUT
 
 
 
 def main(input: dict):
-
-    db = SessionLocal()
     
-    # procesamiento repos llegados
     repos =input["repos_url"]
-    jobs = []
+    repos_count = len(repos)
+    
+    repo_url = repos[0]
+    target = repo_url.rstrip("/").split("/")[-2]
 
+    
+    # truncado de indicadores obsoletos inicial
+    target_dir = os.path.join(BASE_DIR, "outputs", "rsfc",target)
+
+    if os.path.exists(target_dir):
+        shutil.rmtree(target_dir)
+
+    os.makedirs(target_dir, exist_ok=True)
+
+    #procesamiento de repos (jobs)
     for repo_url in repos:
         
         
@@ -21,22 +29,11 @@ def main(input: dict):
         target = repo_url.rstrip("/").split("/")[-2]
         job_id = target + "_" + name
 
+        publish_job(job_id, repo_url, target, repos_count)
 
-        job = Job(
-            id=job_id,
-            target=target,
-            repo_url=repo_url,
-            status="queued"
-        )
-
-        jobs.append(job)
-        
-    db.add_all(jobs)
-    db.commit()
+ 
     
-    # publicacion de jobs
-    for job in jobs:
-        publish_job(job.id, job.repo_url, job.target)
+        
         
 
     
@@ -47,6 +44,6 @@ def main(input: dict):
 
 
 if __name__ == "__main__":
-    input = json.loads(os.getenv("INPUT"))
+    input = json.loads(INPUT)
     main(input)
     

@@ -1,0 +1,894 @@
+{
+  "name": "SQOO_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "=data",
+        "options": {
+          "encoding": "utf8"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1072,
+        112
+      ],
+      "id": "730a0b65-3441-4900-b245-c79f8f94f68c",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        112
+      ],
+      "id": "7cabc14c-ee2d-4297-bf1c-7be8ef79db45",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{ $json.target }} \\\n-e TYPE={{ $json.type }} \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        112
+      ],
+      "id": "7b490b1f-aa0e-427a-94ad-214eee0af787",
+      "name": "Execute soca-runner"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Target\"].json.target}}/repos.txt",
+        "options": {
+          "fileExtension": ""
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1232,
+        112
+      ],
+      "id": "7e63a351-25a5-4a75-8c82-d31d42794f11",
+      "name": "Read target repos"
+    },
+    {
+      "parameters": {
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ repos_url: $json.repos_url }) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        320,
+        112
+      ],
+      "id": "1f1a0f0e-bd00-426f-b9f3-3ca756a50872",
+      "name": "Execute rsfc-runner"
+    },
+    {
+      "parameters": {
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Target\"].json.target}} \\\n-e TYPE={{$node[\"Target\"].json.type}} \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        288
+      ],
+      "id": "98752616-a07f-4fac-a0ce-79c8ca5d1330",
+      "name": "Execute soca portal"
+    },
+    {
+      "parameters": {
+        "jsCode": "const repos = $json.data\n  .split('\\n')\n  .map(r => r.trim())\n  .filter(r => r !== '');\n\nreturn [\n  {\n    json: {\n      repos_url: repos,\n      repo_count: repos.length\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        112
+      ],
+      "id": "389881f8-54f8-403a-80a2-9a7df438d186",
+      "name": "Code repo_url list & repo count"
+    },
+    {
+      "parameters": {
+        "command": "=find /root/.n8n-files/rsfc/{{$node[\"Target\"].json.target}}/ -type f -name \"*.json\" | wc -l"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        512,
+        240
+      ],
+      "id": "494fc188-126f-4abc-9416-889fed03ba53",
+      "name": "find assessments"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        240
+      ],
+      "id": "4d0e4321-b3b0-41a4-9e0c-bd2f1044e585",
+      "name": "Process repocount"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        368
+      ],
+      "id": "de79dfc0-36d5-46e7-a811-579c999ec58e",
+      "name": "Wait1",
+      "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -128,
+        704
+      ],
+      "id": "44810db1-181d-4192-8fb3-bf8a9607715a",
+      "name": "Wait",
+      "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        512
+      ],
+      "id": "332790a7-62eb-4543-a6cb-ee1c2112c709",
+      "name": "Process metadata count"
+    },
+    {
+      "parameters": {
+        "command": "=find /root/.n8n-files/soca/{{$node[\"Target\"].json.target}}/metadata -maxdepth 1 -type f -name \"*.json\" | wc -l"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        512
+      ],
+      "id": "1c4727c2-8fed-4f71-8005-b37b0502087a",
+      "name": "find metadatas json"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        128,
+        112
+      ],
+      "id": "2536b6fa-79d2-4cee-82f4-28ef508fb3c4",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/rsfc/{{$json.target}}/{{$json.repo_name}}/rsfc_output/rsfc_assessment.json",
+        "options": {
+          "fileExtension": ".json"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        1840,
+        -128
+      ],
+      "id": "553108b9-d35e-4c80-800f-ac5aabac976d",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/assessment_checks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3584,
+        -80
+      ],
+      "id": "4545b501-b003-4eff-bf45-964e5e5c49ad",
+      "name": "Post assessments_checks"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n \"context\": \"{{$json.assessment['@context']}}\",\n \"type\": \"{{$json.assessment['@type']}}\",\n \"name\": \"{{$json.assessment.name}}\",\n \"description\": \"{{$json.assessment.description}}\",\n \"date_created\": \"{{$json.assessment.dateCreated}}\",\n \"license_uri\": \"{{$json.assessment.license['@id']}}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2336,
+        80
+      ],
+      "id": "1d38579c-1ba5-4901-a1c9-4b97131c61fc",
+      "name": "Edit Fields for assessment"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"assessment_id\": {{$json[\"id\"]}},\n  \"type\": \"software\",\n  \"name\": {{$json[\"assessment\"][\"assessedSoftware\"][\"name\"]}},\n  \"version\": {{$json[\"assessment\"][\"assessedSoftware\"][\"softwareVersion\"] || null}},\n  \"url\": {{$json[\"assessment\"][\"assessedSoftware\"][\"url\"]}},\n  \"identifier_uri\": {{$json[\"assessment\"][\"assessedSoftware\"][\"url\"]}}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3184,
+        -336
+      ],
+      "id": "807597fa-99de-45a0-8f64-9a2faa34a325",
+      "name": "Edit Fields for assessment_software"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/assessment_software",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates, return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3376,
+        -336
+      ],
+      "id": "90183086-e721-4090-ad72-dcc9376a8576",
+      "name": "Post assessment_software"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/assessments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates, return=representation"
+            },
+            {
+              "name": "Prefer"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2496,
+        80
+      ],
+      "id": "5f894c8e-4122-48c3-bf45-343633c86e93",
+      "name": "Post assessments"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "=={{\n{\n  assessment_id: $json[\"id\"],\n\n  type: $json[\"assessment.checks\"][\"@type\"],\n\n  indicator_uri: $json[\"assessment.checks\"][\"assessesIndicator\"][\"@id\"],\n\n  checking_software_name: $json[\"assessment.checks\"][\"checkingSoftware\"][\"name\"],\n\n  checking_software_version: $json[\"assessment.checks\"][\"checkingSoftware\"][\"softwareVersion\"],\n\n  checking_software_uri: $json[\"assessment.checks\"][\"checkingSoftware\"][\"@id\"],\n\n  process: $json[\"assessment.checks\"][\"process\"],\n\n  status_uri: $json[\"assessment.checks\"][\"status\"][\"@id\"],\n\n  output: $json[\"assessment.checks\"][\"output\"],\n\n  evidence: $json[\"assessment.checks\"][\"evidence\"]\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3376,
+        -80
+      ],
+      "id": "d9bc9c92-1f22-4594-9956-c7a288af89bf",
+      "name": "Edit Fields for assessment_cheks"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "assessment.checks",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        3184,
+        -80
+      ],
+      "id": "c2f374a7-c71c-4131-a9c6-7c10f6dadac8",
+      "name": "Split Out checks"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3008,
+        -80
+      ],
+      "id": "96bad764-492f-421a-a86a-37a0896253d8",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "assessment",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        2064,
+        -128
+      ],
+      "id": "6f56ea12-db0d-4107-b6e6-0c7b6fcb460b",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3008,
+        -336
+      ],
+      "id": "02cb9e3d-9331-4401-bef1-0fc1c1830afa",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1232,
+        -128
+      ],
+      "id": "0ab9b08a-3212-4ac4-a95e-79e8a9ca3c21",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "repos_url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        -128
+      ],
+      "id": "19bc7851-9180-4c21-a00c-ee633d0dcc3d",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      target: url.split(\"/\")[3],   // owner\n      repo_name: url.split(\"/\").pop()\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        -128
+      ],
+      "id": "774825c3-c8e3-48a3-be9a-7eeee9abc68b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"target\": \"FAIR2ADAPT\",\n  \"type\": \"org\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1648,
+        112
+      ],
+      "id": "810aed55-2aa6-4caf-ab9d-1bb31b6af513",
+      "name": "Target"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
+              "leftValue": "={{ $node[\"Process metadata count\"].json.count}}",
+              "rightValue": "={{ $node[\"Code repo_url list & repo count\"].json.repo_count }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -320,
+        512
+      ],
+      "id": "537bd535-7a69-4e38-b054-121a17e90ee9",
+      "name": "If completed soca jobs",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
+              "leftValue": "={{ $node[\"Process repocount\"].json.count}}",
+              "rightValue": "={{ $node[\"Code repo_url list & repo count\"].json.repo_count }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        848,
+        240
+      ],
+      "id": "3d9ab1d7-a6a0-4cce-9ee0-e9b707798691",
+      "name": "If completed rsfc jobs",
+      "alwaysOutputData": false
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code repo_url list & repo count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Target",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute soca-runner": {
+      "main": [
+        [
+          {
+            "node": "Read target repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read target repos": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute soca portal": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code repo_url list & repo count": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "find metadatas json",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute rsfc-runner": {
+      "main": [
+        [
+          {
+            "node": "find assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find assessments": {
+      "main": [
+        [
+          {
+            "node": "Process repocount",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process repocount": {
+      "main": [
+        [
+          {
+            "node": "If completed rsfc jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "find assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "find metadatas json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process metadata count": {
+      "main": [
+        [
+          {
+            "node": "If completed soca jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find metadatas json": {
+      "main": [
+        [
+          {
+            "node": "Process metadata count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Execute rsfc-runner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields for assessment": {
+      "main": [
+        [
+          {
+            "node": "Post assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields for assessment_software": {
+      "main": [
+        [
+          {
+            "node": "Post assessment_software",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post assessments": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields for assessment_cheks": {
+      "main": [
+        [
+          {
+            "node": "Post assessments_checks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out checks": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields for assessment_cheks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Split Out checks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields for assessment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields for assessment_software",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Target": {
+      "main": [
+        [
+          {
+            "node": "Execute soca-runner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If completed soca jobs": {
+      "main": [
+        [
+          {
+            "node": "Execute soca portal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If completed rsfc jobs": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "daee0feb-028e-4499-a5ac-522f1c70b9ba",
+  "meta": {
+    "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
+  },
+  "id": "Wyxi7BMi5j9sHIHs",
+  "tags": []
+}

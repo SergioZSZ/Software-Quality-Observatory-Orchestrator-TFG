@@ -48,7 +48,7 @@ def soca_fetch(dir_base: str, target: str, type: str)-> FetchResponse:
     os.makedirs(target_dir , exist_ok=True)
     
     # ficheror repos
-    repos_file = os.path.abspath(os.path.join(target_dir,"repos.tx"))
+    repos_file = os.path.abspath(os.path.join(target_dir,"repos.txt"))
     print("saving repos file in:", repos_file)
 
     # mandatos soca

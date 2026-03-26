@@ -26,12 +26,11 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 | Componente       | Rol                                    |
 | ---------------- | -------------------------------------- |
 | n8n              | Orquestación                           |
-| soca_container   | extracción/status metadatos y repos    |
-| rsfc_container   | creación/status de jobs                |
-| postgres         | base de datos                          |
+| soca_container   | extracción metadatos y repos           |
+| rsfc_container   | creación de jobs                       |
 | rabbitmq         | message broker                         |
 | worker_rsfc      | procesamiento jobs indicadores         |
-| worker_soca      | procesamiento jobs metadatos/portal    |
+| worker_soca      | procesamiento jobs metadatos           |
 | rate_limiter_rsfc| limitador tokens githubAPI worker_rsfc |
 | rate_limiter_soca| limitador tokens githubAPI worker_soca |
 | DashVerse        | observatorio de evaluación             |
@@ -43,18 +42,6 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 ![Diagrama de flujo del sistema](images/flujo_SQOO.png)
 
 ---
-### 2.1 Arquitectura basada en contenedores Docker
-
-El sistema está desacoplado en contenedores independientes:
-
-- `soca`
-- `rsfc`
-- `n8n` (actualmente incorporado hasta obtención de clasificadores mediante `rsfc`)
-- `postgres`
-- `worker` 
-- `rabbitmq`
-- Red Docker compartida
-
 
 Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 
@@ -65,7 +52,7 @@ Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 - Escalabilidad
 
 
----
+
 ## 3. Estado actual del desarrollo
 ### 3.1 Dockerización de SOCA
 
@@ -76,8 +63,8 @@ Se ha:
 - Adaptado su ejecución vía execute-command de n8n
 - Encapsulado en un contenedor Docker
 - Configurado volúmenes para persistencia de resultados
-- Orquestado mediante lanzamiento de jobs para la extracción de metadatos y generación del portal por workers en paralelo
-
+- Orquestado mediante lanzamiento de jobs para la extracción de metadatos por workers en paralelo
+- Configurado un script para la generación del portal ejecutado por n8n
 Salida generada:
 
 - Fetch de los repositorios y envío a n8n
@@ -94,11 +81,7 @@ Mientras que soca_container publica en una cola de trabajo en RabbitMQ con el us
 Cada worker ejecuta el módulo `python -u -m soca_runner.worker` que se dedica a:
 
 1. Recibe un job de RabbitMQ (con el target)
-2. Cambia ficheros status.json a "running"
-3. Se extraen metadatos de los repos obtenidos en el fetch por workers paralelos
-4. Genera el portal software del target tras la extracción de metadatos de todos los repositorios
-5. Cambia ficheros status.json a "completed" o "error"
-6. Envío de mensaje a RabbitMQ de finalizada extracción de metadatos para la ejecución del workflow de RSFC
+2. Se extraen metadatos de los repos obtenidos en el fetch por workers paralelos o genera un fichero explicando el error en caso de que no se pudiese extraer
 
 El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_soca=N`` siendo N el número de workers que se levantarán.
 
@@ -111,7 +94,6 @@ Se ha:
 - Adaptado su ejecución vía execute-command de n8n
 - Encapsulado en contenedor independiente
 - Orquestado mediante lanzamiento de jobs a RabbitMQ la extraccion de indicadores
-- Creado una BBDD de jobs con su id, status, url_repo, detalles y result_path
 - Implementado lanzamiento de workers para procesar los jobs usando la cola de trabajo de RabbitMQ
 
 Salida generada:
@@ -125,13 +107,10 @@ Mientras que rsfc_container actúa como encargado de registrar los jobs en la co
 Cada worker ejecuta el módulo `python -u -m rsfc_runner.worker` que se encarga de recibir los jobs publicados en RabbitMQ que:
 
 1. Recibe un job de RabbitMQ
-2. Cambia los jobs con estado queued a estado a running
-4. Ejecuta la evaluación del repositorio mediante rsfc
-5. Guarda los resultados generados en la bbdd
-6. Actualiza el estado del job a success, error
-7. Espera a tener token para procesar siguiente trabajo (github rate limit)
-8. Responde a RabbitMQ habiendo procesado el job para recibir otro
-9. Publicación de evento para lanzar workflow de DashVerse en n8n al acabar todos los jobs
+2. Ejecuta la evaluación del repositorio mediante rsfc
+3. Genera un `rsfc_assessment.json` con los indicadores de calidad  o `failed_assessment.json` explicando el error de procesamiento
+4. Espera a tener token para procesar siguiente trabajo (github rate limit)
+5. Responde a RabbitMQ habiendo procesado el job para recibir otro
 
 El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_rsfc=N`` siendo N el número de workers que se levantarán.
 
@@ -143,17 +122,73 @@ El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitM
 ### 3.6 DashVerse Service
 🚧🚧 *In_Progress* 🚧🚧
 
+
+
+
 ### 3.6 Flujo actual(container n8n)
+El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
 
-Mediante `n8n` se han orquestado 2 workflows para la ejecución del flujo:
+A diferencia de versiones anteriores, donde el flujo estaba dividido en múltiples workflows (`soca`, `rsfc`, `dashboard`), actualmente se ha **unificado en un único workflow end-to-end**, simplificando la gestión, monitorización y control del proceso.
 
-1. soca_workflow: ejecuta `soca_container` via docker de la organización escrita y su tipo escritas en formato `.json` del nodo Edit Fields. El workflow se activa manualmente pulsando en 'Execute Workflow'
+---
 
-2. rsfc_worfklow: Se activa mediante un nodo `RabbitMQ Trigger` configurado para actuar cuando la cola `soca_events` recibe el evento `soca_extracted`. Entonces se leen y transforman los enlaces del archivo `repos.txt` generados en el fetch para enviárselos a `rsfc_container` para que publique los jobs de dichos repositorios. **DEBE ESTAR EN ESTADO PUBLISH**
+#### Descripción general del flujo
 
-3. dashboard_workflow: 🚧🚧 *In_Progress* 🚧🚧
+El workflow implementa un pipeline completo que abarca:
 
-Los workflow se encuentran en `/containers/n8n_container/workflow`
+1. **Extracción de repositorios**
+2. **Procesamiento de metadatos (SOCA)**
+3. **Evaluación de calidad (RSFC)**
+4. **Persistencia de resultados en base de datos**
+5. **Generación de portal/dashboard**
+
+Todo el flujo se ejecuta de forma **secuencial y controlada mediante condiciones y sincronización activa**.
+
+---
+
+####  Etapas del workflow
+
+##### 1. Inicialización 
+
+- Trigger manual (`Execute Workflow`)
+- Definición del objetivo (`target`) y tipo (`user` / `org`)
+- Ejecución del contenedor: ```soca-heavy:latest ```
+- Ejecución del pipeline SOCA por los workers
+- Generación de metadatos por repositorio
+
+##### 2. Lectura y procesamiento de repositorios
+
+- Lectura del archivo generado: `repos.txt`
+- Transformación a lista de URLs
+- Cálculo del número total de repositorios (repo_count)
+- Control de finalización procesamiento de repositorios: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
+
+
+##### 3. Generación del portal
+- Generación del portal software mediante nodo Execute-command lanzando un contenedor docker ejecutando el script `genportal.py`, generándose el portal software.
+
+##### 4. Evaluación RSFC
+- Envío de repositorios a los workers RSFC, evaluando la calidad de software
+- Control de finalización: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
+
+##### 5. Envío de assessments a DashVERSE
+
+- Lectura de los archivos generados: `rsfc_assessment.json` por cada repositorio
+- Extracción y transformación de los datos del assessment
+- Separación en tres entidades:
+   - `assessments`: información general del assessment (contexto, tipo, nombre, descripción, fecha de creación del assessment, licencia)
+   - `assessment_software`: información del software evaluado (nombre, versión, URL)
+   - `assessment_checks`: checks individuales del assessment (indicadores, evidencias, resultados)
+- Iteración sobre cada repositorio y sus checks mediante nodos `Split Out`
+- Envío de datos mediante peticiones HTTP POST a la API de DashVERSE:
+   - `/assessments`
+   - `/assessment_software`
+   - `/assessment_checks`
+- Uso de la cabecera `Prefer: resolution=merge-duplicates` para evitar duplicados en la base de datos
+- Persistencia final de los resultados en DashVERSE para su posterior visualización en dashboards
+
+
+
 
 
 ---
@@ -187,7 +222,7 @@ Herramientas usadadas en el proyecto:
 
 ### 4.2 Despliegue y ejecución
 
-🚧🚧 *In_Progress (falta despliegue dashverse)* 🚧🚧
+🚧🚧 *In_Progress (falta despliegue dashverse y build de soca y rsfc heavy)* 🚧🚧
 
 1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar
 
@@ -269,10 +304,12 @@ A pesar de ello, se consigue una reducción sustancial del tiempo total de ejecu
 ---
 ## 6. Issues
 
-- Paralelización procesamientos SOCA y RSFC: Codificar que la publicación de jobs rsfcs se realice nada más extraer los datos del repo(reduciendo así enormemente el tiempo del workflow) 
-- Actualizar diagrama de flujo con las nuevas funcionalidades añadidas (workers, rabbitmq, bbdd, limmiters)
-- Actualizar proyecto para que somef se ejecute solo 1 vez 
+- Pensar ideas para nuevos Charts para los Dashboards 
 - Añadir URL dashverse a repositorios del portal software
-- Actualizar somef en soca y mejorar los metadatos mostrados(somef actualizado ya hecho en el setup.cfg de soca)
+- Mejorar los metadatos mostrados
 - FAIRificar los repositorios mejorando los checks de metadatos
+- Mejoras en SOCA:
+   - Varias organizaciones, que los de citas se enseñen bien, si hay muchos requisitos, apuntar al fichero, etc.
+   - Mirar issues
+
 - (Si da tiempo) automatizar sugerencias para mejorar los repositoros

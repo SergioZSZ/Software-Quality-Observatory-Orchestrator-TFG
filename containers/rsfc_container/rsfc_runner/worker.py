@@ -1,11 +1,9 @@
 import time, os, json
 
-from .database import SessionLocal, Job
 from .cruds import rfsc_runner
 from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE, RATE_LIMIT_RSFC_ENABLED, RETRYABLE_ERRORS
-from .rabbitmq import rabbit_connect, publish_event
+from .rabbitmq import rabbit_connect
 from datetime import datetime
-from sqlalchemy import func
 
 MAX_RETRIES = 7
 
@@ -13,6 +11,17 @@ MAX_RETRIES = 7
 def timestamp(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
     
+
+
+def count_jsons(base_path):
+    count = 0
+    for root, dirs, files in os.walk(base_path):
+        for file in files:
+            if file.endswith(".json"):
+                count += 1
+    return count
+
+
 
 
 def wait_for_token(channel):
@@ -30,18 +39,8 @@ def wait_for_token(channel):
             
             
 #llamada a rsfc_runner y cambios de estado de la bbdd
-def rsfc_indicators_generation(job_id,target, repo_url, base_dir, token, retries):
+def rsfc_indicators_generation(job_id,target, repo_url,repos_count, base_dir, token, retries):
     # creamos sesion db
-    db = SessionLocal()
-    try:
-        #cogemos el job por su id si existe y cambiamos estado a running
-        job = db.get(Job, job_id)
-        if not job:
-            timestamp(f"\n\n\n (RSFC)[{job_id}] ERROR: job does not exist \n\n\n")
-            return
-        
-        job.status = "running"
-        db.commit()
         
         while retries < MAX_RETRIES:
             # ejecutamos rsfc_runner por cada worker
@@ -65,72 +64,39 @@ def rsfc_indicators_generation(job_id,target, repo_url, base_dir, token, retries
             else:
                 break
             
-        # si es error distinto a los volver a intentar
+        # si es error distinto a los volver a intentar o demasiados retries, generamos failed file
         if response.status["status"] == "error":
             
 
             timestamp(f"\n\n\n\n\n\n*******************************************************************************************\n{json.dumps(response.status, indent=2)}*******************************************************************************************\n\n\n\n\n\n")
+            repo_name = repo_url.rstrip("/").split("/")[-1]
+            failed_repo_dir = os.path.join(BASE_DIR,"rsfc",target,repo_name)
+            os.makedirs(failed_repo_dir,exist_ok=True)
+            
+            failed_job = {"detail": response.status}
+            failed_job_file = os.path.join(failed_repo_dir,"failed_assessment.json")
+            
+            with open(failed_job_file,"w") as f:
+                json.dump(failed_job,f, indent=2)
 
-            job.status = "error"
-            job.detail = {"error": response.status}
-            
-            
-            db.commit()
-            
             if retryable:
                 return True
             return False
 
-        #buscamos indicadores generados 
-        indicators = os.path.join(response.personal_dir, "rsfc_output","rsfc_assessment.json")
+        #b uscamos todos los .json del directorio target para logs
+        rsfc_target_dir = os.path.join(BASE_DIR,"outputs", "rsfc", target)
+        completed = count_jsons(rsfc_target_dir)
 
-        if not os.path.exists(indicators):
-            job.status = "error"
-            job.detail = {"error": response.status}
-            
-            timestamp(response.status)
-            db.commit()
-            return False
-        
-        # cargamos indicadores
-        with open(indicators) as f:
-            data = json.load(f)
-
-        # guardamos job bien ejecutado devolviendo los indicadores
-        job.status = "success"
-        job.detail = data
-        job.result_path = indicators
-        db.commit()
-        
-        completed = db.query(func.count(Job.id)).filter(Job.target == target, Job.status == "success").scalar()
-        total_jobs = db.query(func.count(Job.id)).filter(Job.target == target).scalar()
-        timestamp(f"[RSFC] {target} Progress: {completed}/{total_jobs} repos processed")
+        timestamp(f"[RSFC] {target} Progress: {completed}/{repos_count} repos processed")
         
         
         # caso completado empieza dashverse
-        if completed == total_jobs:
-            timestamp(f"[{target}] All repos processed, sending message to DashVERSE")
-            publish_event(target)
+        if completed == repos_count:
+            timestamp(f"[{target}] All repos processed")
         
         return False
             
-    # excepciones posibles
-    except Exception as e:
-        
-        job = db.get(Job, job_id)
-
-        if job:
-            job.status = "error"
-            job.detail = {"error": str(e)}
-            db.commit()
             
-            timestamp(f"\n\n\[{job_id}] failed: {str(e)}\n\n\n")
-            
-    finally:
-        db.close()
-
-
-
 
 # carga del mensaje de la cola y envío a background
 def process_message(ch, method, properties, body):
@@ -141,6 +107,7 @@ def process_message(ch, method, properties, body):
         job_id = message["job_id"]
         repo_url = message["repo_url"]
         target = message["target"]
+        repos_count = message["repos_count"]
 
         start = time.time()
         timestamp(f"[{job_id}] Received job")
@@ -149,7 +116,7 @@ def process_message(ch, method, properties, body):
         if RATE_LIMIT_RSFC_ENABLED:
             wait_for_token(ch)
             
-        requeue = rsfc_indicators_generation(job_id, target, repo_url, BASE_DIR, TOKEN, 0)
+        requeue = rsfc_indicators_generation(job_id, target, repo_url,repos_count, BASE_DIR, TOKEN, 0)
 
         total_time = time.time() - start
         

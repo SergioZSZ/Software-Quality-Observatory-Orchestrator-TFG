@@ -8,8 +8,13 @@ def main():
 
     
     print("** Soca runner started **")
-    
-    os.makedirs(os.path.join(BASE_DIR,"outputs","soca",TARGET), exist_ok=True)
+    target_dir = os.path.join(BASE_DIR, "outputs", "soca", TARGET)
+
+    # truncado carpeta del target por metadatos anticuados guardados y portal
+    if os.path.exists(target_dir):
+        shutil.rmtree(target_dir)
+
+    os.makedirs(target_dir, exist_ok=True)
     
     try:
         #service 
@@ -21,11 +26,7 @@ def main():
             print(f"Soca Fetch Error: {response_fetch.status}")
             raise
             
-        
-        # truncado carpeta del target por metadatos anticuados guardados
-        metadata_dir = os.path.join(BASE_DIR, "outputs", "soca", TARGET,"metadata")
-        if os.path.exists(metadata_dir):
-            shutil.rmtree(metadata_dir)
+
             
         # publicando jobs de repos por cada uno
         for repo in response_fetch.repos:
