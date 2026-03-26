@@ -1,4 +1,4 @@
-**🚧🚧 STILL IN PROCESS 🚧🚧**
+**🚧🚧 STILL IN PROGRESS 🚧🚧**
 
 
 # TFG – Orquestación automatizada de evaluación de software y generación de catálogo
@@ -222,20 +222,27 @@ Herramientas usadadas en el proyecto:
 
 ### 4.2 Despliegue y ejecución
 
-🚧🚧 *In_Progress (falta despliegue dashverse y build de soca y rsfc heavy)* 🚧🚧
+🚧🚧 *In_Progress (falta despliegue dashverse)* 🚧🚧
 
-1. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar
+1. Generar imágenes  docker: y `rsfc-heavy`
+   - `soca-heavy`:
+      - Directorio desde el que crearla: `/containers/soca_container` 
+      - Mandato: `docker build -t soca-heavy .`
+   - `rsfc-heavy`:
+      - Directorio desde el que crearla: `/containers/rsfc_container` 
+      - Mandato: `docker build -t rsfc-heavy .`
 
-        - Configuración usada en desarrollo RSFC worker = 5 | SOCA worker = 10
-2. Acceder a n8n mediante el navegador en http://localhost:5678
-3. En el primer acceso:
+2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
+   - Configuración usada en desarrollo RSFC worker = 4 | SOCA worker = 10
+
+3. Acceder a n8n mediante el navegador en http://localhost:5678
+4. En el primer acceso:
     1. Crear cuenta de usuario en n8n
-    2. Importar los workflows de `/containers/n8n_container/workflow/` en  nuevos workflows
-    3. Publicar `rsfc_workflow`
-4. Editar el nodo `Edit Field` de `soca_workflow` con la organización/usuario deseado
-5. Ejecutar `soca_workflow` manualmente 
+    2. Importar el workflow de `/containers/n8n_container/workflow/` en un nuevo
+5. Editar el nodo `Input` al principio del workflow con la organización/usuario deseado
+6. Ejecutar manualmente
 
-Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes.
+Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes y enviándoselos a DashVERSE.
 
 ---
 
