@@ -282,6 +282,7 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 ### Organización oeg-upm
 #### datos:
 - 376 repositorios
+#### Tabla
 | Métrica                          | Tiempo     |
 |----------------------------------|------------|
 | SOCA (10 workers)                | 36m 57s    |
