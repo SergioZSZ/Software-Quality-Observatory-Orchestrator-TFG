@@ -12,6 +12,21 @@ from .metadata import Metadata
 from ... import base_dir, __version__
 
 
+
+#funcion para insertar de env link dashverse
+def add_dashverse_link(soup, target=None):
+    import os
+
+    DASHVERSE_URL = os.getenv("DASHVERSE_URL", "http://localhost:8088")
+
+    link = soup.find(id="dashverse-link")
+
+    if link:
+        link["href"] = f"{DASHVERSE_URL}/superset/dashboard/7/"
+        
+        
+        
+
 def generate(repo_metadata_dir, output, title, favicon):
 
     copy_assets(output)
@@ -66,6 +81,9 @@ def generate(repo_metadata_dir, output, title, favicon):
 
     # Insert favicon
     add_favicon(soup, favicon, output)
+    
+    # insertar link dashverse
+    add_dashverse_link(soup)
 
     # Save index.html
     with open(f"{output}/index.html", "w") as index:
