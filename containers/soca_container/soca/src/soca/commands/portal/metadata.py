@@ -22,6 +22,37 @@ class Metadata(object):
         self.md = repo_metadata
         self.base = 'https://github.com/oeg-upm/soca/tree/main/src/soca/assets' if embedded else ''
 
+
+
+    # aux para sacar requirements del readme
+    def requirements_from_readme(self):
+        readme_url = self.readme()
+        if not readme_url:
+            return None
+
+        try:
+            import requests
+
+            raw_url = readme_url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/")
+            text = requests.get(raw_url, timeout=5).text
+
+            keywords = ["pip install", "requirements", "dependencies", "conda install"]
+
+            lines = []
+            for line in text.split("\n"):
+                if any(k in line.lower() for k in keywords):
+                    clean = line.strip()
+                    if len(clean) > 5:
+                        lines.append(clean)
+
+            return lines[:10] if lines else None
+
+        except:
+            return None
+
+
+    
+    
     # Assets ####################################################
     def logo(self):
         logo = safe_dic(
@@ -158,6 +189,7 @@ class Metadata(object):
                     title='Notebook',
                     body=mk_list))
 
+        '''
         docker = self.docker()
         if docker:
             mk_list = "\n".join([f'* <{d}>' for d in docker])
@@ -169,7 +201,57 @@ class Metadata(object):
                 modal_html=self.modal(
                     title='Docker',
                     body=mk_list))
+        '''
+        
+        #nueva visualización de docker metadata
+        docker = self.docker()
+        if docker:
+            repo_url = self.repo_url()
 
+            links = []
+            for d in docker:
+                if not d:
+                    continue
+
+                # raw → path
+                if "raw.githubusercontent.com" in d:
+                    parts = d.split("/")
+                    clean_path = "/".join(parts[6:])
+
+                # local path
+                elif self.repo_metadata_dir in d:
+                    clean_path = d.split(self.repo_metadata_dir)[-1].lstrip("/")
+
+                else:
+                    clean_path = d
+
+                # FILTRO CLAVE para solo relacion a docker
+                if not any(x in clean_path.lower() for x in ["dockerfile", "docker-compose"]):
+                    continue
+
+                github_link = f"{repo_url}/blob/main/{clean_path}"
+
+                name = clean_path.replace("/", " → ")
+
+                links.append(f'<li><a href="{github_link}" target="_blank">{name}</a></li>')
+
+            if links:
+                body = "<ul>" + "\n".join(links) + "</ul>"
+
+                html += self.icon_wrapper(
+                    icon_html=f"""<img src="{self.base}repo_icons/docker.png" 
+                            class="repo-icon" 
+                            {self.add_tooltip('bottom', "Docker files")}>""",
+
+                    modal_html=self.modal(
+                        title='Docker',
+                        body=body,
+                        markdown_translation=False)
+                )
+            
+            
+            
+            
         papers = self.paper()
         if papers:
             for paper in papers:
@@ -179,6 +261,7 @@ class Metadata(object):
                                 class="repo-icon" 
                                 {self.add_tooltip('bottom', paper.title_paper)}>
                         </a>""")
+        '''
         # TODO check ScdocLexer
         citations = self.citations()
         if citations:
@@ -220,7 +303,119 @@ class Metadata(object):
                             data-original-title="Copy citation">
                         </button>
                         """))
+        '''
+        
+        # nuevo citations
+        citations = self.citations()
+        if citations:
 
+            body = "No citation available"
+            raw_block = ""
+
+            #  CFF (mejor opción)
+            if 'cff' in citations and citations['cff']:
+                try:
+                    import yaml
+                    parsed = yaml.safe_load(citations['cff'])
+
+                    title = parsed.get("title", "Unknown")
+
+                    # DOI
+                    doi = parsed.get("doi", "")
+                    if not doi:
+                        identifiers = parsed.get("identifiers", [])
+                        for i in identifiers:
+                            if i.get("type") == "doi":
+                                doi = i.get("value")
+                                break
+
+                    # fallback seguro
+                    if not doi:
+                        identifier = self.identifier()
+
+
+                    # Authors
+                    authors = parsed.get("authors", [])
+                    authors_str = ", ".join([
+                        f"{a.get('given-names','')} {a.get('family-names','')}".strip()
+                        for a in authors[:3]
+                    ]) if authors else "Unknown"
+
+                    if len(authors) > 3:
+                        authors_str += " et al."
+
+                    # Extras
+                    abstract = parsed.get("abstract", "")
+                    version = parsed.get("version", "")
+                    license = parsed.get("license", "")
+                    keywords = parsed.get("keywords", [])
+
+                    keywords_str = ", ".join(keywords[:5]) if keywords else ""
+
+                    #  BODY PRINCIPAL (LIMPIO)
+                    body = f"""
+                    <b>{title}</b><br>
+                    <span style="color:#666;">Authors:</span> {authors_str}<br>
+                    <span style="color:#666;">DOI:</span> {doi if doi else "N/A"}<br>
+                    """
+
+                    if version:
+                        body += f'<span style="color:#666;">Version:</span> {version}<br>'
+
+                    if license:
+                        body += f'<span style="color:#666;">License:</span> {license}<br>'
+
+                    if keywords_str:
+                        body += f'<span style="color:#666;">Keywords:</span> {keywords_str}<br>'
+
+                    if abstract:
+                        body += f"""
+                        <br>
+                        <span style="color:#666;">Abstract:</span><br>
+                        <div style="font-size: 0.9em; color:#444; text-align: justify;">
+                        {abstract[:500]}{"..." if len(abstract) > 500 else ""}
+                        </div>
+                        """
+
+                    #  RAW COLLAPSIBLE (PRO)
+                    raw_cff = citations['cff'].replace("<", "&lt;").replace(">", "&gt;")
+
+                    raw_block = f"""
+                    <hr>
+                    <button onclick="this.nextElementSibling.style.display = (this.nextElementSibling.style.display === 'none' ? 'block' : 'none')">
+                        Show raw citation
+                    </button>
+                    <div style="display:none; margin-top:10px;">
+                        <pre style="font-size:0.8em;">{raw_cff}</pre>
+                    </div>
+                    """
+
+                except Exception as e:
+                    print(f"CFF parse error: {e}")
+
+            #  Bibtex fallback
+            elif 'bibtex' in citations and citations['bibtex']:
+                bib = citations['bibtex'][:500]
+                body = f"<pre>{bib}...</pre>"
+
+            #  Texto fallback
+            elif 'citation' in citations and citations['citation']:
+                body = citations['citation'][0][:500] + "..."
+
+            html += self.icon_wrapper(
+                icon_html=f"""<img src="{self.base}repo_icons/citation.png" 
+                            class="repo-icon" 
+                            {self.add_tooltip('bottom', "Citation")}>""",
+                modal_html=self.modal(
+                    title='Citation',
+                    body=body + raw_block,
+                    markdown_translation=False
+                )
+            )
+            
+                    
+            
+        '''
         identifier = self.identifier()
         if identifier:
             html += self.icon_wrapper(
@@ -229,6 +424,26 @@ class Metadata(object):
                             class="repo-icon" 
                             {self.add_tooltip('bottom', f"DOI: {identifier}")}>
                     </a>""")
+        '''
+        
+        # modificado para que no se construyan rutas relativas de localhost
+        identifier = self.identifier()
+        if identifier:
+            doi_url = identifier
+
+            # si no viene como URL → construirla
+            if not doi_url.startswith("http"):
+                doi_url = f"https://doi.org/{doi_url}"
+
+            html += self.icon_wrapper(
+                icon_html=f"""<a href="{doi_url}" target="_blank" class="repo-icon">
+                                <img src="{self.base}repo_icons/doi.png" 
+                                class="repo-icon" 
+                                {self.add_tooltip('bottom', f"DOI: {identifier}")}>
+                        </a>"""
+            )
+                
+
 
         status = self.status()
         if status:
@@ -256,6 +471,7 @@ class Metadata(object):
                     title='Installation',
                     body=f'{installation}'))
 
+        '''
         requirements = self.requirements()
         if requirements:
             html += self.icon_wrapper(
@@ -266,7 +482,59 @@ class Metadata(object):
                 modal_html=self.modal(
                     title='Requirements',
                     body=requirements))
+        '''
+        
+        # requirements usando link a archivos requirements
+        requirements = self.requirements()
+        readme_reqs = self.requirements_from_readme()
+        if requirements or readme_reqs:
+            repo_url = self.repo_url()
 
+            links = []
+            if requirements:
+                for r in requirements.split("\n"):
+                    if not r:
+                        continue
+
+                    # si es ruta local → convertir a repo path
+                    clean_path = r.replace(self.repo_metadata_dir, "").lstrip("/")
+
+                    # heurística: solo archivos típicos
+                    if any(name in clean_path.lower() for name in [
+                        "requirements", "pyproject", "environment", "setup.py", "pipfile"
+                    ]):
+                        github_link = f"{repo_url}/blob/main/{clean_path}"
+                        filename = clean_path.split("/")[-1]
+
+                        links.append(f'<li><a href="{github_link}" target="_blank">{filename}</a></li>')
+
+            if links or readme_reqs:
+                body = "<ul>"
+
+                # archivos detectados
+                if links:
+                    body += "\n".join(links)
+
+                # README detectado
+                if readme_reqs:
+                    body += "<hr><b>Detected in README:</b>"
+                    for r in readme_reqs:
+                        body += f"<li>{r}</li>"
+
+                body += "</ul>"
+                
+                html += self.icon_wrapper(
+                    icon_html=f"""<img src="{self.base}repo_icons/requirements.png"  
+                            class="repo-icon" 
+                            {self.add_tooltip('bottom', 'Requirements files')}>""",
+
+                    modal_html=self.modal(
+                        title='Requirements',
+                        body=body,
+                        markdown_translation=False)
+                )
+                
+                
         usage = self.usage()
         if usage:
             has_i4p = safe_dic(safe_dic(self.md, 'inspect4py'), 'run') # TODO:  inspect4py & run are not keys in the new Results class
@@ -538,8 +806,27 @@ class Metadata(object):
         exe = [x['result']['value'] for x in exe_l]
         return exe if len(exe) > 0 else None
 
+    '''
     def readme(self):
         return safe_dic(safe_dic(safe_list(safe_dic(self.md, 'readme_url'), 0), 'result'), 'value')
+    '''
+    
+    
+    # nuevo readme para leer del readme desde gitub y no raw
+    def readme(self):
+        raw_url = safe_dic(safe_dic(safe_list(safe_dic(self.md, 'readme_url'), 0), 'result'), 'value')
+        
+        if not raw_url:
+            return None
+
+        if "raw.githubusercontent.com" in raw_url:
+            parts = raw_url.split("/")
+            user = parts[3]
+            repo = parts[4]
+            branch = parts[5]
+            return f"https://github.com/{user}/{repo}/blob/{branch}/README.md"
+
+        return raw_url
 
     def languages(self):
         langs = safe_dic(self.md, 'programming_languages')

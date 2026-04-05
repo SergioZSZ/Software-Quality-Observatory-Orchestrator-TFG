@@ -138,11 +138,11 @@ El workflow implementa un pipeline completo que abarca:
 
 1. **Extracción de repositorios**
 2. **Procesamiento de metadatos (SOCA)**
-3. **Evaluación de calidad (RSFC)**
-4. **Persistencia de resultados en base de datos**
-5. **Generación de portal/dashboard**
+3. **Generación de portal/**
+4. **Evaluación de calidad (RSFC)**
+4. **Envío de indicadores a DashVERSE**
 
-Todo el flujo se ejecuta de forma **secuencial y controlada mediante condiciones y sincronización activa**.
+Todo el flujo se ejecuta de forma **secuencial y controlada**.
 
 ---
 
@@ -193,7 +193,7 @@ Todo el flujo se ejecuta de forma **secuencial y controlada mediante condiciones
 
 ---
 
-## 4. Activación del entorno y ejemplo de uso
+## 4. Requisitos
 **PREVIA:** Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
    - `GITHUB_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx` siendo `xxxxxx` el token personal de github obtenido desde github
    - `DATABASE_URL` siguiendo el formato `DATABASE_URL=postgresql://usuario:password@host:puerto/database` siendo el usuario, password y database configurados en el environment del docker-compose.yml, host=postgres y puerto expuesto (default 5432)
@@ -201,6 +201,7 @@ Todo el flujo se ejecuta de forma **secuencial y controlada mediante condiciones
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ del docker compose
    - ``RATE_LIMIT_SOCA_ENABLED`` y `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI(con workers de soca no hace falta debido a que realiza 1 petición/repo, de rsfc si ya que realiza 7 aprox)
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
+   - `DASHBOARD_URL` la URL al dashboard desplegado, `http://localhost:8088` en caso de seguir las indicaciones del README y lanzarlo en local
 
     ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS`. El token se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error)
 
@@ -220,7 +221,7 @@ Herramientas usadadas en el proyecto:
    - DASHVERSE: https://github.com/EVERSE-ResearchSoftware/DashVERSE
       
 
-### 4.2 Despliegue y ejecución
+### 4.2 Instalación
 
 🚧🚧 *In_Progress (falta despliegue dashverse)* 🚧🚧
 
