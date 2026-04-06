@@ -21,40 +21,167 @@ class Metadata(object):
         self.repo_metadata_dir = os.path.abspath(repo_metadata_dir)
         self.md = repo_metadata
         self.base = 'https://github.com/oeg-upm/soca/tree/main/src/soca/assets' if embedded else ''
+        self._repo_root = None
+        self._req_files = None
+        self._readme_reqs = None
+    
+    def _get_repo_name(self):
+        if hasattr(self, "_repo_name"):
+            return self._repo_name
 
+        repo_url = self.repo_url()
+        self._repo_name = repo_url.rstrip("/").split("/")[-1]
+        return self._repo_name
+
+######################################################
+# aux propias
+
+    def get_repo_root(self):
+        if self._repo_root:
+            return self._repo_root
+
+        repo_name = self._get_repo_name()
+
+        for root, dirs, _ in os.walk(self.repo_metadata_dir):
+            
+            for d in dirs:
+                if d.lower() == repo_name.lower():
+                    self._repo_root = os.path.join(root, d)
+                    return self._repo_root
+
+        return None
 
 
     # aux para sacar requirements del readme
     def requirements_from_readme(self):
-        readme_url = self.readme()
-        if not readme_url:
+
+        repo_name = self._get_repo_name()
+        target_repo_dir = os.path.join(self.repo_metadata_dir, repo_name)
+
+        if not target_repo_dir:
+            return None
+
+        readme_path = None
+        for name in ["README.md", "readme.md", "README.MD"]:
+            path = os.path.join(target_repo_dir, name)
+            if os.path.isfile(path):
+                readme_path = path
+                break
+
+        if not readme_path:
             return None
 
         try:
-            import requests
+            with open(readme_path, "r", encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
 
-            raw_url = readme_url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/")
-            text = requests.get(raw_url, timeout=5).text
+            content = []
+            capture = False
+            base_level = None
 
-            keywords = ["pip install", "requirements", "dependencies", "conda install"]
+            for line in lines:
+                stripped = line.strip()
 
-            lines = []
-            for line in text.split("\n"):
-                if any(k in line.lower() for k in keywords):
-                    clean = line.strip()
-                    if len(clean) > 5:
-                        lines.append(clean)
+                # detectar headers markdown
+                if stripped.startswith("#"):
+                    level = len(stripped) - len(stripped.lstrip("#"))
+                    title = stripped.lstrip("#").strip().lower()
 
-            return lines[:10] if lines else None
+                    # empezar captura
+                    if "requirement" in title or "dependency" in title:
+                        capture = True
+                        base_level = level
+                        continue
 
-        except:
+                    # terminar captura
+                    if capture and level <= base_level:
+                        break
+
+                # guardar contenido TAL CUAL
+                if capture:
+                    content.append(line.rstrip())
+
+            return content if content else None
+
+        except Exception:
             return None
 
 
+    #aux para obtener archivos de requisitos o entornos
+    def requirements_files(self):
+            if self._req_files is not None:
+                return self._req_files
+        
+
+            req_files = []
+
+            if not os.path.isdir(self.repo_metadata_dir):
+                return []
+
+            #  1. obtener nombre del repo actual
+            repo_name = self._get_repo_name()
+
+            #  2. buscar carpeta que contiene ese repo
+            
+            target_repo_dir = os.path.join(self.repo_metadata_dir, repo_name)
+            if not target_repo_dir:
+                return []
+
+            #  3. recorrer SOLO ese repo
+            for root, dirs, files in os.walk(target_repo_dir):
+                # limitar profundidad (clave)
+                depth = root.replace(target_repo_dir, "").count(os.sep)
+                if depth > 3:
+                    dirs[:] = []
+                    continue
+                
+                dirs[:] = [
+                    d for d in dirs
+                    if d not in [".git", ".venv", "__pycache__", "node_modules"]
+                ]
+
+                for filename in files:
+                    name = filename.lower()
+
+                    env_type = None
+
+                    if name == "requirements.txt":
+                        env_type = "pip"
+
+                    elif name in ["pyproject.toml", "poetry.lock"]:
+                        env_type = "poetry"
+
+                    elif name in ["environment.yml", "environment.yaml"]:
+                        env_type = "conda"
+
+                    elif name == "setup.py":
+                        env_type = "setup"
+
+                    elif name in ["pipfile", "pipfile.lock"]:
+                        env_type = "pipenv"
+
+                    if env_type:
+                        full_path = os.path.join(root, filename)
+
+                        relative_path = os.path.relpath(full_path, target_repo_dir)
+                        relative_path = relative_path.replace("\\", "/")
+
+                        req_files.append({
+                            "name": filename,
+                            "path": relative_path,
+                            "type": env_type   
+                        })
+            self._req_files = req_files
+            return req_files
     
     
     # Assets ####################################################
     def logo(self):
+        
+        # import time
+        # print(self.md ,"\n", self.repo_metadata_dir,"\n", flush=True )
+        # time.sleep(10)
+        
         logo = safe_dic(
             safe_dic(safe_dic(safe_list(self.md, 'logo'), 0), 'result'), 'value')
         # if logo:
@@ -74,7 +201,7 @@ class Metadata(object):
             if ontologies:
                 onto_list = '\n'.join(list(dict.fromkeys(
                     [f'* <{safe_dic(safe_dic(x, "result"), "value")}>' for x in ontologies if
-                     'http' in safe_dic(safe_dic(x, "result"), "value")])))
+                    'http' in safe_dic(safe_dic(x, "result"), "value")])))
                 # onto_list = '\n'.join([ f'* <{safe_dic(x,"file_url")}>' for x in ontologies])
             return self.icon_wrapper(
                 icon_html=f'<img src="{self.base}repo_icons/ontology.png" {self.add_tooltip("left", "Ontology")} alt="repo-type" class="repo-type" style="height: 1.3rem;">',
@@ -150,6 +277,11 @@ class Metadata(object):
         return html
 
     def html_repo_icons(self):
+    
+        # branch default del repo
+        raw_url = safe_dic(safe_dic(safe_list(safe_dic(self.md, 'readme_url'), 0), 'result'), 'value')
+        parts = raw_url.split("/")
+        branch = parts[5]
 
         html = ''
 
@@ -203,41 +335,102 @@ class Metadata(object):
                     body=mk_list))
         '''
         
-        #nueva visualización de docker metadata
+        # nueva visualización de docker metadata
         docker = self.docker()
         if docker:
+
+            import html as html_lib
+            from collections import defaultdict
+
             repo_url = self.repo_url()
 
-            links = []
+            grouped = defaultdict(list)
+
             for d in docker:
                 if not d:
                     continue
 
-                # raw → path
+                #  limpiar path
                 if "raw.githubusercontent.com" in d:
                     parts = d.split("/")
                     clean_path = "/".join(parts[6:])
 
-                # local path
                 elif self.repo_metadata_dir in d:
                     clean_path = d.split(self.repo_metadata_dir)[-1].lstrip("/")
 
                 else:
                     clean_path = d
 
-                # FILTRO CLAVE para solo relacion a docker
-                if not any(x in clean_path.lower() for x in ["dockerfile", "docker-compose"]):
+                clean_path = clean_path.replace("\\", "/")
+
+                #  detectar tipo
+                lower = clean_path.lower()
+
+                if "docker-compose" in lower:
+                    env_type = "compose"
+                elif "dockerfile" in lower:
+                    env_type = "dockerfile"
+                else:
                     continue
 
-                github_link = f"{repo_url}/blob/main/{clean_path}"
+                grouped[env_type].append(clean_path)
 
-                name = clean_path.replace("/", " → ")
+            #  labels con iconos
+            env_labels = {
+                "dockerfile": "🐳 Dockerfiles",
+                "compose": "🧩 Docker Compose"
+            }
 
-                links.append(f'<li><a href="{github_link}" target="_blank">{name}</a></li>')
+            body_parts = []
 
-            if links:
-                body = "<ul>" + "\n".join(links) + "</ul>"
+            for env_type, paths in grouped.items():
 
+                label = env_labels.get(env_type, env_type)
+                section = f"<b>{label}</b><ul>"
+
+                for path in paths:
+
+                    #  limpiar repo basura 
+                    parts = path.split("/")
+
+                    repo_root_index = None
+                    for i, p in enumerate(parts):
+                        if p.endswith("-main") or p.endswith("-master"):
+                            repo_root_index = i
+                            break
+
+                    if repo_root_index is not None:
+                        clean_parts = parts[repo_root_index + 1:]
+                    else:
+                        clean_parts = parts
+
+                    clean_path_final = "/".join(clean_parts)
+
+                    
+                    #  link
+                    github_link = f"{repo_url}/tree/{branch}/{clean_path_final}"
+
+                    file_url = html_lib.escape(github_link)
+
+                    #  nombre bonito
+                    if len(clean_parts) == 1:
+                        file_name = html_lib.escape(clean_parts[0])
+                    else:
+                        pretty = " → ".join(clean_parts[:-1]) + " → <b>" + clean_parts[-1] + "</b>"
+                        file_name = (
+                            html_lib.escape(pretty)
+                            .replace("&lt;b&gt;", "<b>")
+                            .replace("&lt;/b&gt;", "</b>")
+                        )
+
+                    section += f'<li><a href="{file_url}" target="_blank">{file_name}</a></li>'
+
+                section += "</ul>"
+                body_parts.append(section)
+
+            body = "".join(body_parts)
+
+            if body.strip():
                 html += self.icon_wrapper(
                     icon_html=f"""<img src="{self.base}repo_icons/docker.png" 
                             class="repo-icon" 
@@ -248,6 +441,7 @@ class Metadata(object):
                         body=body,
                         markdown_translation=False)
                 )
+            
             
             
             
@@ -310,7 +504,6 @@ class Metadata(object):
         if citations:
 
             body = "No citation available"
-            raw_block = ""
 
             #  CFF (mejor opción)
             if 'cff' in citations and citations['cff']:
@@ -329,78 +522,91 @@ class Metadata(object):
                                 doi = i.get("value")
                                 break
 
-                    # fallback seguro
+                    # fallback
                     if not doi:
-                        identifier = self.identifier()
-
+                        doi = self.identifier()
 
                     # Authors
                     authors = parsed.get("authors", [])
                     authors_str = ", ".join([
                         f"{a.get('given-names','')} {a.get('family-names','')}".strip()
-                        for a in authors[:3]
+                        for a in authors
                     ]) if authors else "Unknown"
 
-                    if len(authors) > 3:
-                        authors_str += " et al."
 
                     # Extras
                     abstract = parsed.get("abstract", "")
                     version = parsed.get("version", "")
                     license = parsed.get("license", "")
                     keywords = parsed.get("keywords", [])
+                    date_released = parsed.get("date-released", "")
+                    repo_code = parsed.get("repository-code", "")
+                    url = parsed.get("url", "")
 
-                    keywords_str = ", ".join(keywords[:5]) if keywords else ""
+                    keywords_str = ", ".join(keywords[:6]) if keywords else ""
 
-                    #  BODY PRINCIPAL (LIMPIO)
+                    # Body
                     body = f"""
-                    <b>{title}</b><br>
-                    <span style="color:#666;">Authors:</span> {authors_str}<br>
-                    <span style="color:#666;">DOI:</span> {doi if doi else "N/A"}<br>
+                    <div style="font-size: 0.95em; line-height: 1.5;">
+
+                    <b style="font-size:1.1em;">{title}</b><br><br>
+
+                    <span style="color:#666;">👥 Authors:</span> {authors_str}<br>
+
+                    <span style="color:#666;">🔗 DOI:</span> {
+                        f"<a href='https://doi.org/{doi}' target='_blank'>{doi}</a>" if doi else "N/A"
+                    }<br>
                     """
 
                     if version:
-                        body += f'<span style="color:#666;">Version:</span> {version}<br>'
+                        body += f'<span style="color:#666;">📦 Version:</span> {version}<br>'
+
+                    if date_released:
+                        body += f'<span style="color:#666;">📅 Released:</span> {date_released}<br>'
 
                     if license:
-                        body += f'<span style="color:#666;">License:</span> {license}<br>'
+                        body += f'<span style="color:#666;">⚖️ License:</span> {license}<br>'
+
+                    if repo_code:
+                        body += f'<span style="color:#666;">💻 Code:</span> <a href="{repo_code}" target="_blank">{repo_code}</a><br>'
+
+                    if url:
+                        body += f'<span style="color:#666;">🌐 Project:</span> <a href="{url}" target="_blank">{url}</a><br>'
 
                     if keywords_str:
-                        body += f'<span style="color:#666;">Keywords:</span> {keywords_str}<br>'
+                        body += f'<span style="color:#666;">🏷️ Keywords:</span> {keywords_str}<br>'
 
+                    # abstract bonito
                     if abstract:
                         body += f"""
                         <br>
-                        <span style="color:#666;">Abstract:</span><br>
-                        <div style="font-size: 0.9em; color:#444; text-align: justify;">
-                        {abstract[:500]}{"..." if len(abstract) > 500 else ""}
+                        <span style="color:#666;">🧾 Abstract:</span><br>
+                        <div style="
+                            font-size: 0.9em;
+                            color:#444;
+                            text-align: justify;
+                            margin-top:5px;
+                            padding:8px;
+                            background:#f7f7f7;
+                            border-radius:6px;
+                        ">
+                            {abstract[:800]}{"..." if len(abstract) > 800 else ""}
                         </div>
                         """
 
-                    #  RAW COLLAPSIBLE (PRO)
-                    raw_cff = citations['cff'].replace("<", "&lt;").replace(">", "&gt;")
-
-                    raw_block = f"""
-                    <hr>
-                    <button onclick="this.nextElementSibling.style.display = (this.nextElementSibling.style.display === 'none' ? 'block' : 'none')">
-                        Show raw citation
-                    </button>
-                    <div style="display:none; margin-top:10px;">
-                        <pre style="font-size:0.8em;">{raw_cff}</pre>
-                    </div>
-                    """
+                    body += "</div>"
 
                 except Exception as e:
                     print(f"CFF parse error: {e}")
 
             #  Bibtex fallback
             elif 'bibtex' in citations and citations['bibtex']:
-                bib = citations['bibtex'][:500]
+                bib = citations['bibtex'][:800]
                 body = f"<pre>{bib}...</pre>"
 
             #  Texto fallback
             elif 'citation' in citations and citations['citation']:
-                body = citations['citation'][0][:500] + "..."
+                body = citations['citation'][0][:800] + "..."
 
             html += self.icon_wrapper(
                 icon_html=f"""<img src="{self.base}repo_icons/citation.png" 
@@ -408,7 +614,7 @@ class Metadata(object):
                             {self.add_tooltip('bottom', "Citation")}>""",
                 modal_html=self.modal(
                     title='Citation',
-                    body=body + raw_block,
+                    body=body,
                     markdown_translation=False
                 )
             )
@@ -471,6 +677,8 @@ class Metadata(object):
                     title='Installation',
                     body=f'{installation}'))
 
+
+
         '''
         requirements = self.requirements()
         if requirements:
@@ -484,55 +692,122 @@ class Metadata(object):
                     body=requirements))
         '''
         
-        # requirements usando link a archivos requirements
+
+        # requirements usando link a archivos de requisitos + texto del readme
         requirements = self.requirements()
+        req_files = self.requirements_files()
         readme_reqs = self.requirements_from_readme()
-        if requirements or readme_reqs:
-            repo_url = self.repo_url()
 
-            links = []
+        if req_files or requirements or readme_reqs:
+
+            import html as html_lib
+            from collections import defaultdict
+
+
+            # 1. agrupar por entorno (seguro aunque no haya type)
+            grouped = defaultdict(list)
+            for f in req_files:
+                env = f.get("type", "other")
+                grouped[env].append(f)
+
+            # 2. labels + iconos
+            env_labels = {
+                "pip": "🐍 pip",
+                "poetry": "⚙️ poetry",
+                "conda": "🐳 conda",
+                "setup": "📦 setup",
+                "pipenv": "📁 pipenv",
+                "other": "📄 others"
+            }
+
+            body_parts = []
+
+            # 3. DEPENDENCIES (SOLO ARCHIVOS)
+            if grouped:
+                for env_type, files in grouped.items():
+
+                    label = env_labels.get(env_type, env_type)
+                    section = f"<b>{label}</b><ul>"
+
+                    for f in files:
+                        path = f.get("path", "")
+                        if not path:
+                            continue
+
+                        parts = path.split("/")
+
+                        #  quitar carpetas basura tipo repo-main
+                        parts = [
+                            p for p in parts
+                            if not (p.endswith("-main") or p.endswith("-master"))
+                        ]
+
+                        if not parts:
+                            continue
+
+                        clean_path = "/".join(parts)
+
+                        #  LINK CORRECTO
+                        github_link = f"{repo_url}/tree/{branch}/{clean_path}"
+                        file_url = html_lib.escape(github_link)
+
+                        #  NOMBRE BONITO
+                        if len(parts) == 1:
+                            file_name = html_lib.escape(parts[0])
+                        else:
+                            pretty = " → ".join(parts[:-1]) + " → <b>" + parts[-1] + "</b>"
+                            file_name = (
+                                html_lib.escape(pretty)
+                                .replace("&lt;b&gt;", "<b>")
+                                .replace("&lt;/b&gt;", "</b>")
+                            )
+
+                        section += f'<li><a href="{file_url}" target="_blank">{file_name}</a></li>'
+
+                    section += "</ul>"
+                    body_parts.append(f"""
+                    <details>
+                    <summary><b>{label}</b></summary>
+                    <ul>{section.replace(f"<b>{label}</b><ul>", "").replace("</ul>", "")}</ul>
+                    </details>
+                    """)
+
+            #  4. README (SEPARADO)
+            if readme_reqs:
+                md_parser = mistune.create_markdown()
+                rendered_md = md_parser("\n".join(readme_reqs))
+                safe = f"<div>{rendered_md}</div>"
+
+                body_parts.append("<b>📖 Requirements (README)</b><ul>" + safe + "</ul>")
+
+            #  5. METADATA (SEPARADO)
             if requirements:
-                for r in requirements.split("\n"):
-                    if not r:
-                        continue
+                safe_metadata = html_lib.escape(requirements)
 
-                    # si es ruta local → convertir a repo path
-                    clean_path = r.replace(self.repo_metadata_dir, "").lstrip("/")
-
-                    # heurística: solo archivos típicos
-                    if any(name in clean_path.lower() for name in [
-                        "requirements", "pyproject", "environment", "setup.py", "pipfile"
-                    ]):
-                        github_link = f"{repo_url}/blob/main/{clean_path}"
-                        filename = clean_path.split("/")[-1]
-
-                        links.append(f'<li><a href="{github_link}" target="_blank">{filename}</a></li>')
-
-            if links or readme_reqs:
-                body = "<ul>"
-
-                # archivos detectados
-                if links:
-                    body += "\n".join(links)
-
-                # README detectado
-                if readme_reqs:
-                    body += "<hr><b>Detected in README:</b>"
-                    for r in readme_reqs:
-                        body += f"<li>{r}</li>"
-
-                body += "</ul>"
+                body_parts.append(f"""
+                <details>
+                <summary><b>🧠 Metadata Dependencies</b></summary>
+                <ul>{safe_metadata}</ul>
+                </details>
+                """)
                 
+            body = "".join(body_parts)
+
+            #  RENDER FINAL
+            if body.strip():
                 html += self.icon_wrapper(
                     icon_html=f"""<img src="{self.base}repo_icons/requirements.png"  
                             class="repo-icon" 
-                            {self.add_tooltip('bottom', 'Requirements files')}>""",
+                            {self.add_tooltip('bottom', 'Requirements')}>""",
 
                     modal_html=self.modal(
-                        title='Requirements',
+                        title='Requirements/Dependencies',
                         body=body,
                         markdown_translation=False)
                 )
+      
+                
+                
                 
                 
         usage = self.usage()
@@ -824,7 +1099,7 @@ class Metadata(object):
             user = parts[3]
             repo = parts[4]
             branch = parts[5]
-            return f"https://github.com/{user}/{repo}/blob/{branch}/README.md"
+            return f"https://github.com/{user}/{repo}/tree/{branch}/README.md"
 
         return raw_url
 

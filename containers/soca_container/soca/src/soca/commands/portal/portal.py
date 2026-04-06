@@ -29,6 +29,8 @@ def add_dashverse_link(soup, target=None):
 
 def generate(repo_metadata_dir, output, title, favicon):
 
+
+        
     copy_assets(output)
 
     # Load html template
