@@ -341,12 +341,10 @@ A pesar de ello, se consigue una reducción sustancial del tiempo total de ejecu
 ---
 ## 6. Issues
 
-- Pensar ideas para nuevos Charts para los Dashboards 
-- Añadir URL dashverse a repositorios del portal software
-- Mejorar los metadatos mostrados
-- FAIRificar los repositorios mejorando los checks de metadatos
+NEXT STEPS:
 - Mejoras en SOCA:
-   - Varias organizaciones, que los de citas se enseñen bien, si hay muchos requisitos, apuntar al fichero, etc.
-   - Mirar issues
+    - Mejorar visualización de metadatos:
+    - si hay documentación readthedocs apuntar a ella
 
-- (Si da tiempo) automatizar sugerencias para mejorar los repositoros
+- FAIRificar los repositorios mejorando los checks de metadatos
+- (Si da tiempo) automatizar sugerencias para mejorar los repositorios
