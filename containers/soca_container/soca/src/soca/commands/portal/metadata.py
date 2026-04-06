@@ -21,7 +21,6 @@ class Metadata(object):
         self.repo_metadata_dir = os.path.abspath(repo_metadata_dir)
         self.md = repo_metadata
         self.base = 'https://github.com/oeg-upm/soca/tree/main/src/soca/assets' if embedded else ''
-        self._repo_root = None
         self._req_files = None
         self._readme_reqs = None
     
@@ -36,27 +35,46 @@ class Metadata(object):
 ######################################################
 # aux propias
 
-    def get_repo_root(self):
-        if self._repo_root:
-            return self._repo_root
-
-        repo_name = self._get_repo_name()
-
-        for root, dirs, _ in os.walk(self.repo_metadata_dir):
-            
-            for d in dirs:
-                if d.lower() == repo_name.lower():
-                    self._repo_root = os.path.join(root, d)
-                    return self._repo_root
-
-        return None
+    
 
 
     # aux para sacar requirements del readme
     def requirements_from_readme(self):
 
-        repo_name = self._get_repo_name()
-        target_repo_dir = os.path.join(self.repo_metadata_dir, repo_name)
+        import re
+
+        repo_name = self._get_repo_name().lower()
+
+        base = os.path.join(self.repo_metadata_dir, repo_name)
+
+        if not os.path.isdir(base):
+            return None
+
+        target_repo_dir = None
+
+        for org_dir in os.listdir(base):
+            org_path = os.path.join(base, org_dir)
+
+            if not os.path.isdir(org_path):
+                continue
+
+            for d in os.listdir(org_path):
+                candidate = os.path.join(org_path, d)
+
+                if not os.path.isdir(candidate):
+                    continue
+
+                if repo_name in d.lower():
+                    for name in ["README.md", "readme.md", "README.MD"]:
+                        if os.path.isfile(os.path.join(candidate, name)):
+                            target_repo_dir = candidate
+                            break
+
+                if target_repo_dir:
+                    break
+
+            if target_repo_dir:
+                break
 
         if not target_repo_dir:
             return None
@@ -80,31 +98,32 @@ class Metadata(object):
             base_level = None
 
             for line in lines:
-                stripped = line.strip()
 
-                # detectar headers markdown
-                if stripped.startswith("#"):
-                    level = len(stripped) - len(stripped.lstrip("#"))
-                    title = stripped.lstrip("#").strip().lower()
+                header_match = re.match(r'^\s*(#+)\s*(.+)', line)
 
-                    # empezar captura
+                if header_match:
+                    level = len(header_match.group(1))
+                    title = header_match.group(2).strip().lower()
+
                     if "requirement" in title or "dependency" in title:
                         capture = True
                         base_level = level
                         continue
 
-                    # terminar captura
                     if capture and level <= base_level:
                         break
 
-                # guardar contenido TAL CUAL
                 if capture:
                     content.append(line.rstrip())
 
             return content if content else None
 
-        except Exception:
+        except Exception as e:
+            print("README parse error:", e)
             return None
+
+
+
 
 
     #aux para obtener archivos de requisitos o entornos
@@ -131,7 +150,7 @@ class Metadata(object):
             for root, dirs, files in os.walk(target_repo_dir):
                 # limitar profundidad (clave)
                 depth = root.replace(target_repo_dir, "").count(os.sep)
-                if depth > 3:
+                if depth > 4:
                     dirs[:] = []
                     continue
                 
@@ -703,14 +722,35 @@ class Metadata(object):
             import html as html_lib
             from collections import defaultdict
 
+            body_parts = []
+            #  1. README (SEPARADO)
+            if readme_reqs:
+                md_parser = mistune.create_markdown()
+                rendered_md = md_parser("\n".join(readme_reqs))
 
-            # 1. agrupar por entorno (seguro aunque no haya type)
+                body_parts.append(f"""
+                <div style="margin-top:10px;">
+                    <b>📖 Requirements (README)</b>
+                    <div style="
+                        margin-top:6px;
+                        padding:8px;
+                        background:#f7f7f7;
+                        border-radius:6px;
+                        font-size:0.9em;
+                    ">
+                        {rendered_md}
+                    </div>
+                </div>
+                """)
+
+
+            # 2. agrupar por entorno (seguro aunque no haya type)
             grouped = defaultdict(list)
             for f in req_files:
                 env = f.get("type", "other")
                 grouped[env].append(f)
 
-            # 2. labels + iconos
+            # 3. labels + iconos
             env_labels = {
                 "pip": "🐍 pip",
                 "poetry": "⚙️ poetry",
@@ -720,9 +760,9 @@ class Metadata(object):
                 "other": "📄 others"
             }
 
-            body_parts = []
+            
 
-            # 3. DEPENDENCIES (SOLO ARCHIVOS)
+            # 4. DEPENDENCIES (SOLO ARCHIVOS)
             if grouped:
                 for env_type, files in grouped.items():
 
@@ -772,22 +812,24 @@ class Metadata(object):
                     </details>
                     """)
 
-            #  4. README (SEPARADO)
-            if readme_reqs:
-                md_parser = mistune.create_markdown()
-                rendered_md = md_parser("\n".join(readme_reqs))
-                safe = f"<div>{rendered_md}</div>"
-
-                body_parts.append("<b>📖 Requirements (README)</b><ul>" + safe + "</ul>")
-
+            
             #  5. METADATA (SEPARADO)
             if requirements:
                 safe_metadata = html_lib.escape(requirements)
 
                 body_parts.append(f"""
                 <details>
-                <summary><b>🧠 Metadata Dependencies</b></summary>
-                <ul>{safe_metadata}</ul>
+                <summary><b>🧠 Metadata Extracted by SOMEF</b></summary>
+                <div style="
+                    margin-top:6px;
+                    padding:8px;
+                    background:#f7f7f7;
+                    border-radius:6px;
+                    font-size:0.85em;
+                    font-family: monospace;
+                ">
+                    {safe_metadata}
+                </div>
                 </details>
                 """)
                 

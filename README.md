@@ -120,8 +120,30 @@ El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitM
 
 
 ### 3.6 DashVerse Service
-🚧🚧 *In_Progress* 🚧🚧
+El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/DashVERSE_dashboard` existe una plantilla con diversos dashboards, los cuales son:
+1. KPIs generales:
+   - Total de assessments procesados
+   - Porcentaje de repositorios que cumplen el umbral de calidad (≥66%)
 
+2. Análisis de resultados:
+   - Distribución de procesos Passed vs Failed
+   - Distribución de fallos por tier de indicadores (crucial, recommended, good_to_have, etc.)
+   - Histograma de calidad de los assessments
+
+3. Análisis por repositorio:
+   - Tabla de metadatos/información de los repositorios
+   - Top 10 mejores repositorios según score de calidad
+   - Top 10 peores repositorios
+
+4. Análisis de fallos:
+   - Tabla de assessments con tests fallidos (incluyendo indicador y repositorio)
+   - Top 5 indicadores que más fallan
+   - Top 5 procesos que más fallan
+
+Con la plantilla dada en `/DashVERSE_dashboard` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
+
+Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
+ *in progress_ filtros de orgs para dashboard, cross-filtering...*
 
 
 
@@ -141,8 +163,6 @@ El workflow implementa un pipeline completo que abarca:
 3. **Generación de portal/**
 4. **Evaluación de calidad (RSFC)**
 4. **Envío de indicadores a DashVERSE**
-
-Todo el flujo se ejecuta de forma **secuencial y controlada**.
 
 ---
 
@@ -196,16 +216,24 @@ Todo el flujo se ejecuta de forma **secuencial y controlada**.
 ## 4. Requisitos
 **PREVIA:** Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
    - `GITHUB_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx` siendo `xxxxxx` el token personal de github obtenido desde github
-   - `DATABASE_URL` siguiendo el formato `DATABASE_URL=postgresql://usuario:password@host:puerto/database` siendo el usuario, password y database configurados en el environment del docker-compose.yml, host=postgres y puerto expuesto (default 5432)
+
    - `RABBITMQ_USER` usuario de RabbitMQ del docker compose
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ del docker compose
+
    - ``RATE_LIMIT_SOCA_ENABLED`` y `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI(con workers de soca no hace falta debido a que realiza 1 petición/repo, de rsfc si ya que realiza 7 aprox)
+
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
-   - `DASHBOARD_URL` la URL al dashboard desplegado, `http://localhost:8088` en caso de seguir las indicaciones del README y lanzarlo en local
 
-    ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS`. El token se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error)
+   - `DASHBOARD_URL` la URL al dashboard desplegado, `http://localhost:8088/superset/dashboard/nº_de_dashboard/` en caso de seguir las indicaciones del README y lanzarlo en local
 
-### 4.1 Requisitos
+    ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS` y `DASHBOARD_URL`. 
+    
+    El token se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error).
+
+    El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/DashVERSE_dashboard`
+
+
+### 4.1 Requisitos(Requirements)
     
    - Docker/Docker Desktop
    - Estar loggeado en Docker/Docker Desktop
@@ -221,7 +249,7 @@ Herramientas usadadas en el proyecto:
    - DASHVERSE: https://github.com/EVERSE-ResearchSoftware/DashVERSE
       
 
-### 4.2 Instalación
+### 4.2 Instalación/Despliegue
 
 🚧🚧 *In_Progress (falta despliegue dashverse)* 🚧🚧
 

@@ -17,12 +17,12 @@ from ... import base_dir, __version__
 def add_dashverse_link(soup, target=None):
     import os
 
-    DASHVERSE_URL = os.getenv("DASHVERSE_URL", "http://localhost:8088")
+    DASHVERSE_URL = os.getenv("DASHVERSE_URL", "None")
 
     link = soup.find(id="dashverse-link")
 
     if link:
-        link["href"] = f"{DASHVERSE_URL}/superset/dashboard/7/"
+        link["href"] = f"{DASHVERSE_URL}"
         
         
         

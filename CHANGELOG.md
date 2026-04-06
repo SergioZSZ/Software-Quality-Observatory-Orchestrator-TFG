@@ -7,7 +7,7 @@
 
     para encontrar el id desde python y pondiendo href como valor provisional # para modificarlo en python
 
-   - añadido en generacion de portal soca funcion add dashverse link, y añadida en la generacion
+   - añadido en generacion de portal soca funcion add dashverse link, y añadida en la generacion del script portal.py de soca
 
    - Mejorada la visualización de metadatos del portal, pasando de mostrar datos en bruto a una representación más estructurada y navegable.
 
@@ -26,7 +26,7 @@
    - Requirements:
       - antes: cogía los archivos requirements y poetry y Requirements del README.md  los escribía directamente en el portal
 
-      - ahora: en lugar de mostrar el contenido completo, ahora se listan únicamente los archivos relevantes (requirements.txt, pyproject.toml, etc.) con enlaces directos al repositorio, agrupados por tipo de entorno, reduciendo ruido visual, y sacando información de los README.md de requisitos si tienen (alomejor a medio implementar, toca probar)
+      - ahora: en lugar de mostrar el contenido completo, ahora se listan únicamente los archivos relevantes (requirements.txt, pyproject.toml, etc.) con enlaces directos al repositorio, agrupados por tipo de entorno, reduciendo ruido visual, y sacando información de los README.md de requisitos si tienen 
 
    - Citation: 
       - antes: se enseñaba directamente el CITATION.cff
