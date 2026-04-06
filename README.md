@@ -344,7 +344,7 @@ A pesar de ello, se consigue una reducción sustancial del tiempo total de ejecu
 NEXT STEPS:
 - Mejoras en SOCA:
     - Mejorar visualización de metadatos:
-    - si hay documentación readthedocs apuntar a ella
+      - si hay documentación readthedocs apuntar a ella
 
 - FAIRificar los repositorios mejorando los checks de metadatos
 - (Si da tiempo) automatizar sugerencias para mejorar los repositorios
