@@ -251,8 +251,8 @@ Herramientas usadadas en el proyecto:
 
     El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/DashVERSE_dashboard`
 
-🚧🚧 *In_Progress (falta despliegue dashverse)* 🚧🚧
 
+### 4.2.1 Despliegue del orquestador
 1. Generar imágenes  docker:
    - `soca-heavy`:
       - Directorio desde el que crearla: `/containers/soca_container` 
@@ -272,6 +272,13 @@ Herramientas usadadas en el proyecto:
 6. Ejecutar manualmente
 
 Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes y enviándoselos a DashVERSE.
+
+
+
+### 4.2.2 Despliegue de DashVERSE
+
+🚧🚧 *In_Progress (falta despliegue dashverse)* 🚧🚧
+
 
 ---
 
