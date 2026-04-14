@@ -1,4 +1,3 @@
-
 [![DOI](https://zenodo.org/badge/18879858.svg)](https://doi.org/10.5281/zenodo.18879858)
 
 [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
