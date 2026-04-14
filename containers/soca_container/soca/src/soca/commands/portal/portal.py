@@ -17,12 +17,18 @@ from ... import base_dir, __version__
 def add_dashverse_link(soup, target=None):
     import os
 
-    DASHVERSE_URL = os.getenv("DASHVERSE_URL", "None")
 
-    link = soup.find(id="dashverse-link")
+    DASHBOARD_ORG_URL = os.getenv("DASHBOARD_ORG_URL", "http://localhost:8088/superset/dashboard/8/")
+    DASHBOARD_REPO_URL = os.getenv("DASHBOARD_REPO_URL", "http://localhost:8088/superset/dashboard/9/")
 
-    if link:
-        link["href"] = f"{DASHVERSE_URL}"
+    link_org = soup.find(id="dashverse-org-link")
+    link_user = soup.find(id="dashverse-user-link")
+    
+    if link_org and DASHBOARD_ORG_URL:
+        link_org["href"] = DASHBOARD_ORG_URL
+
+    if link_user and DASHBOARD_REPO_URL:
+        link_user["href"] = DASHBOARD_REPO_URL
         
         
         
@@ -84,7 +90,7 @@ def generate(repo_metadata_dir, output, title, favicon):
     # Insert favicon
     add_favicon(soup, favicon, output)
     
-    # insertar link dashverse
+    # insertar links dashverse
     add_dashverse_link(soup)
 
     # Save index.html

@@ -9,33 +9,45 @@
 
    - añadido en generacion de portal soca funcion add dashverse link, y añadida en la generacion del script portal.py de soca
 
-   - Mejorada la visualización de metadatos del portal, pasando de mostrar datos en bruto a una representación más estructurada y navegable.
+   - Mejorada la visualización de metadatos del portal, pasando de mostrar datos en bruto a una representación más estructurada y navegable:
 
-**NOTA:** Todos los links del portal referentes al repo apuntana a ramas main o master
 
-   - README: 
-      - antes: Se visualizaba el rawgithub readme
+         - README: 
+            - antes: Se visualizaba el rawgithub readme
 
-      - ahora: el enlace ahora apunta a la vista de GitHub (blob) en lugar del raw, permitiendo una mejor navegación del repositorio.
+            - ahora: el enlace ahora apunta a la vista de GitHub (blob) en lugar del raw, permitiendo una mejor navegación del repositorio.
 
-   - Docker: 
-      - antes: link al rawgithub del archivo docker
+         - Docker: 
+            - antes: link al rawgithub del archivo docker
 
-      - ahora: mejorada la detección de archivos Dockerfile y docker-compose, incluyendo aquellos en subdirectorios. Se generan enlaces correctos a GitHub y se filtran archivos no relacionados, representando mejor proyectos con múltiples configuraciones (ya no aparecen archivos de requisitos, solo relacionados con docker)
+            - ahora: mejorada la detección de archivos Dockerfile y docker-compose, y archivos de generación de entornos (agrupados y con semántica referente a donde se encuentran) y al clickar te lleva al archivo en github
 
-   - Requirements:
-      - antes: cogía los archivos requirements y poetry y Requirements del README.md  los escribía directamente en el portal
 
-      - ahora: en lugar de mostrar el contenido completo, ahora se listan únicamente los archivos relevantes (requirements.txt, pyproject.toml, etc.) con enlaces directos al repositorio, agrupados por tipo de entorno, reduciendo ruido visual, y sacando información de los README.md de requisitos si tienen 
+         - Citation: 
+            - antes: se enseñaba directamente la citación encontrada (bibtex, citation.cff o texto)
 
-   - Citation: 
-      - antes: se enseñaba directamente el CITATION.cff
+            - ahora: reemplazada la visualización del contenido RAW del bibtex o citation.cff y lo visualiza estructuradamente (o texto) + generación de bibtex en caso de citation.cff
 
-      - ahora: reemplazada la visualización del contenido RAW del CITATION.cff por una interpretación estructurada del mismo
 
+   - cambiado el nombre de soca/assets/img/statIcon.svg a statIcon-org.svg para diferenciarlo del siguiente emoticono
+
+   - añadido a soca/assets/img una imagen statIcon-user.svg para tener un emoticono que lleve al dashboard de usuarios 
+
+   - añadida nueva linea en el template.html para añadir emoticono statIcon-user.svg
+linea 20:         
+      <div data-toggle="tooltip" data-placement="right" title="SOCA Dashboard Analytics (user)"><a id="dashverse-user-link" href="#" target="_blank"><img src="img/statIcon-user.svg" class="grey-color-svg" style="height: 2rem; margin-left: 1rem;"></a></div>
+
+   - modificada funcion propia add_dashverse_link en soca/commands/portal.py para añadir el link al dashboard de usuarios
+
+   - añadido al servicio soca del docker compose estas variables entorno para coger las url del entorno:
+            - DASHBOARD_ORG_URL=${DASHBOARD_ORG_URL}
+            - DASHBOARD_REPO_URL=${DASHBOARD_REPO_URL}
+   
 
 **Modificaciones DashVERSE:**
    - Ahora la BBDD de DashVERSE actualiza los repositorios en vez de añadirlos otra vez en caso de repetición (añadidas constraints UNIQUE en tablas y ?on_conflict en n8n para postgrest)
 
+   - Añadido al proyecto en `/dashboards` los dashboards a nivel de org y de usuario para visualización de métricas
+   
 **Modificaciones n8n:**
    - Modificadas peticiones http a postgrest para que envíe en batches los assessments y checks a postgrest evitando saturación de peticiones 

@@ -1,0 +1,22 @@
+[project]
+name = "containers"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "SergioZSZ",email = "s.zaballosh@gmail.com"}
+]
+license = {text = "Apache 2.0"}
+requires-python = ">=3.11, <3.13"
+dependencies = [
+    "soca @ file:///C:/Users/jzaba/Documents/GitHub/Software%20Quality%20Observatory%20Orchestrator%28TFG%29/containers/soca_container/soca",
+    "rsfc @ file:///C:/Users/jzaba/Documents/GitHub/Software%20Quality%20Observatory%20Orchestrator%28TFG%29/containers/rsfc_container/rsfc-main"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+soca = {develop = true}
+rsfc = {develop = true}

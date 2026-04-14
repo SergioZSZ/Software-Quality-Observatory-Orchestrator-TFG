@@ -67,6 +67,8 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - DASHBOARD_ORG_URL=${DASHBOARD_ORG_URL}
+      - DASHBOARD_REPO_URL=${DASHBOARD_REPO_URL}
 
 
   rate_limiter_soca:
