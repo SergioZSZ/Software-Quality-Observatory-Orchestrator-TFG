@@ -46,7 +46,7 @@ Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarad
 
 
 
-### 5.3 Instalación/Despliegue de DashVERSE
+#### 5.3 Instalación/Despliegue de DashVERSE
 Todo este proceso se deberá hacer desde una terminal Unix, no powershell de windows (por ejemplo Git Bash https://git-scm.com/install/windows), este proceso inicial hacerlo dentro del directorio `/DashVERSE`
 
 1. instalar minikube,  kubectl, y helm (docker instalado de antes)
@@ -174,7 +174,7 @@ ADD CONSTRAINT unique_assessment_checks_assessment_test UNIQUE (assessment_id, t
     ON ALL SEQUENCES IN SCHEMA everse 
     TO web_anon;
    
-### 5.4 Encendido y apagado del servicio DashVERSE:
+#### 5.4 Encendido y apagado del servicio DashVERSE:
 
 apagar todo:
    minikube stop               # apaga el cluster
