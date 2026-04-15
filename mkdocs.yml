@@ -9,6 +9,7 @@ nav:
   # - Validaciones: VALIDACION.md
   # - Limitaciones: LIMITACIONES.md
   # - Changelog: CHANGELOG.md
+  - docs_dir: docs
 
 theme:
   name: readthedocs

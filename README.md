@@ -59,7 +59,7 @@ Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 
 
 
-## 3. Estado actual del desarrollo
+## 3. Desarrollo
 ### 3.1 Dockerización de SOCA
 
 Se ha:
