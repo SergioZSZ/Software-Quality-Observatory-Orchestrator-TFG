@@ -20,14 +20,19 @@
          - Docker: 
             - antes: link al rawgithub del archivo docker
 
-            - ahora: mejorada la detección de archivos Dockerfile y docker-compose, y archivos de generación de entornos (agrupados y con semántica referente a donde se encuentran) y al clickar te lleva al archivo en github
+            - ahora: mejorada la detección de archivos Dockerfile y docker-compose, y archivos de generación de entornos (agrupados y con semántica referente a donde se encuentran) y al clickar te lleva al archivo en github 
 
 
          - Citation: 
             - antes: se enseñaba directamente la citación encontrada (bibtex, citation.cff o texto)
 
-            - ahora: reemplazada la visualización del contenido RAW del bibtex o citation.cff y lo visualiza estructuradamente (o texto) + generación de bibtex en caso de citation.cff
+            - ahora: reemplazada la visualización del contenido RAW del bibtex o citation.cff y lo visualiza estructuradamente (o texto) + generación de bibtex en caso de citation.cff (aparece el source de cada parte)
 
+         - Requirements:
+            - antes: se enseñaba una mezcla entre requirements.txt, .tomls y el readme sin markdown
+            - ahora: archivos de requisitos tienen link para ir a verlos y el readme se ve con markdown (aparece el source de cada)
+
+         - Instalation: ahora se ve en markdown y aparece el source
 
    - cambiado el nombre de soca/assets/img/statIcon.svg a statIcon-org.svg para diferenciarlo del siguiente emoticono
 

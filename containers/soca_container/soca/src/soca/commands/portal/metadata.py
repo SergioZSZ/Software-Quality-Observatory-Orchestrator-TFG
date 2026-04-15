@@ -27,6 +27,43 @@ class Metadata(object):
 
 ######################################################
 # auxs
+    #agrupacion de tipos de requirements
+    def group_requirement_files(self, reqs):
+        if not reqs:
+            return None
+
+        grouped = {}
+
+        for r in reqs:
+            if not isinstance(r, dict):
+                continue
+
+            source = r.get("source")
+            if not source:
+                continue
+
+            filename = source.split("/")[-1].lower()
+
+            if "requirements" in filename:
+                key = "Source requirements.txt"
+            elif filename == "pyproject.toml":
+                key = "Source Poetry"
+            elif filename == "codemeta.json":
+                key = "Source codemeta"
+            elif filename == "readme.md":
+                key = "Source README"
+            else:
+                continue
+
+            #  dict para deduplicar por source
+            grouped.setdefault(key, {})[source] = r
+
+        # convertir a lista final
+        grouped = {k: list(v.values()) for k, v in grouped.items()}
+
+        return grouped if grouped else None
+
+
 
     # agrupacion de self.docker por tipos de archivos
     def group_build_files(self, docker):
@@ -35,10 +72,9 @@ class Metadata(object):
             return None
 
         grouped = {
-            "Dockerfile": [],
-            "Docker Compose": [],
-            "Poetry": [],
-            "Requirements": []
+            "Dockerfiles": [],
+            "Docker Compose files": [],
+            "Poetry files": []
         }
 
         for url in docker:
@@ -48,16 +84,13 @@ class Metadata(object):
             name = url.lower().split("/")[-1]
 
             if name == "dockerfile":
-                grouped["Dockerfile"].append(url)
+                grouped["Dockerfiles"].append(url)
 
             elif "docker-compose" in name:
-                grouped["Docker Compose"].append(url)
+                grouped["Docker Compose files"].append(url)
 
             elif name == "pyproject.toml":
-                grouped["Poetry"].append(url)
-
-            elif "requirements" in name:
-                grouped["Requirements"].append(url)
+                grouped["Poetry files"].append(url)
 
         # quitar categorías vacías
         grouped = {k: v for k, v in grouped.items() if v}
@@ -116,22 +149,39 @@ class Metadata(object):
 
 
     # creacion de boton para copiar bibtex
+
+
     def copy_button(self, text, label):
+        import html
+        import json
+        if not text:
+            return ""
+        safe_html  = html.escape(text)
+        safe_js = json.dumps(text)
         return f"""
-        <div style="margin-bottom:10px;">
-            <b style="font-size:0.9em;">{label}</b>
-        </div>
-        <pre style="
-            background:#f7f7f7;
-            padding:10px;
-            border-radius:6px;
-            font-size:0.85em;
-            overflow:auto;
-            max-height:250px;
-            white-space:pre-wrap;
-            word-break:break-word;
-        ">{text}</pre>
-        """
+            <div style="margin-bottom:10px;">
+                <b style="font-size:0.9em;">{label}</b>
+            </div>
+
+            <div style="position:relative;">
+                <button onclick='navigator.clipboard.writeText({safe_js})'
+                    style="position:absolute; top:5px; right:5px;">
+                    Copy
+                </button>
+
+                <pre style="
+                    background:#f7f7f7;
+                    padding:10px;
+                    border-radius:6px;
+                    font-size:0.85em;
+                    overflow:auto;
+                    max-height:250px;
+                    white-space:pre;
+                ">
+        {safe_html}
+                </pre>
+            </div>
+            """
 
     
     #parseador de bibtex para estructurar en html
@@ -384,12 +434,10 @@ class Metadata(object):
         '''
         #docker propio, saca la parte docker de somef y la agrupa por tipos de archivos importantes
         docker = self.docker()
-        
-        if docker:
-            
-            grouped = self.group_build_files(docker)
+        grouped = self.group_build_files(docker)
 
-            if grouped:
+
+        if grouped:
                 
                 body = "<div style='max-height:300px; overflow:auto;'>"
 
@@ -541,7 +589,7 @@ class Metadata(object):
                 </div>
                 
                 <div style="margin-bottom:15px; max-height:350px; overflow:auto;">
-                    <b style="font-size:1.1em;">BibTeX</b><br><br>
+                    <b style="font-size:1.1em;">Source by BibTeX</b><br><br>
                     <div style="font-size:0.9em;">
                         {bib_clean}
                     </div>
@@ -569,7 +617,7 @@ class Metadata(object):
                     </div>
                     
                     <div style="margin-bottom:15px; max-height:350px; overflow:auto;">
-                        <b style="font-size:1.1em;">Metadata (CFF)</b><br><br>
+                        <b style="font-size:1.1em;">Source by .cff</b><br><br>
 
                         {f"<b>Title:</b> {parsed['title']}<br>" if parsed['title'] else ""}
                         {f"<b>Authors:</b> {parsed['authors']}<br>" if parsed['authors'] else ""}
@@ -617,6 +665,7 @@ class Metadata(object):
 
                 citation = safe_list(safe_dic(citations, 'citation'), 0)
                 body += f"""
+                <b style="font-size:1.1em;">Source by documentation</b><br><br>
                 <div style="
                     font-size:0.95em;
                     line-height:1.5;
@@ -693,6 +742,10 @@ class Metadata(object):
                              'result'), 'description')
                          + '\n #### More information  \n' + f'<{safe_dic(safe_dic(safe_list(status, 0), "result"), "value")}>'))
 
+
+
+
+        '''
         installation = self.installation()
         if installation:
             html += self.icon_wrapper(
@@ -703,10 +756,43 @@ class Metadata(object):
                 modal_html=self.modal(
                     title='Installation',
                     body=f'{installation}'))
+        '''
+        installation = self.installation()
+        if installation:
+
+            md_text = ""
+            source = installation[0].get("source")
+            if source:
+                filename = source.split("/")[-1]
+                md_text += f"**Source {filename}:** \n\n"
+            for item in installation:
+                # header de la instalacion
+                header = safe_dic(safe_dic(item, "result"), "original_header")
+                # contenido del header
+                text = safe_dic(safe_dic(item, "result"), "value")
+
+                if header:
+                    md_text += f"### {header}\n\n"
+
+                if text:
+                    md_text += text.replace("\n", "  \n") + "\n\n"
+                    
+                md_text += "---\n\n"
+                
+            html += self.icon_wrapper(
+                icon_html=f"""<img src="{self.base}repo_icons/installation.png" 
+                        class="repo-icon" 
+                        {self.add_tooltip('bottom', 'Installation')}>""",
+
+                modal_html=self.modal(
+                    title='Installation',
+                    body=md_text,                
+                    markdown_translation=True     
+                )
+            )
 
 
-
-        
+        '''
         requirements = self.requirements()
         if requirements:
             html += self.icon_wrapper(
@@ -717,7 +803,69 @@ class Metadata(object):
                 modal_html=self.modal(
                     title='Requirements',
                     body=requirements))
+        '''
         
+        # propio agrupando requirements
+        raw_requirements = self.requirements()
+        
+        grouped_reqs = self.group_requirement_files(raw_requirements)
+        if grouped_reqs:
+            body = """
+            <div style="
+                max-height:300px;
+                overflow:auto;
+                display:block;
+            ">
+            """
+
+            for filetype, items in grouped_reqs.items():
+
+                body += f"<b>{filetype}</b><br>"
+
+                for r in items:
+
+                    source = r.get("source")
+                    value = safe_dic(safe_dic(r, "result"), "value")
+
+                    filename = source.split("/")[-1].lower() if source else ""
+
+                    #  README mostrar contenido
+                    if "readme.md" in filename and value:
+
+                        html_md = mistune.html(value).replace("<p>", "").replace("</p>", "")
+                        body += f"""
+                        <div style="
+                                background:#f7f7f7;
+                                padding:10px;
+                                border-radius:6px;
+                                font-size:0.9em;
+                                margin-bottom:10px;
+                            ">
+                            {html_md}
+                        </div>
+                        """
+
+                    #  resto link normal
+                    else:
+                        display = self.get_repo_relative_path(source)
+                        github_url = self.raw_to_github_url(source)
+
+                        body += f"""
+                        <a href="{github_url}" target="_blank">{display}</a><br>
+                        """
+
+                body += "<br>"
+                body += "</div>"
+            html += self.icon_wrapper(
+                icon_html=f"""<img src="{self.base}repo_icons/requirements.png"  
+                        class="repo-icon" 
+                        {self.add_tooltip('bottom', 'Requirements')}>""",
+                modal_html=self.modal(
+                    title='Requirements',
+                    body=body,
+                    markdown_translation=False
+                )
+            )
         
 
 
@@ -968,18 +1116,65 @@ class Metadata(object):
         docList = safe_dic(self.md, 'documentation')
         return docList if docList else None
 
+
     def requirements(self):
         reqs = safe_dic(self.md, 'requirements')
         if not reqs:
             return None
-        return "\n".join([safe_dic(safe_dic(d, 'result'), 'value') for d in reqs])
+        '''
+        for d in reqs:
+            source = d.get("source")
+            if source == "https://raw.githubusercontent.com/oeg-upm/rsfc/main/README.md":
+                print("ENCONTRADO EN README:")
+                import json
+                print(json.dumps(reqs, indent=4, ensure_ascii=False))
+        '''        
+ 
+        return reqs
 
+       
     def installation(self):
         inst = safe_dic(self.md, 'installation')
         if not inst:
             return None
-        return "\n".join([safe_dic(safe_dic(d, 'result'), 'value') for d in inst])
+        return inst
 
+    
+    '''
+    def installation(self):
+        inst = safe_dic(self.md, 'installation')
+        import json
+
+        if not inst:
+            return None
+
+        values = []
+
+        for d in inst:
+            source = d.get("source")
+
+            if source == "https://raw.githubusercontent.com/oeg-upm/rsfc/main/README.md":
+                print("ENCONTRADO EN README:")
+                print(json.dumps(inst, indent=4, ensure_ascii=False))
+
+
+            values.append(safe_dic(safe_dic(d, 'result'), 'value'))
+
+        return "\n".join(values)
+    '''
+    
+    '''
+    def docker(self):
+
+        hasBuildFileList = safe_dic(self.md, 'has_build_file')
+        if not hasBuildFileList:
+            return None
+    
+        return [safe_dic(safe_dic(d, 'result'), 'value') for d in hasBuildFileList]
+    '''
+    
+    # implementación para sacar los requirements del build file y que no haya requirements.txt
+    # esto para que se filtre bien todo en el portal
     def docker(self):
 
         hasBuildFileList = safe_dic(self.md, 'has_build_file')
@@ -987,7 +1182,22 @@ class Metadata(object):
         if not hasBuildFileList:
             return None
 
-        return [safe_dic(safe_dic(d, 'result'), 'value') for d in hasBuildFileList]
+        urls = [safe_dic(safe_dic(d, 'result'), 'value') for d in hasBuildFileList]
+
+        grouped = self.group_build_files(urls)
+
+        if not grouped:
+            return None
+
+        # devolver SOLO los archivos válidos
+        filtered_urls = []
+        for v in grouped.values():
+            filtered_urls.extend(v)
+
+        return filtered_urls
+    
+    
+    
 
     def downloadUrl(self):
         return safe_dic(safe_dic(safe_list(safe_dic(self.md, 'download_url'), 0), 'result'), 'value') \
