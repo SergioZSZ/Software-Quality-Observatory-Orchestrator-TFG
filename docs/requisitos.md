@@ -9,7 +9,14 @@
 
 Herramientas usadadas en el proyecto:
 
-- SOCA: https://github.com/oeg-upm/soca/
-- RSFC: https://github.com/oeg-upm/rsfc/
-- SOMEF: https://github.com/KnowledgeCaptureAndDiscovery/somef
-- DASHVERSE: https://github.com/EVERSE-ResearchSoftware/DashVERSE
+- SOCA: 
+https://github.com/oeg-upm/soca/
+
+- RSFC: 
+https://github.com/oeg-upm/rsfc/
+
+- SOMEF: 
+https://github.com/KnowledgeCaptureAndDiscovery/somef
+
+- DASHVERSE: 
+https://github.com/EVERSE-ResearchSoftware/DashVERSE
