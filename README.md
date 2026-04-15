@@ -321,7 +321,9 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 ##### Organización FAIR2ADAPT
 **Datos**
 - 27 repositorios
+
 **Tabla**
+
 | Métrica                          | Tiempo   |
 |----------------------------------|----------|
 | SOCA (10 workers)                | 1m 20s   |
@@ -331,10 +333,12 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 | RSFC secuencial (total)          | 13m 20s  |
 
 
-### Organización oeg-upm
+##### Organización oeg-upm
 **Datos**
 - 376 repositorios
+
 **Tabla**
+
 | Métrica                          | Tiempo     |
 |----------------------------------|------------|
 | SOCA (10 workers)                | 36m 57s    |
