@@ -21,7 +21,9 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 ##### Organización FAIR2ADAPT
 **Datos**
 - 27 repositorios
+
 **Tabla**
+
 | Métrica                          | Tiempo   |
 |----------------------------------|----------|
 | SOCA (10 workers)                | 1m 20s   |
@@ -34,7 +36,9 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 ### Organización oeg-upm
 **Datos**
 - 376 repositorios
+
 **Tabla**
+
 | Métrica                          | Tiempo     |
 |----------------------------------|------------|
 | SOCA (10 workers)                | 36m 57s    |
@@ -45,6 +49,7 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 
 
 ### Conclusiones
+
 | Organización | Tiempo paralelo | Tiempo secuencial | Speedup |
 |-------------|-----------------|-------------------|---------|
 | FAIR2ADAPT  | 4m 50s          | 25m 10s           | 5.21x   |
