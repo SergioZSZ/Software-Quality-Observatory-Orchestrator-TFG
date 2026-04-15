@@ -6,6 +6,8 @@
 
 **🚧🚧 STILL IN PROGRESS 🚧🚧**
 
+Documentación detallada en : https://software-quality-observatory-orchestrator.readthedocs.io/es/latest/
+
 # TFG – Orquestación automatizada de evaluación de software y generación de catálogo
 
 

@@ -12,7 +12,7 @@
 
 ## 1. Objetivo del proyecto
 
-El objetivo del TFG es diseñar e implementar un sistema reproducible que:
+El objetivo del proyecto es diseñar e implementar un sistema reproducible que:
 
 1. Extraiga automáticamente repositorios de GitHub
 2. Genere metadatos estructurados del software
@@ -21,7 +21,6 @@ El objetivo del TFG es diseñar e implementar un sistema reproducible que:
 5. Permita orquestar todo el proceso mediante workflows automatizados
 
 El sistema se basa en la integración y orquestación de herramientas existentes dentro de una arquitectura desacoplada y reproducible.
-
 
 
 
@@ -43,7 +42,7 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 ---
 
 
-![Diagrama de flujo del sistema](images/flujo_SQOO.png)
+![Diagrama de flujo del sistema](docs/simages/flujo_SQOO.png)
 
 ---
 
