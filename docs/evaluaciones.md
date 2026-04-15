@@ -33,7 +33,7 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 | RSFC secuencial (total)          | 13m 20s  |
 
 
-### Organización oeg-upm
+##### Organización oeg-upm
 **Datos**
 - 376 repositorios
 
