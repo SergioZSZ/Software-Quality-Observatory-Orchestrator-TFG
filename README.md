@@ -126,30 +126,38 @@ El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitM
 
 
 ### 3.6 DashVerse Service
-El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/DashVERSE_dashboard` existe una plantilla con diversos dashboards, los cuales son:
+El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/DashVERSE_dashboard` existen 2 plantillas con diversos dashboards, los cuales son:
+
+#### SQOO-org:
 1. KPIs generales:
    - Total de assessments procesados
-   - Porcentaje de repositorios que cumplen el umbral de calidad (≥66%)
+   - Total de organizaciones visualizadas
+   - Porcentaje de assessments que pasan el 50% de calidad declarado
 
 2. Análisis de resultados:
-   - Distribución de procesos Passed vs Failed
-   - Distribución de fallos por tier de indicadores (crucial, recommended, good_to_have, etc.)
-   - Histograma de calidad de los assessments
+    **NOTA** la importancia del indicador viene declarada en: https://everse.software/indicators/website/rs_tiers.htm (Relevant for Prototype Tool)
 
-3. Análisis por repositorio:
-   - Tabla de metadatos/información de los repositorios
-   - Top 10 mejores repositorios según score de calidad
-   - Top 10 peores repositorios
+    - Comparación de assessments que pasan los indicadores `Crucial` comparados con los assessments totales
+    - Comparación de assessments que pasan los indicadores `Recommended` comparados con los assessments totales
+    - Comparación de assessments que pasan los indicadores `Good to have` comparados con los assessments totales
+    - Top 10 mejores repositorios según score de calidad
 
-4. Análisis de fallos:
-   - Tabla de assessments con tests fallidos (incluyendo indicador y repositorio)
-   - Top 5 indicadores que más fallan
-   - Top 5 procesos que más fallan
 
-Con la plantilla dada en `/DashVERSE_dashboard` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
+3. Análisis de fallos:
+   - Top 5 indicadores que más fallan de las organizaciones
+   - Top 5 procesos que más fallan de las organizaciones
+
+#### SQOO-repo:
+1. Relacionado a procesos:
+    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel total de procesos por tier
+    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel de indicador 
+    - Tabla con metadatos de los assessments procesados
+    - Tabla con los procesos fallidos del assessment
+
+Con las plantillas dada en `/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
 
 Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
- *in progress_ filtros de orgs para dashboard, cross-filtering...*
+ *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
 
 
 
@@ -240,8 +248,8 @@ Herramientas usadadas en el proyecto:
 **PREVIA:** Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
    - `GITHUB_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx` siendo `xxxxxx` el token personal de github obtenido desde github
 
-   - `RABBITMQ_USER` usuario de RabbitMQ del docker compose
-   - `RABBITMQ_PASSWORD` contraseña de RabbitMQ del docker compose
+   - `RABBITMQ_USER` usuario de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
+   - `RABBITMQ_PASSWORD` contraseña de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
 
    - ``RATE_LIMIT_SOCA_ENABLED`` y `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI(con workers de soca no hace falta debido a que realiza 1 petición/repo, de rsfc si ya que realiza 7 aprox)
 
@@ -255,10 +263,12 @@ Herramientas usadadas en el proyecto:
     
     El token se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error).
 
-    El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/DashVERSE_dashboard`
+    El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/dashboard`
 
 
 ### 4.2.1 Despliegue del orquestador
+Siguiendo los pasos en orden secuencial:
+
 1. Generar imágenes  docker:
    - `soca-heavy`:
       - Directorio desde el que crearla: `/containers/soca_container` 
@@ -268,7 +278,6 @@ Herramientas usadadas en el proyecto:
       - Mandato: `docker build -t rsfc-heavy .`
 
 2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
-   - Configuración usada en desarrollo RSFC worker = 4 | SOCA worker = 10
 
 3. Acceder a n8n mediante el navegador en http://localhost:5678
 4. En el primer acceso:
@@ -287,6 +296,7 @@ Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarad
 
 
 ---
+
 
 ## 5. Evaluación del paralelismo en los workers
 ## 5.1 Hardware usado en las pruebas
