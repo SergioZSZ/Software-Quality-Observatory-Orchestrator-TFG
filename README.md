@@ -125,7 +125,7 @@ El sistema permite escalar horizontalmente el número de workers mediante docker
 El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitMQ de tamaño 1. Los workers RSFC se esperarán a obtener un token de la cola para procesar los jobs para no saturar de peticiones GitHubAPI y no sobrepasar el RateLimit.
 
 
-### 3.6 DashVerse Service
+### 3.7 DashVerse Service
 El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/DashVERSE_dashboard` existen 2 plantillas con diversos dashboards, los cuales son:
 
 #### SQOO-org:

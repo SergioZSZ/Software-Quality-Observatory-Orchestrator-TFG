@@ -1,4 +1,4 @@
-### 3.6 Flujo actual(container n8n)
+### 3.7 Flujo actual(container n8n)
 El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
 
 A diferencia de versiones anteriores, donde el flujo estaba dividido en múltiples workflows (`soca`, `rsfc`, `dashboard`), actualmente se ha **unificado en un único workflow end-to-end**, simplificando la gestión, monitorización y control del proceso.
