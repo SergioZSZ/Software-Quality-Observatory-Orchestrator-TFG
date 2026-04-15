@@ -1,5 +1,5 @@
-## 5. Evaluación del paralelismo en los workers
-## 5.1 Hardware usado en las pruebas
+## 6. Evaluación del paralelismo en los workers
+### 6.1 Hardware usado en las pruebas
 
 | Componente        | Especificación                  |
 | ----------------- | ------------------------------- |
@@ -11,17 +11,17 @@
 | Sistema Operativo | Windows 11 Pro 64 bits          |
 | DirectX           | DirectX 12                      |
 
-## 5.2 Rendimientos
+### 6.2 Rendimientos
 Se comparó el rendimiento del sistema utilizando la configuración de workers considerada óptima para el hardware disponible durante el desarrollo frente al tiempo total secuencial estimado.
 
 Este tiempo secuencial se calculó como el sumatorio de los tiempos individuales de procesamiento de cada repositorio, tanto en la fase de extracción de metadatos (SOCA) como en la fase de evaluación de calidad (RSFC). De este modo, se obtiene una aproximación del tiempo total que habría requerido la ejecución en un escenario completamente secuencial.
 
 La comparación entre ambos enfoques permite evaluar el grado de paralelización alcanzado por el sistema, así como cuantificar la mejora en términos de reducción del tiempo total de ejecución.
 
-### Organización FAIR2ADAPT
-#### datos:
+##### Organización FAIR2ADAPT
+**Datos**
 - 27 repositorios
-#### Tabla
+**Tabla**
 | Métrica                          | Tiempo   |
 |----------------------------------|----------|
 | SOCA (10 workers)                | 1m 20s   |
@@ -32,9 +32,9 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 
 
 ### Organización oeg-upm
-#### datos:
+**Datos**
 - 376 repositorios
-#### Tabla
+**Tabla**
 | Métrica                          | Tiempo     |
 |----------------------------------|------------|
 | SOCA (10 workers)                | 36m 57s    |
@@ -44,7 +44,7 @@ La comparación entre ambos enfoques permite evaluar el grado de paralelización
 | RSFC secuencial (total)          | 3h 19m 20s |
 
 
-#### Conclusiones
+### Conclusiones
 | Organización | Tiempo paralelo | Tiempo secuencial | Speedup |
 |-------------|-----------------|-------------------|---------|
 | FAIR2ADAPT  | 4m 50s          | 25m 10s           | 5.21x   |

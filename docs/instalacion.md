@@ -1,6 +1,7 @@
-### 4.2 Instalación/Despliegue
+### 5. Instalación/Despliegue
 
-**PREVIA:** Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
+#### 5.1 Previa
+ Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
    - `GITHUB_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx` siendo `xxxxxx` el token personal de github obtenido desde github
 
    - `RABBITMQ_USER` usuario de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
@@ -21,7 +22,7 @@
     El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/dashboard`
 
 
-### 4.2.1 Despliegue del orquestador
+#### 5.2 Instalación/Despliegue del orquestador
 Siguiendo los pasos en orden secuencial:
 
 1. Generar imágenes  docker:
@@ -45,7 +46,7 @@ Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarad
 
 
 
-### 4.2.2 Despliegue de DashVERSE
+### 5.3 Instalación/Despliegue de DashVERSE
 
 🚧🚧 *In_Progress (falta despliegue dashverse)* 🚧🚧
 

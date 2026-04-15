@@ -1,4 +1,4 @@
-## 6. Issues
+## 7. Issues-NextSteps
 
 NEXT STEPS:
 - Mejoras en SOCA:
