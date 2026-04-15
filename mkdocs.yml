@@ -1,0 +1,14 @@
+site_name: SQOO Documentation
+site_description: Software Quality Observatory Orquestator Software
+site_author: Sergio Zaballos Herrera
+nav:
+  - Home: Index.md
+  # - Instalacion: INSTALATION.md
+  # - Descripcion: DESCRIPCION.md
+  # - Uso: USO.md
+  # - Validaciones: VALIDACION.md
+  # - Limitaciones: LIMITACIONES.md
+  # - Changelog: CHANGELOG.md
+
+theme:
+  name: readthedocs
