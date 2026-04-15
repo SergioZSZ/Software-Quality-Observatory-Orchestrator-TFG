@@ -1,8 +1,9 @@
 ### 5. Instalación/Despliegue
 
-#### 5.1 Previa
+#### 5.1 Previa (env)
  Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
- 
+
+
    - `GITHUB_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx` siendo `xxxxxx` el token personal de github obtenido desde github
 
    - `RABBITMQ_USER` usuario de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
