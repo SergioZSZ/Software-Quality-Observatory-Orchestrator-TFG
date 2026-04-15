@@ -42,7 +42,7 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 ---
 
 
-![Diagrama de flujo del sistema](docs/simages/flujo_SQOO.png)
+![Diagrama de flujo del sistema](docs/images/flujo_SQOO.png)
 
 ---
 
