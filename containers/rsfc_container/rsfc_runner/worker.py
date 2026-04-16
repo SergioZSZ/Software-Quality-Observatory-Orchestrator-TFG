@@ -44,7 +44,7 @@ def rsfc_indicators_generation(job_id,target, repo_url,repos_count, base_dir, to
         
         while retries < MAX_RETRIES:
             # ejecutamos rsfc_runner por cada worker
-            response = rfsc_runner(base_dir, str(repo_url), token)
+            response = rfsc_runner(base_dir, target, str(repo_url), token)
             error_text = str(response.status)
             retryable = any(err in error_text for err in RETRYABLE_ERRORS)
             #si no error rompemos retries o si es error no 
@@ -56,7 +56,7 @@ def rsfc_indicators_generation(job_id,target, repo_url,repos_count, base_dir, to
                 retries += 1
                 if retries < MAX_RETRIES:
                     timestamp(f"[{job_id}] retry {retries}/{MAX_RETRIES} due to network error")
-                    time.sleep(2 ** retries * 30)
+                    time.sleep(min(2 ** retries * 5, 300))
                     continue
                 else:
                     timestamp(f"[{job_id}] max retries reached")
@@ -70,7 +70,7 @@ def rsfc_indicators_generation(job_id,target, repo_url,repos_count, base_dir, to
 
             timestamp(f"\n\n\n\n\n\n*******************************************************************************************\n{json.dumps(response.status, indent=2)}*******************************************************************************************\n\n\n\n\n\n")
             repo_name = repo_url.rstrip("/").split("/")[-1]
-            failed_repo_dir = os.path.join(BASE_DIR,"rsfc",target,repo_name)
+            failed_repo_dir = os.path.join(BASE_DIR,"outputs","rsfc",target,repo_name)
             os.makedirs(failed_repo_dir,exist_ok=True)
             
             failed_job = {"detail": response.status}

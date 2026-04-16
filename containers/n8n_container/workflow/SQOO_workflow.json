@@ -20,12 +20,12 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{ $json.target }} \\\n-e TYPE={{ $json.type }} \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{ $json.target }} \\\n-e TYPE={{ $json.type }} \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest \\\npython -m soca_runner.main \\\n{{ $json.mode === \"manual\" \n    ? \"--repos /app/outputs/\" + $json.repos + \" --name \" + $json.target \n    : \"\" \n}}"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -1392,
+        -1424,
         112
       ],
       "id": "7b490b1f-aa0e-427a-94ad-214eee0af787",
@@ -49,7 +49,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ repos_url: $json.repos_url }) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Target\"].json.target \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -169,7 +169,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        128,
+        96,
         112
       ],
       "id": "2536b6fa-79d2-4cee-82f4-28ef508fb3c4",
@@ -185,7 +185,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        1888,
+        2064,
         -128
       ],
       "id": "553108b9-d35e-4c80-800f-ac5aabac976d",
@@ -223,7 +223,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3856,
+        4080,
         -96
       ],
       "id": "4545b501-b003-4eff-bf45-964e5e5c49ad",
@@ -238,7 +238,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2288,
+        2512,
         16
       ],
       "id": "1d38579c-1ba5-4901-a1c9-4b97131c61fc",
@@ -253,7 +253,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3184,
+        3408,
         -336
       ],
       "id": "807597fa-99de-45a0-8f64-9a2faa34a325",
@@ -290,7 +290,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3376,
+        3600,
         -336
       ],
       "id": "90183086-e721-4090-ad72-dcc9376a8576",
@@ -329,7 +329,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2496,
+        2720,
         32
       ],
       "id": "5f894c8e-4122-48c3-bf45-343633c86e93",
@@ -344,7 +344,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3664,
+        3888,
         -96
       ],
       "id": "d9bc9c92-1f22-4594-9956-c7a288af89bf",
@@ -359,7 +359,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3312,
+        3536,
         -96
       ],
       "id": "96bad764-492f-421a-a86a-37a0896253d8",
@@ -374,7 +374,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3008,
+        3232,
         -336
       ],
       "id": "02cb9e3d-9331-4401-bef1-0fc1c1830afa",
@@ -387,7 +387,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1200,
+        1328,
         -128
       ],
       "id": "0ab9b08a-3212-4ac4-a95e-79e8a9ca3c21",
@@ -395,22 +395,8 @@
     },
     {
       "parameters": {
-        "fieldToSplitOut": "repos_url",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitOut",
-      "typeVersion": 1,
-      "position": [
-        1440,
-        -128
-      ],
-      "id": "19bc7851-9180-4c21-a00c-ee633d0dcc3d",
-      "name": "Split Out"
-    },
-    {
-      "parameters": {
         "mode": "raw",
-        "jsonOutput": "{\n  \"target\": \"SergioZSZ\",\n  \"type\": \"user\"\n}\n",
+        "jsonOutput": "{\n  \"target\": \"SergioZSZ\",\n  \"type\": \"user\",\n  \"mode\": \"auto\",\n  \"repos\": \"\" \n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -499,7 +485,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3088,
+        3312,
         96
       ],
       "id": "27efa629-d71b-4e7b-b169-29d83f47eb0f",
@@ -530,7 +516,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2896,
+        3120,
         208
       ],
       "id": "3b49cc9a-0312-4588-b1d8-a360fafa941c",
@@ -544,24 +530,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2720,
+        2944,
         208
       ],
       "id": "30285607-0f45-4cd6-9bbd-3a0b619ff0d2",
       "name": "Code in JavaScript1"
-    },
-    {
-      "parameters": {
-        "jsCode": "return $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      target: url.split(\"/\")[3],   // owner\n      repo_name: url.split(\"/\").pop()\n    }\n  };\n});"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1648,
-        -128
-      ],
-      "id": "774825c3-c8e3-48a3-be9a-7eeee9abc68b",
-      "name": "Code url->target-name"
     },
     {
       "parameters": {
@@ -572,7 +545,7 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        2096,
+        2320,
         -128
       ],
       "id": "6f56ea12-db0d-4107-b6e6-0c7b6fcb460b",
@@ -588,7 +561,7 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        3472,
+        3696,
         -96
       ],
       "id": "c2f374a7-c71c-4131-a9c6-7c10f6dadac8",
@@ -599,11 +572,38 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1888,
+        -1904,
         112
       ],
       "id": "2a165b89-eab2-4b1d-9396-c3b50d8aa431",
       "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "repos_url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        -128
+      ],
+      "id": "fa54ee4f-d622-42fe-9587-783ca522ff58",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const target = $(\"Target\").first().json.target;\n\nreturn $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      target,\n      repo_name: url.split(\"/\").pop(),\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        -128
+      ],
+      "id": "f63fd288-ee28-4e91-9611-fb8466e163de",
+      "name": "Code url->target-name1"
     }
   ],
   "pinData": {},
@@ -852,18 +852,7 @@
       "main": [
         [
           {
-            "node": "Split Out",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Split Out": {
-      "main": [
-        [
-          {
-            "node": "Code url->target-name",
+            "node": "Split Out1",
             "type": "main",
             "index": 0
           }
@@ -955,17 +944,6 @@
         ]
       ]
     },
-    "Code url->target-name": {
-      "main": [
-        [
-          {
-            "node": "Read/Write Files from Disk",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Extract assessments": {
       "main": [
         [
@@ -1013,6 +991,28 @@
           }
         ]
       ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Code url->target-name1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code url->target-name1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -1021,7 +1021,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "5004fbd8-f57d-4e8d-b576-4fc21bfe01df",
+  "versionId": "77a514d4-2b2a-4598-b5ab-53c2e6f347e7",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

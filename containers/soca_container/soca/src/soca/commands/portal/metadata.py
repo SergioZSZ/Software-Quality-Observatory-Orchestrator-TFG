@@ -710,6 +710,7 @@ class Metadata(object):
         
         # modificado para que no se construyan rutas relativas de localhost
         identifier = self.identifier()
+        
         if identifier:
             doi_url = identifier
 

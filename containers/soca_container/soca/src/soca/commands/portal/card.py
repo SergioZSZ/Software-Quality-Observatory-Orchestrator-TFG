@@ -77,6 +77,7 @@ def html_view(repo_metadata_dir, repo_metadata, embedded, minify=True):
     <article class="soca-card" id="{md.repo_url()}">
         <div class="card-row">
             <div class="card-col">
+            <span class="repo-owner">{md.owner()}</span>
                 <div class="flex-horizontal">
                     <a href="{md.repo_url()}" target="_blank" style="text-decoration: none;">
                         <h4 class="title">{md.title()}</h4>

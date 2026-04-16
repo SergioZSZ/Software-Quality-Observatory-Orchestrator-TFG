@@ -10,7 +10,7 @@ def main(input: dict):
     repos_count = len(repos)
     
     repo_url = repos[0]
-    target = repo_url.rstrip("/").split("/")[-2]
+    target = input.get("target")
 
     
     # truncado de indicadores obsoletos inicial
@@ -26,7 +26,7 @@ def main(input: dict):
         
         
         name = repo_url.rstrip("/").split("/")[-1]
-        target = repo_url.rstrip("/").split("/")[-2]
+        target = input.get("target")
         job_id = target + "_" + name
 
         publish_job(job_id, repo_url, target, repos_count)

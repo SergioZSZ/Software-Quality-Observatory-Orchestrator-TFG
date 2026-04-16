@@ -6,8 +6,16 @@
    - Helm (DashVERSE)
    - Kubectl (DashVERSE)
 
+Instalaciones necesarias para desplegar DashVERSE:
+   - make 
+      - Linux:   ``sudo apt install make``
+      - Windows: ``winget install -e --id GnuWin32.Make``
 
-Herramientas usadadas en el proyecto:
+   - Terraform/OpenTofu 
+      - Linux:    ``sudo snap install opentofu`` 
+      - Windows:  ``winget install --exact --id=OpenTofu.Tofu``
+
+
 
 Herramientas usadadas en el proyecto:
    - SOCA 0.0.3: 
@@ -19,6 +27,6 @@ Herramientas usadadas en el proyecto:
    - SOMEF 0.10.0:
    https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.0
 
-   - DASHVERSE 0.1.1: 
-   https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.1.1
+   - DASHVERSE 0.2.0: 
+   https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.2.0
    

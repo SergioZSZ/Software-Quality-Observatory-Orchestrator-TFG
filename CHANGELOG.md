@@ -50,9 +50,9 @@ linea 20:
    
 
 **Modificaciones DashVERSE:**
-   - Ahora la BBDD de DashVERSE actualiza los repositorios en vez de añadirlos otra vez en caso de repetición (añadidas constraints UNIQUE en tablas y ?on_conflict en n8n para postgrest)
+   - Actualizado DashVERSE a su versión 2.0
 
-   - Añadido al proyecto en `/dashboards` los dashboards a nivel de org y de usuario para visualización de métricas
+   - **Incompatibles con DashVERSE 2.0**: Añadido al proyecto en `/dashboards` los dashboards a nivel de org y de usuario para visualización de métricas (falta rehacerlos para nueva versión,)
    
 **Modificaciones n8n:**
    - Modificadas peticiones http a postgrest para que envíe en batches los assessments y checks a postgrest evitando saturación de peticiones 

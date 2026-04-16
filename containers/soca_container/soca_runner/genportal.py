@@ -11,8 +11,9 @@ def genportal():
     
     try:
         #service 
+        target = os.getenv("TARGET")
 
-        response_fetch = soca_portal(BASE_DIR, TARGET)
+        response_fetch = soca_portal(BASE_DIR, target)
         
         if response_fetch.status["status"]=="error":
             print(f"Soca Portal Error: {response_fetch.status}")

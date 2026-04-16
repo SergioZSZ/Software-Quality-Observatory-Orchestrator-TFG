@@ -45,7 +45,7 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> di
         }
 
 
-def gen_dir(base_dir, repo_url: str) -> str:
+def gen_dir(base_dir,target, repo_url: str) -> str:
     #guardamos ultima parte de la url
     repo_name = repo_url.rstrip("/").split("/")[-1]
     repo_owner = repo_url.rstrip("/").split("/")[-2]
@@ -54,23 +54,29 @@ def gen_dir(base_dir, repo_url: str) -> str:
     outputs_dir = os.path.join(base_dir,"outputs","rsfc")
     os.makedirs(outputs_dir, exist_ok=True)
 
-    personal_out = os.path.join(outputs_dir,repo_owner,repo_name)
+    personal_out = os.path.join(
+        outputs_dir,
+        target,
+        repo_name
+    )
     os.makedirs(personal_out, exist_ok=True)
     
     return personal_out
     
+
+
     
     
     
-    
-def rfsc_runner(base_dir: str, repo_url: str, token: str | None = None) -> RunResponse:
+def rfsc_runner(base_dir: str, target: str, repo_url: str, token: str | None = None) -> RunResponse:
 
     if token:
         cmd = ["rsfc","--repo",f"{repo_url}","-t",f"{token}"]
     else: 
         cmd = ["rsfc","--repo",f"{repo_url}"]
+        
 
-    personal_dir = gen_dir(base_dir,repo_url)
+    personal_dir = gen_dir(base_dir,target, repo_url)
     
     print(" (RSFC)Repo to process:", repo_url)
     result = run_command(personal_dir, cmd)
