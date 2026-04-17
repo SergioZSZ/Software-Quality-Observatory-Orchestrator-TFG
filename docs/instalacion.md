@@ -60,8 +60,8 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 3. arrancar cluster de minikube
       mandato: ``minikube start --cpus=4 --memory=4g --driver=docker``
 
-   para comprobar que  kubernetes responde usar este mandato:
-   ``kubectl get nodes`` y si funciona y se crea el nodo todo ok
+      para comprobar que  kubernetes responde usar este mandato:
+      ``kubectl get nodes`` y si funciona y se crea el nodo todo ok
 
 4. desplegar y montar el servicio con el archivo make del directorio `/DashVERSE`
       mandato: `make deploy`
@@ -98,11 +98,11 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 
 #### 5.4 Encendido y apagado del servicio DashVERSE:
 
-apagar todo:
+##### apagar todo:
 1. ``Cntrl+C`` para cerrar el port-forwarding desde el terminal abierto
 2. ``minikube stop `` apaga el cluster
 
-encenderlo:
+##### encenderlo:
 1. encendemos cluster: ``minikube start`` 
 2. lo reiniciamos ``kubectl delete pods --all -n dashverse``
 3. desde ``/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
