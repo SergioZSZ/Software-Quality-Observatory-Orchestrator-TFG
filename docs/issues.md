@@ -7,7 +7,6 @@
 - documentar manual de uso de usuario de dashverse
 
 #### Dashboards:
-- cambiar top quality assessments por un ranking (1 tabla)
 - cambiar top quality assessments por un ranking (1 tabla, pero preguntar por nuevo scores debido a scores propios de dashverse aunque no funcionan)
 - pensar más dashboards para SQO-ORG
 

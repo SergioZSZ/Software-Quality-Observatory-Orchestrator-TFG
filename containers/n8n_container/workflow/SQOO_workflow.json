@@ -390,8 +390,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1952,
-        128
+        -1856,
+        112
       ],
       "id": "c421dbb5-7f90-4fde-9d77-6b9253a97629",
       "name": "When clicking ‘Execute workflow’"
@@ -425,16 +425,31 @@
     },
     {
       "parameters": {
-        "jsCode": "return items.map(item => {\n  const assessment = item.json.assessment;\n  const repoUrl = assessment.assessedSoftware?.url || null;\n\n  let owner = null;\n\n  if (repoUrl) {\n    const match = repoUrl.match(/^https?:\\/\\/github\\.com\\/([^\\/]+)\\/([^\\/]+?)(?:\\/)?$/);\n    if (match) {\n      owner = match[1];\n    }\n  }\n\n  item.json.assessment = {\n    ...assessment,\n    \"@id\": assessment[\"@id\"] || (\n      repoUrl\n        ? `${repoUrl}/assessment/${assessment.dateCreated}`\n        : null\n    ),\n    author: owner\n    \n  };\n\n  return item;\n});\n"
+        "jsCode": "return items.map(item => {\n  const assessment = item.json.assessment;\n  const repoUrl = assessment.assessedSoftware?.url || null;\n\n  let owner = null;\n\n  if (repoUrl) {\n    const match = repoUrl.match(/^https?:\\/\\/github\\.com\\/([^\\/]+)\\/([^\\/]+?)(?:\\/)?$/);\n    if (match) {\n      owner = match[1];\n    }\n  }\n\n  item.json.assessment = {\n    ...assessment,\n    \"@id\": assessment[\"@id\"] || (\n      repoUrl\n        ? `${repoUrl}/assessment/${assessment.dateCreated}`\n        : null\n    ),\n    author: owner\n\n    \n  };\n\n  return item;\n});\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2528,
+        2480,
         -128
       ],
       "id": "7a66df7d-058b-4a55-b504-a17916310ab0",
       "name": "Code input @id + author in json-ld"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "\n  {\n    \"assessment\": {\n      \"@context\": \"https://w3id.org/everse/rsqa/0.0.1/\",\n      \"@type\": \"SoftwareQualityAssessment\",\n      \"name\": \"Quality Assessment for Software-Quality-Observatory-Orchestrator-TFG 0.9.0\",\n      \"description\": \"An automated assessment of the Software-Quality-Observatory-Orchestrator-TFG tool based on the EVERSE software quality indicators, run on 2026-04-16.\",\n      \"dateCreated\": \"2026-04-16T11:18:46Z\",\n      \"license\": {\n        \"@id\": \"https://creativecommons.org/publicdomain/zero/1.0/\"\n      },\n      \"assessedSoftware\": {\n        \"@type\": \"schema:SoftwareApplication\",\n        \"name\": \"Software-Quality-Observatory-Orchestrator-TFG\",\n        \"softwareVersion\": \"0.9.0\",\n        \"url\": \"https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG\"\n      },\n      \"checks\": [\n        {\n          \"@type\": \"CheckResult\",\n          \"test_id\": \"https://w3id.org/rsfc/test/RSFC-01-1\",\n          \"test_name\": \"There is an identifier and resolves\",\n          \"assessesIndicator\": {\n            \"@id\": \"https://w3id.org/everse/i/indicators/persistent_and_unique_identifier\"\n          },\n          \"checkingSoftware\": {\n            \"@type\": \"schema:SoftwareApplication\",\n            \"name\": \"RSFC\",\n            \"@id\": \"https://w3id.org/rsfc/\",\n            \"softwareVersion\": \"0.1.2\"\n          },\n          \"process\": \"Searches for an identifier (i.e. DOI or SWHID) in the README file of the repository\",\n          \"status\": {\n            \"@id\": \"schema:CompletedActionStatus\"\n          },\n          \"output\": \"true\",\n          \"evidence\": \"Found the identifier https://doi.org/10.5281/zenodo.18879858 in the README and it resolves\",\n          \"suggestions\": \"No suggestions\"\n        }\n      ],\n      \"@id\": \"https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/assessment/2026-04-16T11:18:46Z\",\n      \"author\": \"SergioZSZ\"\n    }\n  }\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2304,
+        -496
+      ],
+      "id": "6e34bf5d-4392-4945-a8cd-0f6b5250528e",
+      "name": "Edit Fields1"
     }
   ],
   "pinData": {},
@@ -747,6 +762,11 @@
           }
         ]
       ]
+    },
+    "Edit Fields1": {
+      "main": [
+        []
+      ]
     }
   },
   "active": false,
@@ -755,7 +775,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "e0dfea0a-06ff-434f-adb0-ea9af98b7417",
+  "versionId": "6a9fafd1-9296-4436-9697-0de2a24d8992",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
