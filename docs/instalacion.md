@@ -110,6 +110,6 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 ##### encenderlo:
 1. encendemos cluster: ``minikube start`` 
 2. lo reiniciamos ``kubectl delete pods --all -n dashverse``
-3. desde ``/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
+3. forwarding de puertos desde ``/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
 
 

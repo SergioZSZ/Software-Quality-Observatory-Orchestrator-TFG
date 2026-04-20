@@ -370,14 +370,14 @@ Todo este proceso se deberá hacer desde una terminal Unix, no powershell de win
    
 #### 5.4 Encendido y apagado del servicio DashVERSE:
 
-apagar todo:
+##### apagar todo:
 1. ``Cntrl+C`` para cerrar el port-forwarding desde el terminal abierto
 2. ``minikube stop `` apaga el cluster
 
-encenderlo:
+##### encenderlo:
 1. encendemos cluster: ``minikube start`` 
 2. lo reiniciamos ``kubectl delete pods --all -n dashverse``
-3. desde ``/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
+3. forwarding de puertos desde ``/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
 
 
 
