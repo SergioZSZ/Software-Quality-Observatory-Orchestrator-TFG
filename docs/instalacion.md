@@ -38,13 +38,13 @@ Siguiendo los pasos en orden secuencial:
 2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
 
 3. Acceder a n8n mediante el navegador en http://localhost:5678
+
 4. En el primer acceso:
     1. Crear cuenta de usuario en n8n
     2. Importar el workflow de `/containers/n8n_container/workflow/` en un nuevo
-5. Editar el nodo `Input` al principio del workflow con la organización/usuario deseado
-6. Ejecutar manualmente
 
-Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes y enviándoselos a DashVERSE.
+5. Editar el nodo `Input` al principio del workflow con la organización/usuario deseado
+6. Ejecutar manualmente el workflow desde el Manual Trigger inicial. Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes y enviándoselos a DashVERSE.
 
 
 
@@ -85,14 +85,14 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 
 9. Añadir Database a dashverse
 
-| Campo        | Valor                              |
-| ------------ | ---------------------------------- |
-| HOST         | `postgresql`                       |
-| PORT         | `5432`                             |
-| DATABASE     | `dashverse`                        |
-| USERNAME     | `dashverse`                        |
-| PASSWORD     | `contraseña bbdd obtenida antes`   |
-| DISPLAY NAME | `DashVERSE DB`                     |
+      | Campo        | Valor                              |
+      | ------------ | ---------------------------------- |
+      | HOST         | `postgresql`                       |
+      | PORT         | `5432`                             |
+      | DATABASE     | `dashverse`                        |
+      | USERNAME     | `dashverse`                        |
+      | PASSWORD     | `contraseña bbdd obtenida antes`   |
+      | DISPLAY NAME | `DashVERSE DB`                     |
 
 
 10. Se necesita un token jwt para las peticiones desde n8n. Para ello con el servicio desplegado ir a http://localhost:8000 y hacerse una cuenta EVERSE. Después hacer login y generar un token auth. Expiran tras un mes. Este token debe ponerse en los nodos que hacen peticiones http a dashVERSE del flujo n8n en el campo Authorization dentro de Headers como `Bearer TU_TOKEN`.
