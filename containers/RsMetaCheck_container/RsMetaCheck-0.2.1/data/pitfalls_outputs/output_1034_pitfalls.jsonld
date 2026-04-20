@@ -1,0 +1,45 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for caltechlibrary/template",
+  "description": "Template repository for software projects by the Caltech Library",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:40:15Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "caltechlibrary/template",
+    "softwareVersion": "v1.36.0",
+    "url": "https://github.com/caltechlibrary/template",
+    "schema:identifier": {
+      "@id": "https://doi.org/10.22002/k9hsp-m7d21"
+    }
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json uses bare DOIs in the identifier field instead of full https://doi.org/ URL",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P014",
+      "evidence": "P014 detected: Issue detected in output_1034.json",
+      "suggestion": "You should include the full DOI URL form in your metadata (e.g., https://doi.org/XX.XXXX/zenodo.XXXX)"
+    }
+  ]
+}

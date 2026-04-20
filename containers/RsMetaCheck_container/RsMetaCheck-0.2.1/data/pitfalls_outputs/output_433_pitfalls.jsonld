@@ -1,0 +1,61 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for boydorr/TraitExtraction.jl",
+  "description": "Software quality assessment for repository metadata",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:44:55Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "boydorr/TraitExtraction.jl",
+    "softwareVersion": "Unknown",
+    "url": "https://github.com/boydorr/TraitExtraction.jl"
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) License does not have the specific version",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P013",
+      "evidence": "P013 detected: Software requirements contain invalid URLs",
+      "suggestion": "You should declare the specific version of the license using a recognized SPDX identifier. For example, use 'GPL-3.0-only' or 'GPL-2.0-or-later' instead of simply 'GPL'"
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Programming languages in codemeta.json do not have versions",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W004",
+      "evidence": "W004 detected: dateModified in codemeta.json is outdated compared to actual repository last update",
+      "suggestion": "Include version numbers for each programming language used. Defining these helps ensure reproducibility and compatibility across systems."
+    }
+  ]
+}

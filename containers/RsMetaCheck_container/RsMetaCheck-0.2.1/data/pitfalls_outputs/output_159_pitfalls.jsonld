@@ -1,0 +1,80 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for parham075/TextSummerizer-NLP",
+  "description": "Text Summarization is a crucial and top Natural Language Processing task that involves generating concise and coherent summaries of longer pieces of text. It enables quick information retrieval and comprehension, making it invaluable for dealing with large volumes of textual data.",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:41:48Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "parham075/TextSummerizer-NLP",
+    "softwareVersion": "Unknown",
+    "url": "https://github.com/parham075/TextSummerizer-NLP"
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) License does not have the specific version",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P013",
+      "evidence": "P013 detected: Software requirements contain invalid URLs",
+      "suggestion": "You should declare the specific version of the license using a recognized SPDX identifier. For example, use 'GPL-3.0-only' or 'GPL-2.0-or-later' instead of simply 'GPL'"
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) Software requirements don't have version specifications",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W001",
+      "evidence": "W001 detected: Issue detected in output_159.json",
+      "suggestion": "Add version numbers to your dependencies. This provides stability for users and allows reproducibility across different environments."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Programming languages in codemeta.json do not have versions",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W004",
+      "evidence": "W004 detected: dateModified in codemeta.json is outdated compared to actual repository last update",
+      "suggestion": "Include version numbers for each programming language used. Defining these helps ensure reproducibility and compatibility across systems."
+    }
+  ]
+}

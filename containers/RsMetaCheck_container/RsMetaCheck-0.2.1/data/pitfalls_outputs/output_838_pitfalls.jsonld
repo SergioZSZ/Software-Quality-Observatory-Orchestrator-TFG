@@ -1,0 +1,80 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for megasanjay/testrepository",
+  "description": "testing with new repo name",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:50:16Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "megasanjay/testrepository",
+    "softwareVersion": "v1.3",
+    "url": "https://github.com/megasanjay/testrepository"
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json IssueTracker violates the expected URL format",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P011",
+      "evidence": "P011 detected: CITATION.cff file exists but does not contain referencePublication while codemeta.json references it",
+      "suggestion": "You need to correct the issue tracker URL so it follows a valid format, such as https://github.com/user/repo/issues. Proper links help users engage with your development process."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) codeRepository does not point to the same repository",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P016",
+      "evidence": "P016 detected: Issue detected in output_838.json",
+      "suggestion": "Make sure that the codeRepository URL in your metadata exactly matches the repository hosting your source code."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Programming languages in codemeta.json do not have versions",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W004",
+      "evidence": "W004 detected: dateModified in codemeta.json is outdated compared to actual repository last update",
+      "suggestion": "Include version numbers for each programming language used. Defining these helps ensure reproducibility and compatibility across systems."
+    }
+  ]
+}

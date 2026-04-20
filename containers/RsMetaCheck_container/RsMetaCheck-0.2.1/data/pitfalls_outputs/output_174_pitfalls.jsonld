@@ -1,0 +1,102 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for bojanakoteska/SchrodingerAPI",
+  "description": "This RESTful web service (SchrodingerAPI) provides a method for solution of one-dimensional, two-dimensional and three-dimensional time-independent Schrödinger equation based on the the Gauss-Hermite Discrete Variable Representation (DVR) approach.\n\nThe solution of one-dimensional (1D) Schrödinger equation is illustrated in the case of following model potentials:\n\nMorse potential;\nSimple Harmonic Oscillator (SHO) potential;\nSombrero potential (Mexican hat);\nWoods-Saxon potential.\nSolutions of two-dimensional (2D) and three-dimensional (3D) Schrödinger equations are illustrated for the following two model potentials: multidimensional Morse potential and multidimensional SHO potential.\n\n",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:41:56Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "bojanakoteska/SchrodingerAPI",
+    "softwareVersion": "v1.0.0",
+    "url": "https://github.com/bojanakoteska/SchrodingerAPI",
+    "schema:identifier": {
+      "@id": "https://doi.org/10.5281/zenodo.11408339"
+    }
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) has a version which does not correspond to the version used in the latest release",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P001",
+      "evidence": "P001 detected: pom.xml version '0.0.1-SNAPSHOT' does not match release version '1.0.0'",
+      "suggestion": "Ensure the version in your metadata matches the latest official release. Keeping these synchronized avoids confusion for users and improves reproducibility."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json uses bare DOIs in the identifier field instead of full https://doi.org/ URL",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P014",
+      "evidence": "P014 detected: Issue detected in output_174.json",
+      "suggestion": "You should include the full DOI URL form in your metadata (e.g., https://doi.org/XX.XXXX/zenodo.XXXX)"
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Repository has multiple licenses but in codemeta.json only has one listed",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W003",
+      "evidence": "W003 detected: Software requirements found without version specifications",
+      "suggestion": "Make sure you are using the correct licenses. This avoids confusion about terms of use and ensures full transparency."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Programming languages in codemeta.json do not have versions",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W004",
+      "evidence": "W004 detected: dateModified in codemeta.json is outdated compared to actual repository last update",
+      "suggestion": "Include version numbers for each programming language used. Defining these helps ensure reproducibility and compatibility across systems."
+    }
+  ]
+}

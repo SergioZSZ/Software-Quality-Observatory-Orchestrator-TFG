@@ -1,0 +1,2313 @@
+{
+  "repo_1": {
+    "url": "https://github.com/ComputationalGenomics/Reveal",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "245b109d77370eec2eb7c4dce0370638887aa7c6"
+  },
+  "repo_2": {
+    "url": "https://github.com/damiendevienne/phylter",
+    "warnings": {
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "4d74241169be3882da9d5f08da47bd40604764eb"
+  },
+  "repo_3": {
+    "url": "https://github.com/gavinsimpson/data.adapt.multi.test",
+    "pitfalls": {
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W007": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Identifier is empty"
+      }
+    },
+    "commit ID": "b33e222ddb9e05da62afb0bbfd88bd8a3567ac89"
+  },
+  "repo_4": {
+    "url": "https://github.com/FairRootGroup/FairMQ",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P006": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License pointing to a local file instead of stating the name. For example: “license”: LICENSE.MD"
+      }
+    },
+    "warnings": {},
+    "commit ID": "fa64faf3f755e9b00e0af738826718bf5117c8ea"
+  },
+  "repo_5": {
+    "url": "https://github.com/neuronsimulator/nrn",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "aba5057b527587f1ca9a43b772edf47346d41e5a"
+  },
+  "repo_6": {
+    "url": "https://github.com/gabrielblain/CropWaterBalance",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "6b6a27d027b3508b62aff062cb8fd66f3942951e"
+  },
+  "repo_7": {
+    "url": "https://github.com/instatdealii/idealii",
+    "pitfalls": {
+      "P008": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "softwareRequirement points to an invalid page"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "8f6d66b22dfcf276cce0eb275f46fdb2f6c5d59e"
+  },
+  "repo_8": {
+    "url": "https://github.com/sillyplots/spotifyr",
+    "pitfalls": {
+      "P010": {
+        "source_file": "LICENSE",
+        "description": "The file does not have any specific license except for copyright"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      }
+    },
+    "commit ID": "68bc0ae54ee5f727b9ff6b70483f9b4b1fddaf3e"
+  },
+  "repo_9": {
+    "url": "https://github.com/Materials-Data-Science-and-Informatics/dirschema",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "297c914fa277e2c720ae08a758707ef8ebe51ef6"
+  },
+  "repo_10": {
+    "url": "https://github.com/sanorthey/pemmss",
+    "pitfalls": {},
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      }
+    },
+    "commit ID": "65883be0f53fdfa3911cc8d3847931d1cc9f4037"
+  },
+  "repo_11": {
+    "url": "https://github.com/gemini3d/gemini3d",
+    "pitfalls": {
+      "P014": {
+        "source_file": "codemeta.json",
+        "description": "uses bare DOIs in the identifier field instead of full https://doi.org/ URL"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "ee89832c620c05101751759f3fbaf1ba9e7d7b74"
+  },
+  "repo_12": {
+    "url": "https://github.com/Sprinterzzj/ggstatsplot",
+    "pitfalls": {
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "150a4bd2bb66bd1bdbe19eadec3bb6a6f00c66b7"
+  },
+  "repo_13": {
+    "url": "https://github.com/bioconductor-source/treeio",
+    "pitfalls": {
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "df013a97e144086980317527de6fab39dc54e9fa"
+  },
+  "repo_14": {
+    "url": "https://github.com/Kaffeegangster/tclf",
+    "pitfalls": {
+      "P006": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License pointing to a local file instead of stating the name. For example: “license”: LICENSE.MD"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "d44b74f990c3e2d03d9a3ced3a89ffa619b59d63"
+  },
+  "repo_15": {
+    "url": "https://github.com/BM32ESRF/LaueNN",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "9033ffbf5c5257b0e22289bf6fb175dc678e1c84"
+  },
+  "repo_16": {
+    "url": "https://github.com/Ruitao-Terry/GA-cal",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      }
+    },
+    "commit ID": "62f5b3a8bcd3ae2e3c3e639bd6ad856d2b001d04"
+  },
+  "repo_17": {
+    "url": "https://github.com/LanguageMachines/ucto",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      }
+    },
+    "commit ID": "a57692225c4693a4229f7cd74f39465aaa96b4a7"
+  },
+  "repo_18": {
+    "url": "https://github.com/eebrown/workloopR",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "51ca63341023a996fecaa6057109aa8c16029b51"
+  },
+  "repo_19": {
+    "url": "https://gricad-gitlab.univ-grenoble-alpes.fr/bidegarb/nautil/",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "5d60f004a965a016cf40cca42cc696e33296969a"
+  },
+  "repo_20": {
+    "url": "https://github.com/lecfab/rescience-gorder",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W005": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "softwareRequirements have more than one req, but it’s written as one string"
+      }
+    },
+    "commit ID": "305d28dc1584b152ff981ee81be0de12598b402e"
+  },
+  "repo_21": {
+    "url": "https://github.com/arthurcuri/flixfinder-tis1",
+    "pitfalls": {},
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      }
+    },
+    "commit ID": "8771f700fd168e2e6c16a4f85b6631ca6b9c569f"
+  },
+  "repo_22": {
+    "url": "https://github.com/ComputationalBiomechanicsLab/opensim-creator",
+    "pitfalls": {
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "824222911d158f0ffc6929605f8a925ff08fcf64"
+  },
+  "repo_23": {
+    "url": "https://github.com/nazar-mykolyshyn/TikTok-Api",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "3973da62a683b34548d07acb48e334ac5b4cfe6d"
+  },
+  "repo_24": {
+    "url": "https://github.com/iljah/hdintegrator",
+    "pitfalls": {},
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      }
+    },
+    "commit ID": "f2ab7fb246ef88a79789e492d1f40d3a07b602d9"
+  },
+  "repo_25": {
+    "url": "https://github.com/peterpolidoro/kicad_netlist_reader",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "1b2108e0a8da04acdb595c724f3272a73f1ab755"
+  },
+  "repo_26": {
+    "url": "https://github.com/ropensci/geojson",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P010": {
+        "source_file": "LICENSE",
+        "description": "The file does not have any specific license except for copyright"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "3881c7df07e924b3afce2270b78e316e5e47e79d"
+  },
+  "repo_27": {
+    "url": "https://github.com/Neplex/ArchiTXT",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "e82e532453dff78fe5ea2475774be167521c0fca"
+  },
+  "repo_28": {
+    "url": "https://github.com/NeuralEnsemble/PyNN",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P012": {
+        "source_file": "codemeta.json",
+        "description": "downloadURL is outdated"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W005": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "softwareRequirements have more than one req, but it’s written as one string"
+      }
+    },
+    "commit ID": "5a53a5144e5c8c739a0ad65435cea23579574a19"
+  },
+  "repo_29": {
+    "url": "https://github.com/Rbfinch/grepq",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      }
+    },
+    "commit ID": "3251219d23b1242a562a593f4e9f2f98ce797fad"
+  },
+  "repo_30": {
+    "url": "https://github.com/ms609/TreeSearch",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      }
+    },
+    "commit ID": "d4af0fba212c8490e2c0250d3872f4b9e0d630c2"
+  },
+  "repo_31": {
+    "url": "https://github.com/inbo/archivaltag",
+    "pitfalls": {
+      "P003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "There are more than two authors but only one field for them (\"author\": \"Thomas Boch and Matthieu Baumann\") instead of a list"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "ad337685076bb7eae906bee4dae6067812564284"
+  },
+  "repo_32": {
+    "url": "https://github.com/ms609/Quartet",
+    "pitfalls": {
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      }
+    },
+    "commit ID": "8b81f549be20f251f71f2be402c5ff6d90dada3f"
+  },
+  "repo_33": {
+    "url": "https://github.com/tvwenger/bayes_spec",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W007": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Identifier is empty"
+      }
+    },
+    "commit ID": "2dc53e3fc9302b8a40fcaec6384ee152c700590a"
+  },
+  "repo_34": {
+    "url": "https://github.com/caseyyoungflesh/MCMCvis",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      }
+    },
+    "commit ID": "3c7b05282dbe3b509f2a101e0ac5fd397c283cfa"
+  },
+  "repo_35": {
+    "url": "https://github.com/sep-developers/sep",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      }
+    },
+    "commit ID": "93b3ac52e0f6cb26449204dc8bc8c3cf65602f0f"
+  },
+  "repo_36": {
+    "url": "https://github.com/ropensci/tradestatistics",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P009": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "coderepository points to their homepage"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "4c0b85989f0085f4eb4c16eaefab6214b7854b6b"
+  },
+  "repo_37": {
+    "url": "https://github.com/bioc/BioCor",
+    "pitfalls": {
+      "P010": {
+        "source_file": "LICENSE",
+        "description": "The file does not have any specific license except for copyright"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "e26910ce2bb0f6e1b4edcde1b0fa925d78c837a0"
+  },
+  "repo_38": {
+    "url": "https://github.com/ropensci-archive/tidytags",
+    "pitfalls": {
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "65c40bcb0e6721b55be676c42b524e33ea59885e"
+  },
+  "repo_39": {
+    "url": "https://github.com/giscience-fsu/sperrorest",
+    "pitfalls": {
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "b4d2a1426bfcbb2f5630c6182ff946b926f96e4a"
+  },
+  "repo_40": {
+    "url": "https://github.com/IBM/multi-variate-parallel-transformer",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "9f5357bb55d53c66e9cfc63ef39fddb05c1c1ad7"
+  },
+  "repo_41": {
+    "url": "https://github.com/mia-jinns/jinns",
+    "pitfalls": {
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "dbd98a4fe05f04b8f96d1bf23ea977a3938c8d66"
+  },
+  "repo_42": {
+    "url": "https://github.com/PRIDE-Archive/pridepy",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "b046bd00569ae3930b51581d559cc5c5afde866a"
+  },
+  "repo_43": {
+    "url": "https://github.com/fair-test/license-already-here",
+    "pitfalls": {
+      "P010": {
+        "source_file": "LICENSE",
+        "description": "The file does not have any specific license except for copyright"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "4ca932834fe48821f39300c8de3bf92a4ffd366b"
+  },
+  "repo_44": {
+    "url": "https://github.com/SedFoam/sedfoam",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "08a5552af912fa8c89a265329484618ae7919be9"
+  },
+  "repo_45": {
+    "url": "https://github.com/assume-framework/assume",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      }
+    },
+    "commit ID": "aaa904c603ef267aaab6872d67cd87affcb17688"
+  },
+  "repo_46": {
+    "url": "https://github.com/felixsc1/COSplay",
+    "pitfalls": {
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W007": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Identifier is empty"
+      }
+    },
+    "commit ID": "9a10c3f55b1f80c916d55acb3110402cdfda6fa5"
+  },
+  "repo_47": {
+    "url": "https://github.com/megasanjay/testrepository",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P011": {
+        "source_file": "codemeta.json",
+        "description": "IssueTracker violates the expected URL format"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "b589e13fb3a725d82d6d0f9a8c68de51b765e546"
+  },
+  "repo_48": {
+    "url": "https://github.com/GlobalEcologyLab/poems",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "129b021c42b726a9cb3e8b2b0786a1bc9513f4d9"
+  },
+  "repo_49": {
+    "url": "https://github.com/EDIorg/ecocomDP",
+    "pitfalls": {},
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "531bbefc6a584cfde708c8112ac08b9c63b810bc"
+  },
+  "repo_50": {
+    "url": "https://github.com/fhdsl/conrad",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "f7bda1bcc042e61b96ff84c860f3bb0ff5d690b1"
+  },
+  "repo_51": {
+    "url": "https://github.com/MiguelRodo/Slides24STA5069Z",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "44fa1574b3dd34eee6eda27fb8428e44c4a9dd51"
+  },
+  "repo_52": {
+    "url": "https://github.com/FairRootGroup/DDS",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      }
+    },
+    "warnings": {},
+    "commit ID": "39e33651d1fe319411d7c50ff44b5ede31d75f9d"
+  },
+  "repo_53": {
+    "url": "https://github.com/amd/mumps-build",
+    "pitfalls": {
+      "P014": {
+        "source_file": "codemeta.json",
+        "description": "uses bare DOIs in the identifier field instead of full https://doi.org/ URL"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "a9af8ebc5a24c075f62464daf03b30ce6ab1945b"
+  },
+  "repo_54": {
+    "url": "https://github.com/MolSSI/QCEngine",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "cdda3660afee241968907c3020ee368ef8230b99"
+  },
+  "repo_55": {
+    "url": "https://github.com/Simple-Robotics/proxsuite",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "00a6eff9dcb21f31b8990d232d46fba5d6b18cbf"
+  },
+  "repo_56": {
+    "url": "https://github.com/ropensci/occCite",
+    "pitfalls": {
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "b1af9efcf9a6b892591297c08bc2f0e1c00b573a"
+  },
+  "repo_57": {
+    "url": "https://github.com/sscu-budapest/lead-contamination-hungary",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "17db2298e25bb439873e3746ddab6aad05b9014f"
+  },
+  "repo_58": {
+    "url": "https://github.com/Mariizero/ECGRat",
+    "pitfalls": {
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "eaeb1758e791926d267c69807ad5b3dab75c98a9"
+  },
+  "repo_59": {
+    "url": "https://github.com/khinsen/MMTK",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "84547c238580201fe21bf3f227be7c02a1a2b9bc"
+  },
+  "repo_60": {
+    "url": "https://github.com/electronicvisions/releases-ebrains",
+    "pitfalls": {
+      "P014": {
+        "source_file": "codemeta.json",
+        "description": "uses bare DOIs in the identifier field instead of full https://doi.org/ URL"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W005": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "softwareRequirements have more than one req, but it’s written as one string"
+      }
+    },
+    "commit ID": "fcd2149561ab1796fba4d2500facdd3e532a6b86"
+  },
+  "repo_61": {
+    "url": "https://github.com/LanguageMachines/foliautils",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "bdcfd01531c0b147bfc2cb08f9e8e351db6100fb"
+  },
+  "repo_62": {
+    "url": "https://github.com/yt-project/unyt",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W007": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Identifier is empty"
+      }
+    },
+    "commit ID": "969fc6a629d332568832b849c6cb058d405ad442"
+  },
+  "repo_63": {
+    "url": "https://github.com/cristal-smac/ipd",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "40c86c7f7ad51599ed402ab03bbfad398d4cce61"
+  },
+  "repo_64": {
+    "url": "https://github.com/grycap/im-client",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "2e9f20e0a1326a63998b2c181042f5315515b98d"
+  },
+  "repo_65": {
+    "url": "https://github.com/ashbythorpe/selenider",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "0f802fea4d6429786335a9f31ca53b0e941a80de"
+  },
+  "repo_66": {
+    "url": "https://github.com/HumanBrainProject/kg-core-sdks",
+    "pitfalls": {
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "83b3091785a7e007408e463122cd64cd40049bad"
+  },
+  "repo_67": {
+    "url": "https://github.com/ajpelu/likelihoodTools",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "e0d8fdb5b69d27a641ffc4731e8c2e5b6a21b67c"
+  },
+  "repo_68": {
+    "url": "https://github.com/KonradHoeffner/rickview",
+    "pitfalls": {
+      "P014": {
+        "source_file": "codemeta.json",
+        "description": "uses bare DOIs in the identifier field instead of full https://doi.org/ URL"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "934e834915544005e0a0106d45d222d4e745f129"
+  },
+  "repo_69": {
+    "url": "https://github.com/dankelley/oce",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "40904f6d5b9b1fd3d2d0631da59759283285a93f"
+  },
+  "repo_70": {
+    "url": "https://github.com/jonas-ellert/linear-time-runs",
+    "pitfalls": {},
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "065dfae01cccc8fa7fa8b116cfa91f272c0b22ba"
+  },
+  "repo_71": {
+    "url": "https://github.com/Miagarciaru/atlas-outreach-data-tools-for-lumi36",
+    "pitfalls": {
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "fc28e29316a373b917db9e88c778fb52697476cc"
+  },
+  "repo_72": {
+    "url": "https://github.com/peterpolidoro/kicad_bom",
+    "pitfalls": {
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "9868eeec378a9a3723c963c66a4a5e77023903aa"
+  },
+  "repo_73": {
+    "url": "https://github.com/FIPE18-007-VERMEULEN/csdvp-evolutionary-algorithm-optimization",
+    "pitfalls": {
+      "P011": {
+        "source_file": "codemeta.json",
+        "description": "IssueTracker violates the expected URL format"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "19cc44fd5204dcc32fdff9e1a2213e5aa74db5b2"
+  },
+  "repo_74": {
+    "url": "https://github.com/Nowosad/rcartocolor",
+    "pitfalls": {
+      "P010": {
+        "source_file": "LICENSE",
+        "description": "The file does not have any specific license except for copyright"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "39298c7dd95fc9d661ec88fd8fe38f1eaefe0322"
+  },
+  "repo_75": {
+    "url": "https://github.com/DanielSc4/inseq",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "5a217b0410ba73d0e6b2df712d04569497a3be97"
+  },
+  "repo_76": {
+    "url": "https://github.com/aravind-j/EvaluateCore",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "There are more than two authors but only one field for them (\"author\": \"Thomas Boch and Matthieu Baumann\") instead of a list"
+      },
+      "P009": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "coderepository points to their homepage"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W008": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "GivenName in author field, has more than one name"
+      }
+    },
+    "commit ID": "83f380c102022ddfd0fb275c821b9f16e2ec4cd4"
+  },
+  "repo_77": {
+    "url": "https://github.com/matthiasprobst/pivmetalib",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "a8d2fafb200cb3663f77c21bf768b94c87a2618c"
+  },
+  "repo_78": {
+    "url": "https://github.com/craddm/eegUtils",
+    "pitfalls": {
+      "P010": {
+        "source_file": "LICENSE",
+        "description": "The file does not have any specific license except for copyright"
+      },
+      "P015": {
+        "source_file": "codemeta.json",
+        "description": "contIntegration link returns 404"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "2b2dbe123b1fabaac414aa0f62b8259194d40e5f"
+  },
+  "repo_79": {
+    "url": "https://github.com/arviz-devs/preliz",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {},
+    "commit ID": "2fbd0c585d81faadbc5b9818c151323a89d890b4"
+  },
+  "repo_80": {
+    "url": "https://github.com/JSadowska/testLille",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "a944981f43c1bd37710b8a41442754bdc95e339b"
+  },
+  "repo_81": {
+    "url": "https://github.com/riatelab/tanaka",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "fd2efc3d9b417612c81c318f0223a40f5f4e6518"
+  },
+  "repo_82": {
+    "url": "https://github.com/underworldcode/underworld2",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P006": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License pointing to a local file instead of stating the name. For example: “license”: LICENSE.MD"
+      },
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      }
+    },
+    "commit ID": "a017a16c73c7c8bbb2869ceb05080c5c5098ac8e"
+  },
+  "repo_83": {
+    "url": "https://github.com/caltechlibrary/admin-shell-scripts",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "ba5753c86812f4230e2c68dcecaf825c22aeefd4"
+  },
+  "repo_84": {
+    "url": "https://github.com/jvegreg/ESMValCore",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P009": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "coderepository points to their homepage"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "03eb1c942bf1dc3be98cb30c3592b42e82a94f16"
+  },
+  "repo_85": {
+    "url": "https://github.com/sthanhe/ParticleDispersion",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      }
+    },
+    "commit ID": "9eafc76b75a52846b9bf78aa8a2fd0c24c5f2b9d"
+  },
+  "repo_86": {
+    "url": "https://github.com/Neplex/COveR",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P013": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "License does not have the specific version"
+      }
+    },
+    "warnings": {
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "35423ec7f840c68070b73a9910350c1ac93e4a53"
+  },
+  "repo_87": {
+    "url": "https://github.com/AI5GW/Goertzel",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      }
+    },
+    "commit ID": "2eb355240d0a66147309c783c91877af350414a9"
+  },
+  "repo_88": {
+    "url": "https://github.com/mdstephenserdc/network_representativeness",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      }
+    },
+    "commit ID": "a0f9fc12d1bf44811423b1fc212c0b6d398b677c"
+  },
+  "repo_89": {
+    "url": "https://github.com/matthiasprobst/h5RDMtoolbox",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "eaf66f66d23fcc6b7b1728f2fe7ac6d65c9d9d85"
+  },
+  "repo_90": {
+    "url": "https://github.com/m-team-kit/cookiecutter-web",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "728cf1ae38ce76aaaa31fd52bb46006144a2e5fa"
+  },
+  "repo_91": {
+    "url": "https://github.com/ParaStation/psmpi",
+    "pitfalls": {
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "375f8ee387a70bb5e80b774c0ec8472f2ca7d840"
+  },
+  "repo_92": {
+    "url": "https://github.com/LanguageMachines/frog",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W003": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Inconsistent use of licenses in metadata files"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      }
+    },
+    "commit ID": "53da3bfd9958af5e7221348607f6db358edef486"
+  },
+  "repo_93": {
+    "url": "https://github.com/LDEO-CREW/Pythonic-DISORT",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "eb92fb81d422e76c1501d196bf14db6756430d03"
+  },
+  "repo_94": {
+    "url": "https://github.com/barbagroup/PetIBM",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      }
+    },
+    "warnings": {
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W007": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Identifier is empty"
+      }
+    },
+    "commit ID": "be91f218702ada7fe569fe77c258fa748f075713"
+  },
+  "repo_95": {
+    "url": "https://github.com/DrMattG/SDGsR",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P009": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "coderepository points to their homepage"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "commit ID": "fa1898e88b9a31a05c2b722f36d6993595536a12"
+  },
+  "repo_96": {
+    "url": "https://github.com/tesselle/kairos",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P009": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "coderepository points to their homepage"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "113e0be3cc9beb2895f0ff5ac95063aad219b536"
+  },
+  "repo_97": {
+    "url": "https://github.com/SeUniVr/PLC-RE",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "a12a44cbc077dbd4c20b5f4764f9d53da5647b86"
+  },
+  "repo_98": {
+    "url": "https://github.com/andrew-saydjari/mfouesneau.github.com",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "17fbd909db0122eeca39d0c313b11742e7fd8164"
+  },
+  "repo_99": {
+    "url": "https://github.com/fran2410/AI-Open-Science",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "592afb0b0f8a64cb57b66ed4f79d2bca9f448fbc"
+  },
+  "repo_100": {
+    "url": "https://github.com/umr-amap/StormR",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      },
+      "P018": {
+        "source_file": "codemeta.json",
+        "description": "Identifier uses raw SWHIDs  without their resolvable URL"
+      }
+    },
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      }
+    },
+    "commit ID": "0f179f94caac8ee075473472cb0474f54e745947"
+  },
+  "repo_101": {
+    "url": "https://github.com/viznuv/transforEmotion",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "commit ID": "f40dbf651f4361c2cd2dca4092e6e90b9bf4a073"
+  },
+  "repo_102": {
+    "url": "https://github.com/rOpenGov/r311",
+    "pitfalls": {
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "commit ID": "1273245299f477b47754319cf0e22b8cdf4995a8"
+  },
+  "repo_103": {
+    "url": "https://github.com/R3BRootGroup/sofia",
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      },
+      "W002": {
+        "source_file": "codemeta.json",
+        "description": "dateModified is outdated"
+      },
+      "W004": {
+        "source_file": "codemeta.json",
+        "description": "programmingLanguages do not have versions"
+      },
+      "W005": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "softwareRequirements have more than one req, but it’s written as one string"
+      }
+    },
+    "commit ID": "ce7e8f0296333ca952d5f5554c068cc44a500380"
+  },
+  "repo_104": {
+    "url": "https://github.com/sorokinvld/LLFn",
+    "pitfalls": {},
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "a8ec8da19a3cc5d8207d362add83181bffa18c4e"
+  },
+  "repo_105": {
+    "url": "https://github.com/DeepRank/Deeprank-GNN",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      }
+    },
+    "warnings": {},
+    "commit ID": "544ee2b98a1d784047c25f4014f09a1effcdbcec"
+  },
+  "repo_106": {
+    "url": "https://github.com/r-spatialecology/landscapemetrics",
+    "pitfalls": {
+      "P001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "Version does not correspond to the version used in the latest release"
+      },
+      "P009": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "coderepository points to their homepage"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      }
+    },
+    "commit ID": "9e777a5c5ec568ebca8f5ddec7bed1c2d465a357"
+  },
+  "repo_107": {
+    "url": "https://github.com/aloftdata/getRad",
+    "pitfalls": {
+      "P017": {
+        "source_file": "codemeta.json",
+        "description": "version does not match the package’s"
+      }
+    },
+    "warnings": {
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "f4bc21602adecdae6dfd123e8d439933de426f7b"
+  },
+  "repo_110": {
+    "url": "https://github.com/R-Lum/Luminescence",
+    "pitfalls": {
+      "P002": {
+        "source_file": "LICENSE",
+        "description": "Copyright section taken as template without modification"
+      },
+      "P016": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "codeRepository does not point to the same repository"
+      }
+    },
+    "warnings": {
+      "W006": {
+        "source_file": "codemeta.json",
+        "description": "Identifier is a name instead of a valid unique identifier, but an identifier exist (e.g., in a badge)"
+      },
+      "W009": {
+        "source_file": "codemeta.json",
+        "description": "developmentStatus is a URL instead of a string"
+      }
+    },
+    "commit ID": "3aca65758cd130df06afb274c6a419033ecdadd0"
+  },
+  "repo_111": {
+    "url": "https://github.com/naaci/watermarking",
+    "warnings": {
+      "W001": {
+        "source_file": "Metadata files (codemeta.json, setup.py, pom.xml etc...)",
+        "description": "SoftwareRequirements don’t have versions"
+      }
+    },
+    "commit ID": "48211f102defdb16d0cd3cf6fc281518a4a96442"
+  }
+}

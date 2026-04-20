@@ -1,0 +1,64 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for geospace-code/h5fortran",
+  "description": "Lightweight HDF5 polymorphic Fortran: h5write() h5read()",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:48:50Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "geospace-code/h5fortran",
+    "softwareVersion": "v4.11.0",
+    "url": "https://github.com/geospace-code/h5fortran",
+    "schema:identifier": {
+      "@id": "https://doi.org/10.5281/zenodo.3757269"
+    }
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json uses bare DOIs in the identifier field instead of full https://doi.org/ URL",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P014",
+      "evidence": "P014 detected: Issue detected in output_725.json",
+      "suggestion": "You should include the full DOI URL form in your metadata (e.g., https://doi.org/XX.XXXX/zenodo.XXXX)"
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Programming languages in codemeta.json do not have versions",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W004",
+      "evidence": "W004 detected: dateModified in codemeta.json is outdated compared to actual repository last update",
+      "suggestion": "Include version numbers for each programming language used. Defining these helps ensure reproducibility and compatibility across systems."
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for DanChaltiel/nih.joinpoint",
+  "description": "Functions to easily use National Institute of Health (NIH)'s 'Joinpoint Regression Software'. \n  You **must** download and install the software beforehand at <https://surveillance.cancer.gov/joinpoint/callable/>. \n  NIH's approval will be needed to download the executable.",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:48:31Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "DanChaltiel/nih.joinpoint",
+    "softwareVersion": "Unknown",
+    "url": "https://github.com/DanChaltiel/nih.joinpoint"
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/license"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json version does not match the package's",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P017",
+      "evidence": "P017 detected: LICENSE file only contains copyright information without actual license terms",
+      "suggestion": "You need to synchronize all version references across metadata and build configuration files."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Repository has multiple licenses but in codemeta.json only has one listed",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W003",
+      "evidence": "W003 detected: Software requirements found without version specifications",
+      "suggestion": "Make sure you are using the correct licenses. This avoids confusion about terms of use and ensures full transparency."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Programming languages in codemeta.json do not have versions",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W004",
+      "evidence": "W004 detected: dateModified in codemeta.json is outdated compared to actual repository last update",
+      "suggestion": "Include version numbers for each programming language used. Defining these helps ensure reproducibility and compatibility across systems."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json developmentStatus is a URL instead of a string",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W009",
+      "evidence": "W009 detected: Issue detected in output_699.json",
+      "suggestion": "You need to replace URLs in the developmentStatus field with descriptive text values, such as 'active', 'beta', or 'stable'. This maintains schema compliance and clarity."
+    }
+  ]
+}

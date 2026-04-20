@@ -1,0 +1,99 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for LivingNorway/LivingNorwayR",
+  "description": "This repository contains R functions for the Living Norway project. The LivingNorwayR package aims to simplify the sharing of  ecological data making use of the DarwinCore Standards. All the functions and vignettes can be found at the website below. The package is in development and therefore you should expect rapid changes.",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:41:05Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "LivingNorway/LivingNorwayR",
+    "softwareVersion": "v1.0.0",
+    "url": "https://github.com/LivingNorway/LivingNorwayR"
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) has a version which does not correspond to the version used in the latest release",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P001",
+      "evidence": "P001 detected: DESCRIPTION version '0.1.0.0' does not match release version '1.0.0'",
+      "suggestion": "Ensure the version in your metadata matches the latest official release. Keeping these synchronized avoids confusion for users and improves reproducibility."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Repository has multiple licenses but in codemeta.json only has one listed",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W003",
+      "evidence": "W003 detected: Software requirements found without version specifications",
+      "suggestion": "Make sure you are using the correct licenses. This avoids confusion about terms of use and ensures full transparency."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Programming languages in codemeta.json do not have versions",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W004",
+      "evidence": "W004 detected: dateModified in codemeta.json is outdated compared to actual repository last update",
+      "suggestion": "Include version numbers for each programming language used. Defining these helps ensure reproducibility and compatibility across systems."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json Identifier is a name instead of a valid unique identifier, but an identifier exist",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W006",
+      "evidence": "W006 detected: Issue detected in output_1112.json",
+      "suggestion": "You should replace plain name in your identifier field with persistent identifiers, such as DOIs or SWHIDs, to improve discoverability and interoperability."
+    }
+  ]
+}

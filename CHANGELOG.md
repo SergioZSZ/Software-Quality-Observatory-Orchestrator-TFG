@@ -52,7 +52,9 @@ linea 20:
 **Modificaciones DashVERSE:**
    - Actualizado DashVERSE a su versión 2.0
 
-   - **Incompatibles con DashVERSE 2.0**: Añadido al proyecto en `/dashboards` los dashboards a nivel de org y de usuario para visualización de métricas (falta rehacerlos para nueva versión,)
-   
+
 **Modificaciones n8n:**
-   - Modificadas peticiones http a postgrest para que envíe en batches los assessments y checks a postgrest evitando saturación de peticiones 
+   - Actualizado workflow:
+      1. Modificado workflow para compatibilidad con 2 modos de ejecución del orquestador:
+         - `auto`:   Obtención de indicadores y metadatos de una organización o usuario de GitHub concreto
+         - `manual`: Obtención de indicadores y metadatos de repositorios específicos de GitHub a partir de un documento `repos.txt` propio ubicado en `/containers/outputs`

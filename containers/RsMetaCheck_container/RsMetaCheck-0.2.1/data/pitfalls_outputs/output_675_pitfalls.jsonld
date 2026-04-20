@@ -1,0 +1,194 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for ropensci/opentripplanner",
+  "description": "An R package to set up and use OpenTripPlanner (OTP) as a local or remote multimodal trip planner.",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:48:14Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "ropensci/opentripplanner",
+    "softwareVersion": "v0.5.1",
+    "url": "https://github.com/ropensci/opentripplanner"
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) has a version which does not correspond to the version used in the latest release",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P001",
+      "evidence": "P001 detected: DESCRIPTION version '0.5.2' does not match release version '0.5.1'",
+      "suggestion": "Ensure the version in your metadata matches the latest official release. Keeping these synchronized avoids confusion for users and improves reproducibility."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/license"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "LICENSE file contains template placeholders like <program>, <year>, <name of author> that were not replaced",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P002",
+      "evidence": "P002 detected:  License file contains unreplaced template placeholders",
+      "suggestion": "Update the copyright section with accurate names, organizations, and the current year. Personalizing this section ensures clarity and legal accuracy."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "In codemeta.json contIntegration link returns 404",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P015",
+      "evidence": "P015 detected: Issue detected in output_675.json",
+      "suggestion": "You need to update the outdated URLs to point to the current CI platform, or remove the property if no active CI is in place. A good pratcie would be to periodically test all external links, especially those related to CI or build status."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/license"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json version does not match the package's",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P017",
+      "evidence": "P017 detected: LICENSE file only contains copyright information without actual license terms",
+      "suggestion": "You need to synchronize all version references across metadata and build configuration files."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) Software requirements don't have version specifications",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W001",
+      "evidence": "W001 detected: Issue detected in output_675.json",
+      "suggestion": "Add version numbers to your dependencies. This provides stability for users and allows reproducibility across different environments."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Repository has multiple licenses but in codemeta.json only has one listed",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W003",
+      "evidence": "W003 detected: Software requirements found without version specifications",
+      "suggestion": "Make sure you are using the correct licenses. This avoids confusion about terms of use and ensures full transparency."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "Programming languages in codemeta.json do not have versions",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W004",
+      "evidence": "W004 detected: dateModified in codemeta.json is outdated compared to actual repository last update",
+      "suggestion": "Include version numbers for each programming language used. Defining these helps ensure reproducibility and compatibility across systems."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json Identifier is a name instead of a valid unique identifier, but an identifier exist",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W006",
+      "evidence": "W006 detected: Issue detected in output_675.json",
+      "suggestion": "You should replace plain name in your identifier field with persistent identifiers, such as DOIs or SWHIDs, to improve discoverability and interoperability."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json developmentStatus is a URL instead of a string",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W009",
+      "evidence": "W009 detected: Issue detected in output_675.json",
+      "suggestion": "You need to replace URLs in the developmentStatus field with descriptive text values, such as 'active', 'beta', or 'stable'. This maintains schema compliance and clarity."
+    }
+  ]
+}

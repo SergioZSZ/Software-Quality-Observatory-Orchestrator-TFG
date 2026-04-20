@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RsMetaCheck Catalog</title>
+
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2em;
+      background: #f9f9f9;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    .intro {
+      text-align: center;
+      margin-bottom: 2em;
+      color: #555;
+      font-size: 1.3em;
+      line-height: 1.2;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .table-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #myTable {
+      width: 100%;
+    }
+    .dataTables_wrapper {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>RsMetaCheck Catalog</h1>
+
+<div class="intro">
+  <p>
+    This is a catalog of the pitfalls and warnings we have come across during our research on software metadata quality.
+    Based on these findings, we at <a href="https://oeg.fi.upm.es/" target="_blank">Ontology Engineering Group (OEG)</a>
+    have developed our tool <strong>RsMetaCheck</strong> to automatically diagnose and identify these common issues in software metadata files.
+    Warnings do not have a severity level because originally they were opted due to their low severity and classified as "Warnings" instead of "Pitfalls"
+  </p>
+</div>
+
+  <!-- TABLE -->
+  <div class="table-container">
+    <table id="myTable" class="display">
+    <thead>
+      <tr>
+        <th>Identifier</th>
+        <th>Source</th>
+        <th>Pitfall</th>
+        <th>Description</th>
+        <th>Suggestion</th>
+        <th>Examples</th>
+        <th>Importance</th>
+      </tr>
+    </thead>
+    <tbody>
+
+     </tbody>
+   </table>
+  </div>
+
+  <script>
+    function loadTableData() {
+        const timestamp = new Date().getTime();
+        fetch(`catalog.md?v=${timestamp}`)
+          .then(response => response.text())
+          .then(markdown => {
+            const lines = markdown.trim().split('\n');
+            const tableBody = $('#myTable tbody');
+
+            for (let i = 2; i < lines.length; i++) {
+              const line = lines[i].trim();
+              if (line.startsWith('|') && line.endsWith('|')) {
+                const cells = line.split('|').slice(1, -1).map(cell => cell.trim());
+                if (cells.length >= 7) {
+                  const [identifier, source, pitfall, description, suggestion, examples, importance] = cells;
+
+                  let exampleCell = examples;
+                  if (examples.startsWith('http')) {
+                    exampleCell = `<a href="${examples}" target="_blank">${examples}</a>`;
+                  }
+
+                  const row = `<tr id="${identifier}">
+                    <td>${identifier}</td>
+                    <td>${source}</td>
+                    <td>${pitfall}</td>
+                    <td>${description}</td>
+                    <td>${suggestion}</td>
+                    <td>${exampleCell}</td>
+                    <td>${importance}</td>
+                  </tr>`;
+                  tableBody.append(row);
+                }
+              }
+            }
+
+            const table = $('#myTable').DataTable({
+              pageLength: 25,
+              order: [[0, 'asc']],
+              initComplete: function(settings, json) {
+                if (window.location.hash) {
+                  const targetId = window.location.hash;
+                  const api = this.api();
+                  
+                  const rowIndex = api.row(targetId).index();
+                  
+                  if (rowIndex !== undefined) {
+                    const pageInfo = api.page.info();
+                    const targetPage = Math.floor(rowIndex / pageInfo.length);
+                    api.page(targetPage).draw(false);
+                    
+                    setTimeout(() => {
+                      $('html, body').animate({
+                        scrollTop: $(targetId).offset().top - 20
+                      }, 500);
+                      
+                      $(targetId).css('background-color', '#ffff99');
+                      setTimeout(() => $(targetId).css('background-color', ''), 2000);
+                    }, 100);
+                  }
+                }
+              }
+            });
+          })
+          .catch(error => console.error('Error loading table data:', error));
+    }
+
+    $(document).ready(function () {
+      loadTableData();
+    });
+  </script>
+</body>
+</html>

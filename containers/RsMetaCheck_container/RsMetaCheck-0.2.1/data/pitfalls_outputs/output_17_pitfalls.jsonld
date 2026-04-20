@@ -1,0 +1,45 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for datacite/maremma",
+  "description": "Ruby utility library for network calls",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:41:59Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "datacite/maremma",
+    "softwareVersion": "5.0.0",
+    "url": "https://github.com/datacite/maremma",
+    "schema:identifier": {
+      "@id": "https://doi.org/10.5438/QEG0-3GM3"
+    }
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "codemeta.json dateModified is outdated compared to the actual repository last update date",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W002",
+      "evidence": "W002 detected: Issue detected in output_17.json",
+      "suggestion": "You need to align the version in your metadata file with your latest release tag. Automating this synchronization as part of your release process is highly recommended."
+    }
+  ]
+}

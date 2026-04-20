@@ -1,0 +1,61 @@
+{
+  "@context": "https://w3id.org/example/metacheck/0.1.0/",
+  "@type": "SoftwareQualityAssessment",
+  "name": "Quality Assessment for lionandjelka/QhX1",
+  "description": "QhX-Quasar harmonics eXplorer- Python package for detecting oscillations in red noise",
+  "creator": {
+    "@type": "schema:Person",
+    "name": "Anonymous",
+    "email": "example@email.com"
+  },
+  "dateCreated": "2025-11-18T09:48:31Z",
+  "license": [
+    "@id: https://opensource.org/license/mit"
+  ],
+  "assessedSoftware": {
+    "@type": "schema:SoftwareApplication",
+    "name": "lionandjelka/QhX1",
+    "softwareVersion": "Unknown",
+    "url": "https://github.com/lionandjelka/QhX1"
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/codemeta"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) has License pointing to a local file instead of stating the name",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "P006",
+      "evidence": "P006 detected: Issue detected in output_697.json",
+      "suggestion": "You need to replace local file paths with recognized SPDX license identifiers, such as MIT or GPL-3.0-only in URL form. This ensures your license can be correctly detected by automated tools."
+    },
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/example/metacheck/i/indicators/metadatafile"
+      },
+      "checkingSoftware": {
+        "@type": "schema:SoftwareApplication",
+        "name": "metacheck",
+        "@id": "https://w3id.org/example/metacheck/tools/",
+        "softwareVersion": "0.1.0"
+      },
+      "process": "The metadata file (codemeta or other) Software requirements don't have version specifications",
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "checkId": "W001",
+      "evidence": "W001 detected: Issue detected in output_697.json",
+      "suggestion": "Add version numbers to your dependencies. This provides stability for users and allows reproducibility across different environments."
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+name: Test Action
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run RsMetaCheck Action on self
+        uses: ./
+        with:
+          # Automatically uses ${{ github.repository }} and checks it
+          verbose: "false"
+        env:
+          # Provide token for SoMEF API rate limits (optional but recommended)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify outputs are generated
+        run: |
+          if [ ! -d "somef_outputs" ]; then
+            echo "somef_outputs directory not found!"
+            exit 1
+          fi
+          if [ ! -d "pitfalls" ]; then
+            echo "pitfalls directory not found!"
+            exit 1
+          fi
+          if [ ! -f "all_pitfalls_results.json" ]; then
+            echo "all_pitfalls_results.json not found!"
+            exit 1
+          fi
+          echo "Output files verified successfully."

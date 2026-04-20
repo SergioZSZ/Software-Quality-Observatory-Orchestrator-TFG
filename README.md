@@ -364,6 +364,9 @@ Todo este proceso se deberá hacer desde una terminal Unix, no powershell de win
 | DISPLAY NAME | `DashVERSE DB`                     |
 
 
+10. Se necesita un token jwt para las peticiones desde n8n. Para ello con el servicio desplegado ir a http://localhost:8000 y hacerse una cuenta EVERSE. Después hacer login y generar un token auth. Expiran tras un mes. Este token debe ponerse en los nodos que hacen peticiones http a dashVERSE del flujo n8n en el campo Authorization dentro de Headers como `Bearer TU_TOKEN`.
+
+11. Importar los dashboards encontrados en `/dashboards`
 
    
 #### 5.4 Encendido y apagado del servicio DashVERSE:
@@ -456,16 +459,15 @@ A pesar de ello, se consigue una reducción sustancial del tiempo total de ejecu
 NEXT STEPS:
 
 ### DASHVERSE:
-#### General:
-- Modificar flujo n8n para funcionamiento con nuevas tablas (uris nuevas, datos distintos que meter)
 
 #### Dashboards:
-- añadir nuevo indicador total_repos para solo tener una barra de repos totales en dashboard de assessments que pasan por tiered indicator
+
 	- cambiar top quality assessments por un ranking (1 tabla)
-	- cambiar cualquier "Process" por "Checks"
-	- añadir fecha de creacion de assessment a tabla de metadatas
-	
-	- que no sustituyan los assessments nuevos a los viejos, que se acumuluen
+
+
+#### ORQUESTADOR
+- codificar contenedor RsMetaCheck 
+- incorporar al flujo de trabajo la generación de indicadores creados por RsMetaCheck
 
 
  ### General:

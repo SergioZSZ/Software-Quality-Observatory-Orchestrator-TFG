@@ -193,195 +193,6 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "http://host.docker.internal:3000/assessment_checks?on_conflict=assessment_id,test_id",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Prefer",
-              "value": "resolution=merge-duplicates, return=minimal"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json "
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json }}",
-        "options": {
-          "batching": {
-            "batch": {
-              "batchSize": 100
-            }
-          },
-          "timeout": 600000
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        4080,
-        -96
-      ],
-      "id": "4545b501-b003-4eff-bf45-964e5e5c49ad",
-      "name": "Post assessments_checks"
-    },
-    {
-      "parameters": {
-        "mode": "raw",
-        "jsonOutput": "={\n \"context\": \"{{$json.assessment['@context']}}\",\n \"type\": \"{{$json.assessment['@type']}}\",\n \"name\": \"{{$json.assessment.name}}\",\n \"description\": \"{{$json.assessment.description}}\",\n \"date_created\": \"{{$json.assessment.dateCreated}}\",\n \"license_uri\": \"{{$json.assessment.license['@id']}}\"\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        2512,
-        16
-      ],
-      "id": "1d38579c-1ba5-4901-a1c9-4b97131c61fc",
-      "name": "Edit Fields for assessment"
-    },
-    {
-      "parameters": {
-        "mode": "raw",
-        "jsonOutput": "={\n  \"assessment_id\": {{$json[\"id\"]}},\n  \"type\": \"software\",\n  \"name\": {{$json[\"assessment\"][\"assessedSoftware\"][\"name\"]}},\n  \"version\": {{$json[\"assessment\"][\"assessedSoftware\"][\"softwareVersion\"] || null}},\n  \"url\": {{$json[\"assessment\"][\"assessedSoftware\"][\"url\"]}},\n  \"identifier_uri\": {{$json[\"assessment\"][\"assessedSoftware\"][\"url\"]}}\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        3408,
-        -336
-      ],
-      "id": "807597fa-99de-45a0-8f64-9a2faa34a325",
-      "name": "Edit Fields for assessment_software"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://host.docker.internal:3000/assessment_software?on_conflict=assessment_id",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Prefer",
-              "value": "resolution=merge-duplicates, return=representation"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json "
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json }}",
-        "options": {
-          "batching": {
-            "batch": {
-              "batchSize": 200
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        3600,
-        -336
-      ],
-      "id": "90183086-e721-4090-ad72-dcc9376a8576",
-      "name": "Post assessment_software"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://host.docker.internal:3000/assessments?on_conflict=name",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Prefer",
-              "value": "resolution=merge-duplicates, return=representation"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json }}",
-        "options": {
-          "batching": {
-            "batch": {
-              "batchSize": 200,
-              "batchInterval": 1000
-            }
-          },
-          "redirect": {}
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        2720,
-        32
-      ],
-      "id": "5f894c8e-4122-48c3-bf45-343633c86e93",
-      "name": "Post assessments"
-    },
-    {
-      "parameters": {
-        "mode": "raw",
-        "jsonOutput": "=={{\n{\n  assessment_id: $json.id,\n\n  type: $json[\"assessment.checks\"][\"@type\"],\n\n  test_id: $json[\"assessment.checks\"].test_id,\n\n  indicator_uri: $json[\"assessment.checks\"].assessesIndicator?.[\"@id\"],\n\n  checking_software_name: $json[\"assessment.checks\"].checkingSoftware?.name,\n\n  checking_software_version: $json[\"assessment.checks\"].checkingSoftware?.softwareVersion,\n\n  checking_software_uri: $json[\"assessment.checks\"].checkingSoftware?.[\"@id\"],\n\n  process: $json[\"assessment.checks\"].process,\n\n  status_uri: $json[\"assessment.checks\"].status?.[\"@id\"],\n\n  output: $json[\"assessment.checks\"].output,\n\n  evidence: $json[\"assessment.checks\"].evidence\n}\n}}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        3888,
-        -96
-      ],
-      "id": "d9bc9c92-1f22-4594-9956-c7a288af89bf",
-      "name": "Edit Fields for assessment_cheks"
-    },
-    {
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        3536,
-        -96
-      ],
-      "id": "96bad764-492f-421a-a86a-37a0896253d8",
-      "name": "Merge1"
-    },
-    {
-      "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        3232,
-        -336
-      ],
-      "id": "02cb9e3d-9331-4401-bef1-0fc1c1830afa",
-      "name": "Merge2"
-    },
-    {
-      "parameters": {
         "mode": "chooseBranch"
       },
       "type": "n8n-nodes-base.merge",
@@ -480,64 +291,6 @@
     },
     {
       "parameters": {
-        "mode": "chooseBranch"
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        3312,
-        96
-      ],
-      "id": "27efa629-d71b-4e7b-b169-29d83f47eb0f",
-      "name": "Merge4",
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "method": "DELETE",
-        "url": "=http://host.docker.internal:3000/assessment_checks?assessment_id=in.({{$json.ids}})",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Prefer",
-              "value": "return=representation"
-            }
-          ]
-        },
-        "options": {
-          "batching": {
-            "batch": {
-              "batchSize": 200
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        3120,
-        208
-      ],
-      "id": "3b49cc9a-0312-4588-b1d8-a360fafa941c",
-      "name": "Delete dashverse test",
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
-        "jsCode": "const ids = $items().map(item => item.json.id);\n\nreturn [{\n  json: {\n    ids: ids.join(',')\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2944,
-        208
-      ],
-      "id": "30285607-0f45-4cd6-9bbd-3a0b619ff0d2",
-      "name": "Code in JavaScript1"
-    },
-    {
-      "parameters": {
         "operation": "fromJson",
         "destinationKey": "assessment",
         "options": {}
@@ -550,33 +303,6 @@
       ],
       "id": "6f56ea12-db0d-4107-b6e6-0c7b6fcb460b",
       "name": "Extract assessments"
-    },
-    {
-      "parameters": {
-        "fieldToSplitOut": "assessment.checks",
-        "include": "selectedOtherFields",
-        "fieldsToInclude": "id",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitOut",
-      "typeVersion": 1,
-      "position": [
-        3696,
-        -96
-      ],
-      "id": "c2f374a7-c71c-4131-a9c6-7c10f6dadac8",
-      "name": "Split Out checks"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -1904,
-        112
-      ],
-      "id": "2a165b89-eab2-4b1d-9396-c3b50d8aa431",
-      "name": "When clicking ‘Execute workflow’"
     },
     {
       "parameters": {
@@ -604,6 +330,111 @@
       ],
       "id": "f63fd288-ee28-4e91-9611-fb8466e163de",
       "name": "Code url->target-name1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/assessment_raw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJTZXJnaW9aU1oiLCJpc19zdXBlcnVzZXIiOmZhbHNlLCJyb2xlIjoid2ViX3VzZXIiLCJhdWQiOiJwb3N0Z3Jlc3QiLCJleHAiOjE3NzkwMDU3MDAsImlhdCI6MTc3NjQxMzcwMCwianRpIjoiZWE3YzUwOGUtNDRjNC00ZTliLTg3YTQtNjY2MWFjNjU5N2Q1In0.LTQDSaQqZ5FsZrUlHJL3XtuDx4Abt5DuYUMtgfZidrg"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { payload: $json.assessment } }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 200,
+              "batchInterval": 1000
+            }
+          },
+          "redirect": {}
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2720,
+        -128
+      ],
+      "id": "df270f38-44de-49c6-8fa3-d661f611f835",
+      "name": "Post assessments_raw"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "  {\n    \"repos_url\": [\n\"https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG\",\n\"https://github.com/oeg-upm/soca\",\n\"https://github.com/oeg-upm/rsfc\",\n\"https://github.com/FAIR2Adapt/ro-crate-generation-notebooks\"\n    ],\n    \"repo_count\": 5\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1248,
+        -496
+      ],
+      "id": "16a233c5-cf8b-47ce-a437-7dfb7272f0bd",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1952,
+        128
+      ],
+      "id": "c421dbb5-7f90-4fde-9d77-6b9253a97629",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "const target = \"oeg-fair-sergio\"\n\nreturn $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      target,\n      repo_name: url.split(\"/\").pop(),\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1728,
+        -512
+      ],
+      "id": "68a60f43-4b39-468d-b4bf-afb0261b037d",
+      "name": "Code url->target-name"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "repos_url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        -512
+      ],
+      "id": "a24e3b97-955f-4e15-82e3-0179af2c77a0",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const assessment = item.json.assessment;\n  const repoUrl = assessment.assessedSoftware?.url || null;\n\n  let owner = null;\n\n  if (repoUrl) {\n    const match = repoUrl.match(/^https?:\\/\\/github\\.com\\/([^\\/]+)\\/([^\\/]+?)(?:\\/)?$/);\n    if (match) {\n      owner = match[1];\n    }\n  }\n\n  item.json.assessment = {\n    ...assessment,\n    \"@id\": assessment[\"@id\"] || (\n      repoUrl\n        ? `${repoUrl}/assessment/${assessment.dateCreated}`\n        : null\n    ),\n    author: owner\n    \n  };\n\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2528,
+        -128
+      ],
+      "id": "7a66df7d-058b-4a55-b504-a17916310ab0",
+      "name": "Code input @id + author in json-ld"
     }
   ],
   "pinData": {},
@@ -772,82 +603,6 @@
         ]
       ]
     },
-    "Edit Fields for assessment": {
-      "main": [
-        [
-          {
-            "node": "Post assessments",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields for assessment_software": {
-      "main": [
-        [
-          {
-            "node": "Post assessment_software",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Post assessments": {
-      "main": [
-        [
-          {
-            "node": "Merge4",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Code in JavaScript1",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Merge2",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Edit Fields for assessment_cheks": {
-      "main": [
-        [
-          {
-            "node": "Post assessments_checks",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge1": {
-      "main": [
-        [
-          {
-            "node": "Split Out checks",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge2": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields for assessment_software",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Merge3": {
       "main": [
         [
@@ -906,86 +661,11 @@
         ]
       ]
     },
-    "Merge4": {
-      "main": [
-        [
-          {
-            "node": "Merge1",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Delete dashverse test": {
-      "main": [
-        [
-          {
-            "node": "Merge4",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Post assessments_checks": {
-      "main": [
-        []
-      ]
-    },
-    "Code in JavaScript1": {
-      "main": [
-        [
-          {
-            "node": "Delete dashverse test",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Extract assessments": {
       "main": [
         [
           {
-            "node": "Edit Fields for assessment",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Merge2",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Merge1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Split Out checks": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields for assessment_cheks",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Post assessment_software": {
-      "main": [
-        []
-      ]
-    },
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Target",
+            "node": "Code input @id + author in json-ld",
             "type": "main",
             "index": 0
           }
@@ -1013,6 +693,60 @@
           }
         ]
       ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Target",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Code url->target-name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code url->target-name": {
+      "main": [
+        []
+      ]
+    },
+    "Post assessments_raw": {
+      "main": [
+        []
+      ]
+    },
+    "Code input @id + author in json-ld": {
+      "main": [
+        [
+          {
+            "node": "Post assessments_raw",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -1021,7 +755,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "77a514d4-2b2a-4598-b5ab-53c2e6f347e7",
+  "versionId": "e0dfea0a-06ff-434f-adb0-ea9af98b7417",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

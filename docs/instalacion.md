@@ -95,6 +95,11 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 | DISPLAY NAME | `DashVERSE DB`                     |
 
 
+10. Se necesita un token jwt para las peticiones desde n8n. Para ello con el servicio desplegado ir a http://localhost:8000 y hacerse una cuenta EVERSE. Después hacer login y generar un token auth. Expiran tras un mes. Este token debe ponerse en los nodos que hacen peticiones http a dashVERSE del flujo n8n en el campo Authorization dentro de Headers como `Bearer TU_TOKEN`.
+
+11. Importar los dashboards encontrados en `/dashboards`
+
+
 
 #### 5.4 Encendido y apagado del servicio DashVERSE:
 
