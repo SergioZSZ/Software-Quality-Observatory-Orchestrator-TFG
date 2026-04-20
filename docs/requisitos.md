@@ -29,4 +29,7 @@ https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.0
 
 - DASHVERSE 0.2.0: 
 https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.2.0
+
+- RsMetaCheck 0.2.1:
+https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
    
