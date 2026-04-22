@@ -121,40 +121,6 @@ El sistema permite escalar horizontalmente el número de workers mediante docker
 El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitMQ de tamaño 1. Los workers RSFC se esperarán a obtener un token de la cola para procesar los jobs para no saturar de peticiones GitHubAPI y no sobrepasar el RateLimit.
 
 
-### 3.7 DashVerse Service
-El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/DashVERSE_dashboard` existen 2 plantillas con diversos dashboards, los cuales son:
-
-#### SQOO-org:
-1. KPIs generales:
-   - Total de assessments procesados
-   - Total de organizaciones visualizadas
-   - Porcentaje de assessments que pasan el 50% de calidad declarado
-
-2. Análisis de resultados:
-    **NOTA** la importancia del indicador viene declarada en: https://everse.software/indicators/website/rs_tiers.htm (Relevant for Prototype Tool)
-
-    - Comparación de assessments que pasan los indicadores `Crucial` comparados con los assessments totales
-    - Comparación de assessments que pasan los indicadores `Recommended` comparados con los assessments totales
-    - Comparación de assessments que pasan los indicadores `Good to have` comparados con los assessments totales
-    - Top 10 mejores repositorios según score de calidad
-
-
-3. Análisis de fallos:
-   - Top 5 indicadores que más fallan de las organizaciones
-   - Top 5 procesos que más fallan de las organizaciones
-
-#### SQOO-repo:
-1. Relacionado a procesos:
-    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel total de procesos por tier
-    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel de indicador 
-    - Tabla con metadatos de los assessments procesados
-    - Tabla con los procesos fallidos del assessment
-
-Con las plantillas dada en `/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
-
-Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
- *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
-
 
 
 ### 3.6 Flujo actual(container n8n)
@@ -221,33 +187,65 @@ El workflow implementa un pipeline completo que abarca:
 
 
 
+### 3.7 DashVerse Service
+El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/DashVERSE_dashboard` existen 2 plantillas con diversos dashboards, los cuales son:
+
+#### SQOO-org:
+1. KPIs generales:
+   - Total de assessments procesados
+   - Total de repositorios
+   - Total de organizaciones visualizadas
+
+2. Análisis de resultados:
+    **NOTA** la importancia del indicador viene declarada en: https://everse.software/indicators/website/rs_tiers.htm (Relevant for Prototype Tool)
+
+    - Comparación de assessments que pasan los indicadores `Crucial` comparados con los assessments totales
+    - Comparación de assessments que pasan los indicadores `Recommended` comparados con los assessments totales
+    - Comparación de assessments que pasan los indicadores `Good to have` comparados con los assessments totales
+
+
+
+#### SQOO-repo:
+1. Relacionado a procesos:
+    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel total de procesos por tier
+    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel de indicador 
+    - Tabla con metadatos de los assessments procesados
+    - Tabla con los procesos fallidos del assessment + sugerencias
+
+Con las plantillas dada en `/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
+
+Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
+ *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
+
 ---
 
-## 4. Requisitos(Requirements)
-    
-   - Docker/Docker Desktop
-   - Estar loggeado en Docker/Docker Desktop
-   - Minikube (DashVERSE)
-   - Helm (DashVERSE)
-   - Kubectl (DashVERSE)
 
 
 ## 4. Requisitos(Requirements)
 #### Requisitos generales
    - Docker/Docker Desktop
    - Estar loggeado en Docker/Docker Desktop
-   - Minikube (DashVERSE)
-   - Helm (DashVERSE)
-   - Kubectl (DashVERSE)
 
 #### Instalaciones necesarias para desplegar DashVERSE:
-- make 
-   - Linux:   ``sudo apt install make``
-   - Windows: ``winget install -e --id GnuWin32.Make``
+   - make 
+      - Linux:   ``sudo apt install make --classic``
+      - Windows: ``winget install -e --id GnuWin32.Make``
 
-- Terraform/OpenTofu 
-   - Linux:    ``sudo snap install opentofu`` 
-   - Windows:  ``winget install --exact --id=OpenTofu.Tofu``
+   - Terraform/OpenTofu 
+      - Linux:    ``sudo snap install opentofu --classic`` 
+      - Windows:  ``winget install --exact --id=OpenTofu.Tofu``
+
+   - Minikube
+      - Windows:  ``winget install -e --id Kubernetes.minikube``
+      - Linux:    ``sudo snap install minikube --classic``
+
+   - Helm      
+      - Windows:  ``winget install -e --id Helm.Helm``
+      - Linux:    ``sudo snap install kubectl --classic``
+
+   - Kubectl
+      - Windows:  ``winget install -e --id Kubernetes.kubectl``
+      - Linux:    ``sudo snap install helm --classic``
 
 
 
@@ -277,7 +275,7 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
    - `RABBITMQ_USER` usuario de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
 
-   - ``RATE_LIMIT_SOCA_ENABLED`` y `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI(con workers de soca no hace falta debido a que realiza 1 petición/repo, de rsfc si ya que realiza 7 aprox)
+   - `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI
 
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
 
@@ -467,12 +465,16 @@ A pesar de ello, se consigue una reducción sustancial del tiempo total de ejecu
 
 
 ### Orquestador
-- codificar contenedor RsMetaCheck 
-- incorporar al flujo de trabajo la generación de indicadores creados por RsMetaCheck
+- ver como subir a dashverse los indicadores de RsMetaCheck
 
 
  ### General:
+
+- Añadir al diagrama de flujo rsmetachek
+- Cambiar el estudio de paralelismo por el que se está realizando nuevo
+- Realizar un nuevo estudio de consumo de memoria + espacio en disco
 - Ver si merece la pena hacer un RO
 - FAIRificar los repositorios mejorando los checks de metadatos
 - (Si da tiempo) automatizar sugerencias para mejorar los repositorios
+
 

@@ -12,11 +12,19 @@
 
 
 ### Orquestador
-- codificar contenedor RsMetaCheck 
-- incorporar al flujo de trabajo la generación de indicadores creados por RsMetaCheck
+- ver como subir a dashverse los indicadores de RsMetaCheck
 
 
  ### General:
+
+- Añadir al diagrama de flujo rsmetachek
+- Cambiar el estudio de paralelismo por el que se está realizando nuevo
+- Realizar un nuevo estudio de consumo de memoria + espacio en disco
 - Ver si merece la pena hacer un RO
 - FAIRificar los repositorios mejorando los checks de metadatos
 - (Si da tiempo) automatizar sugerencias para mejorar los repositorios
+
+
+
+
+

@@ -15,7 +15,7 @@ def token_generator():
             channel.basic_publish(exchange="", routing_key=RATE_LIMIT_QUEUE, body="token")
             
             print(f"token sent", flush=True)
-            time.sleep(8)  # intervalo entre requests 
+            time.sleep(6)  # intervalo entre requests 
 
     else:
         print("Rate limit disabled")

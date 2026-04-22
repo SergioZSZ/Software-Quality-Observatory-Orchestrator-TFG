@@ -71,18 +71,18 @@ services:
       - DASHBOARD_REPO_URL=${DASHBOARD_REPO_URL}
 
 
-  rate_limiter_soca:
-    image: soca-heavy
-    command: python -m soca_runner.rabbitmq.rate_limiter
-    depends_on:
-      - rabbitmq
-    environment:
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-      - RATE_LIMIT_SOCA_ENABLED=${RATE_LIMIT_SOCA_ENABLED}
-    networks:
-      - net
+  # rate_limiter_soca:
+  #   image: soca-heavy
+  #   command: python -m soca_runner.rabbitmq.rate_limiter
+  #   depends_on:
+  #     - rabbitmq
+  #   environment:
+  #     - RABBITMQ_HOST=rabbitmq
+  #     - RABBITMQ_USER=${RABBITMQ_USER}
+  #     - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+  #     - RATE_LIMIT_SOCA_ENABLED=${RATE_LIMIT_SOCA_ENABLED}
+  #   networks:
+  #     - net
 
 
 # *** RSFC ***
@@ -114,6 +114,7 @@ services:
 
     networks:
       - net
+
 
 
 

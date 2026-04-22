@@ -1,4 +1,30 @@
-## 3.2. Datasets que se rellenan parcialmente
+## Cambio en el código
+Trying to deploy DashVERSE 2.0 service in my own local machine I had this error:
+bash
+```
+╷
+│ Error: Unsupported attribute
+│
+│ on main.tf line 109, in module "demo_portal":
+│ 109: superset_url = "http://${module.superset.service_name}:${module.superset.port}"
+│ ├────────────────
+│ │ module.superset is a object
+│
+│ This object does not have an attribute named "service_name".
+╵
+make: *** [deploy] Error 1
+```
+
+
+This was fixed by replacing: line 109 in main.tf 
+
+ superset_url   = "http://$/{module.superset.service_name}:${module.superset.port}"
+ 
+with
+
+superset_url = module.superset.url
+
+## Datasets que se rellenan parcialmente
 
 #### `api.assessment`
 

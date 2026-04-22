@@ -2,18 +2,27 @@
     
    - Docker/Docker Desktop
    - Estar loggeado en Docker/Docker Desktop
-   - Minikube (DashVERSE)
-   - Helm (DashVERSE)
-   - Kubectl (DashVERSE)
 
 #### Instalaciones necesarias para desplegar DashVERSE:
    - make 
-      - Linux:   ``sudo apt install make``
+      - Linux:   ``sudo apt install make --classic``
       - Windows: ``winget install -e --id GnuWin32.Make``
 
    - Terraform/OpenTofu 
-      - Linux:    ``sudo snap install opentofu`` 
+      - Linux:    ``sudo snap install opentofu --classic`` 
       - Windows:  ``winget install --exact --id=OpenTofu.Tofu``
+
+   - Minikube
+      - Windows:  ``winget install -e --id Kubernetes.minikube``
+      - Linux:    ``sudo snap install minikube --classic``
+
+   - Helm      
+      - Windows:  ``winget install -e --id Helm.Helm``
+      - Linux:    ``sudo snap install kubectl --classic``
+
+   - Kubectl
+      - Windows:  ``winget install -e --id Kubernetes.kubectl``
+      - Linux:    ``sudo snap install helm --classic``
 
 
 

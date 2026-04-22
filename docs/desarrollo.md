@@ -70,8 +70,8 @@ El servicio DashVerse sirve para la creación y visualización de los dashboards
 #### SQOO-org:
 1. KPIs generales:
    - Total de assessments procesados
+   - Total de repositorios
    - Total de organizaciones visualizadas
-   - Porcentaje de assessments que pasan el 50% de calidad declarado
 
 2. Análisis de resultados:
     **NOTA** la importancia del indicador viene declarada en: https://everse.software/indicators/website/rs_tiers.htm (Relevant for Prototype Tool)
@@ -79,19 +79,15 @@ El servicio DashVerse sirve para la creación y visualización de los dashboards
     - Comparación de assessments que pasan los indicadores `Crucial` comparados con los assessments totales
     - Comparación de assessments que pasan los indicadores `Recommended` comparados con los assessments totales
     - Comparación de assessments que pasan los indicadores `Good to have` comparados con los assessments totales
-    - Top 10 mejores repositorios según score de calidad
 
 
-3. Análisis de fallos:
-   - Top 5 indicadores que más fallan de las organizaciones
-   - Top 5 procesos que más fallan de las organizaciones
 
 #### SQOO-repo:
 1. Relacionado a procesos:
     - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel total de procesos por tier
     - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel de indicador 
     - Tabla con metadatos de los assessments procesados
-    - Tabla con los procesos fallidos del assessment
+    - Tabla con los procesos fallidos del assessment + sugerencias
 
 Con las plantillas dada en `/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
 

@@ -113,7 +113,7 @@ def process_message(ch, method, properties, body):
         timestamp(f"[{job_id}] Received job")
 
         # procesamos mensaje pero nates  limit
-        if RATE_LIMIT_RSFC_ENABLED:
+        if RATE_LIMIT_RSFC_ENABLED==True:
             wait_for_token(ch)
             
         requeue = rsfc_indicators_generation(job_id, target, repo_url,repos_count, BASE_DIR, TOKEN, 0)
