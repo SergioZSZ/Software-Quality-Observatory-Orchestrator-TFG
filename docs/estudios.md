@@ -1,6 +1,8 @@
-# Estudio sobre el paralelismo de workers
+# Estudios referentes al software
 
-## Objetivo
+## Estudio sobre el paralelismo de workers
+
+### Objetivo
 
 Este documento resume los resultados obtenidos en los tres casos de estudio analizados para evaluar el impacto del paralelismo en los workers de SOCA y RSFC:
 
@@ -10,9 +12,9 @@ Este documento resume los resultados obtenidos en los tres casos de estudio anal
 
 En todos los casos, los tiempos reflejan solo el tiempo de ejecución de los workers de `SOCA` y `RSFC`, sin contar tiempos intermedios del workflow. `RsMetaCheck` se ha ejecutado de forma secuencial y su coste temporal es reducido frente al resto del pipeline
 
-## Resultados finales
+### Resultados finales
 
-### SergioZSZ
+#### SergioZSZ
 
 | Nº de workers | Tiempo SOCA | Tiempo RSFC | Tiempo total |
 | ------------- | ----------- | ----------- | ------------ |
@@ -21,7 +23,7 @@ En todos los casos, los tiempos reflejan solo el tiempo de ejecución de los wor
 | 4             | 01m 02s     | 00m 21s     | 01m 23s      |
 | 6 y 4         | 01m 53s     | 00m 21s     | 02m 14s      |
 
-### FAIR2ADAPT
+#### FAIR2ADAPT
 
 | Nº de workers | Tiempo SOCA | Tiempo RSFC | Tiempo total |
 | ------------- | ----------- | ----------- | ------------ |
@@ -30,7 +32,7 @@ En todos los casos, los tiempos reflejan solo el tiempo de ejecución de los wor
 | 4             | 01m 49s     | 03m 05s     | 04m 54s      |
 | 6 y 4         | 01m 46s     | 03m 09s     | 04m 55s      |
 
-### oeg-upm
+#### oeg-upm
 
 | Nº de workers | Tiempo SOCA | Tiempo RSFC | Tiempo total |
 | ------------- | ----------- | ----------- | ------------ |
@@ -39,12 +41,12 @@ En todos los casos, los tiempos reflejan solo el tiempo de ejecución de los wor
 | 4             | 50m 48s     | 38m 16s     | 1h 29m 04s   |
 | 6 y 4         | 42m 50s     | 38m 14s     | 1h 21m 04s   |
 
-## Tablas de speedup
+### Tablas de speedup
 
 Speedup calculado respecto al escenario base de `1 worker`, usando la formula:
 `speedup = tiempo_1_worker / tiempo_configuracion`
 
-### SergioZSZ
+#### SergioZSZ
 
 | Config. workers | Speedup SOCA | Speedup RSFC | Speedup total |
 | ------------- | ------------ | ------------ | ------------- |
@@ -53,7 +55,7 @@ Speedup calculado respecto al escenario base de `1 worker`, usando la formula:
 | 4             | 1.44         | 2.33         | 1.66          |
 | 6 y 4         | 0.79         | 2.33         | 1.03          |
 
-### FAIR2ADAPT
+#### FAIR2ADAPT
 
 | Config. workers | Speedup SOCA | Speedup RSFC | Speedup total |
 | ------------- | ------------ | ------------ | ------------- |
@@ -62,7 +64,7 @@ Speedup calculado respecto al escenario base de `1 worker`, usando la formula:
 | 4             | 3.05         | 1.54         | 2.10          |
 | 6 y 4         | 3.13         | 1.51         | 2.09          |
 
-### oeg-upm
+#### oeg-upm
 
 | Config. workers | Speedup SOCA | Speedup RSFC | Speedup total |
 | ------------- | ------------ | ------------ | ------------- |
@@ -71,29 +73,29 @@ Speedup calculado respecto al escenario base de `1 worker`, usando la formula:
 | 4             | 2.66         | 1.94         | 2.35          |
 | 6 y 4         | 3.15         | 1.94         | 2.58          |
 
-## Conclusiones por herramienta
+### Conclusiones por herramienta
 
-### SOCA
+#### SOCA
 
 - El paralelismo en `SOCA` aporta una mejora clara al pasar de `1` a `2` workers y de `2` a `4` workers
 - En casos pequeños, como `SergioZSZ`, aumentar hasta `6` workers no solo deja de mejorar, sino que empeora el tiempo total
 - En `FAIR2ADAPT`, pasar de `4` a `6` workers apenas reduce el tiempo de `SOCA` (`01m 49s` frente a `01m 46s`), por lo que la mejora marginal es casi nula
 - En `oeg-upm`, que es un caso mucho mas grande, `SOCA` sigue mejorando al subir de `4` a `6` workers, aunque la mejora ya es menor que en saltos anteriores
 
-### RSFC
+#### RSFC
 
 - `RSFC` mejora de forma clara entre `1` y `2` workers en los casos pequeños y medianos
 - Sin embargo, a partir de `4` workers el comportamiento se estabiliza mucho mas que `SOCA`
 - En `FAIR2ADAPT`, `RSFC` permanece prácticamente igual entre los escenarios `4` y `6 y 4`
 - En `oeg-upm`, `RSFC` mejora ligeramente entre `2` y `4` workers, pero apenas cambia entre `4` y `6 y 4`, lo que sugiere que en este entorno el cuello de botella ya no depende tanto del numero de workers
 
-### RsMetaCheck
+#### RsMetaCheck
 
 - `RsMetaCheck` tiene un coste temporal muy bajo en los tres casos de estudio
 - Su contribución al tiempo total del pipeline es pequena frente a `SOCA` y `RSFC`
 - Esto refuerza la idea de que no resulta prioritario paralelizar `RsMetaCheck` en el estado actual del orquestador
 
-## Conclusiones del speedup
+### Conclusiones del speedup
 
 - En `SOCA`, el speedup crece con claridad al aumentar workers en los casos medianos y grandes: `3.05x` en `FAIR2ADAPT` con `4 workers` y `3.15x` en `oeg-upm` con `6 y 4`
 - En `SergioZSZ`, `SOCA` empeora con `6 y 4`, cayendo a un speedup de `0.79x`, lo que confirma que en lotes pequenos el overhead de paralelizar demasiado pesa mas que el beneficio
@@ -102,7 +104,7 @@ Speedup calculado respecto al escenario base de `1 worker`, usando la formula:
 - El speedup total mas alto de cada caso es `1.66x` en `SergioZSZ` con `4 workers`, `2.10x` en `FAIR2ADAPT` con `4 workers` y `2.58x` en `oeg-upm` con `6 y 4`
 - En conjunto, los datos del speedup refuerzan que `4 workers` es la configuracion mas equilibrada y que `6 workers en SOCA` solo merece la pena cuando el tamano del lote es grande
 
-## Conclusiones globales
+### Conclusiones globales
 
 - El paralelismo es util en el orquestador, pero no escala de forma lineal.
 - El mayor beneficio se obtiene al pasar de `1` a `2` workers y, en muchos casos, hasta `4` workers
@@ -110,7 +112,7 @@ Speedup calculado respecto al escenario base de `1 worker`, usando la formula:
 - En los casos pequenos y medianos (`SergioZSZ` y `FAIR2ADAPT`), el punto más equilibrado se encuentra alrededor de `4 workers` para `SOCA` y `4 workers` para `RSFC`
 - En el caso grande (`oeg-upm`), el escenario `6 workers SOCA + 4 workers RSFC` es el mejor de los medidos, pero la mejora respecto a `4 workers` ya es bastante menor que en los saltos anteriores
 
-## Interpretacion final
+### Interpretacion final
 
 Tomando en conjunto los tres casos de estudio, puede concluirse que:
 
