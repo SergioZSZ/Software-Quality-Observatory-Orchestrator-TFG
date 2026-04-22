@@ -384,11 +384,13 @@ Todo este proceso se deberá hacer desde una terminal Unix, no powershell de win
 
 ## 6. Estudios sobre el proyecto
 
-*en un futuro en readthedocs*
 
-**Evaluación de paralelismo de workers:**
+
+**Evaluación de paralelismo de workers:** 
+https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/estudios/#estudio-sobre-el-paralelismo-de-workers
+
 **Estudio sobre RAM y espacio del dispositivo:**
-
+*In progress*
 
 
 # 7. Issues
