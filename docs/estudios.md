@@ -34,10 +34,42 @@ En todos los casos, los tiempos reflejan solo el tiempo de ejecución de los wor
 
 | Nº de workers | Tiempo SOCA | Tiempo RSFC | Tiempo total |
 | ------------- | ----------- | ----------- | ------------ |
-| 1             |             |             |              |
+| 1             | 2h 15m 02s  | 1h 14m 17s  | 3h 29m 19s   |
 | 2             | 1h 20m 27s  | 44m 57s     | 2h 05m 24s   |
 | 4             | 50m 48s     | 38m 16s     | 1h 29m 04s   |
 | 6 y 4         | 42m 50s     | 38m 14s     | 1h 21m 04s   |
+
+## Tablas de speedup
+
+Speedup calculado respecto al escenario base de `1 worker`, usando la formula:
+`speedup = tiempo_1_worker / tiempo_configuracion`
+
+### SergioZSZ
+
+| Config. workers | Speedup SOCA | Speedup RSFC | Speedup total |
+| ------------- | ------------ | ------------ | ------------- |
+| 1             | 1.00         | 1.00         | 1.00          |
+| 2             | 1.11         | 2.13         | 1.34          |
+| 4             | 1.44         | 2.33         | 1.66          |
+| 6 y 4         | 0.79         | 2.33         | 1.03          |
+
+### FAIR2ADAPT
+
+| Config. workers | Speedup SOCA | Speedup RSFC | Speedup total |
+| ------------- | ------------ | ------------ | ------------- |
+| 1             | 1.00         | 1.00         | 1.00          |
+| 2             | 1.82         | 1.55         | 1.69          |
+| 4             | 3.05         | 1.54         | 2.10          |
+| 6 y 4         | 3.13         | 1.51         | 2.09          |
+
+### oeg-upm
+
+| Config. workers | Speedup SOCA | Speedup RSFC | Speedup total |
+| ------------- | ------------ | ------------ | ------------- |
+| 1             | 1.00         | 1.00         | 1.00          |
+| 2             | 1.68         | 1.65         | 1.67          |
+| 4             | 2.66         | 1.94         | 2.35          |
+| 6 y 4         | 3.15         | 1.94         | 2.58          |
 
 ## Conclusiones por herramienta
 
@@ -60,6 +92,15 @@ En todos los casos, los tiempos reflejan solo el tiempo de ejecución de los wor
 - `RsMetaCheck` tiene un coste temporal muy bajo en los tres casos de estudio
 - Su contribución al tiempo total del pipeline es pequena frente a `SOCA` y `RSFC`
 - Esto refuerza la idea de que no resulta prioritario paralelizar `RsMetaCheck` en el estado actual del orquestador
+
+## Conclusiones del speedup
+
+- En `SOCA`, el speedup crece con claridad al aumentar workers en los casos medianos y grandes: `3.05x` en `FAIR2ADAPT` con `4 workers` y `3.15x` en `oeg-upm` con `6 y 4`
+- En `SergioZSZ`, `SOCA` empeora con `6 y 4`, cayendo a un speedup de `0.79x`, lo que confirma que en lotes pequenos el overhead de paralelizar demasiado pesa mas que el beneficio
+- En `RSFC`, el speedup mejora pronto pero se satura antes que `SOCA`: `2.33x` en `SergioZSZ`, `1.54x-1.55x` en `FAIR2ADAPT` y `1.94x` en `oeg-upm`
+- La comparacion entre `4` y `6 y 4` muestra que en `RSFC` apenas hay diferencia, mientras que la mejora adicional en `SOCA` solo compensa en el caso grande
+- El speedup total mas alto de cada caso es `1.66x` en `SergioZSZ` con `4 workers`, `2.10x` en `FAIR2ADAPT` con `4 workers` y `2.58x` en `oeg-upm` con `6 y 4`
+- En conjunto, los datos del speedup refuerzan que `4 workers` es la configuracion mas equilibrada y que `6 workers en SOCA` solo merece la pena cuando el tamano del lote es grande
 
 ## Conclusiones globales
 
