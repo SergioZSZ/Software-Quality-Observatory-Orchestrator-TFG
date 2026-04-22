@@ -18,7 +18,6 @@
  ### General:
 
 - Añadir al diagrama de flujo rsmetachek
-- Cambiar el estudio de paralelismo por el que se está realizando nuevo
 - Realizar un nuevo estudio de consumo de memoria + espacio en disco
 - Ver si merece la pena hacer un RO
 - FAIRificar los repositorios mejorando los checks de metadatos
