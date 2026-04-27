@@ -32,7 +32,7 @@
         "Windows",
         "macOS"
     ],
-    "programmingLanguage": "Python >=3.11,<3.13",
+    "programmingLanguage": "python>=3.11",
     "relatedLink": [
         "https://github.com/oeg-upm/soca",
         "https://github.com/oeg-upm/soca",
@@ -41,7 +41,7 @@
     "releaseNotes": "Initial release of the Software Quality Observatory Orchestrator.\n\nThis version provides a containerized architecture for orchestrating\nsoftware quality assessment workflows using SOCA and RSFC.\n\nMain features:\n- Automated repository retrieval\n- Integration with RSFC for quality assessment\n- Workflow orchestration using n8n\n- Docker-based deployment",
     "runtimePlatform": [
         "Docker",
-        "Python >=3.11,<3.13"
+        "Python"
     ],
     "softwareRequirements": [
         {
