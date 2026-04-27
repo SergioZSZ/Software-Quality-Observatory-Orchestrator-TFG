@@ -7,9 +7,13 @@
 
 - Actualizada información de instalación de herramientas para el lanzamiento de DashVERSE
 
-# RsMetaCheck:
-- Codificado nuevo contenedor RsMetaCheck para la elaboración de más indicadores de calidad a partir de dicho software 
+- Actualizada documentación con las nuevas integraciones
+
+- Actualizada imagen de flujo a una más completa y visualmente correcta
+
+# sw-metadata-bot:
+- Codificada nueva integración sw-metadata-bot al workflow para generación de Issues sobre los metadatos de los repositorios
 
 # n8n:
-- Modificado workflow para la integración de RsMetaCheck en él
+- Modificado workflow para la integración de sw-metadata-bot en él
 
