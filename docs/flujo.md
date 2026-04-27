@@ -66,4 +66,4 @@ Salida generada:
 - Extracción y transformación de los datos del assessment añadiendo un @id y el `author` como keys del json-ld
 
 - Iteración sobre cada repositorio y sus checks mediante nodos `Split Out`
-- Envío de datos mediante peticiones HTTP POST a la API de DashVERSE `/assessments_raw`
+- Envío de datos mediante peticiones HTTP POST a la API de DashVERSE `/assessment_raw`
