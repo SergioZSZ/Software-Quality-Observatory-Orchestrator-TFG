@@ -1,10 +1,12 @@
+
 ## 5. Instalación/Despliegue
 
-#### 5.1 Previa (env)
+#### 5.1 Previa
  Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
-
-
    - `GITHUB_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx` siendo `xxxxxx` el token personal de github obtenido desde github
+   - `GITHUB_API_TOKEN` con el mismo formato que el anterior, siendo el `xxxxxx` el token personal de github obtenido desde github, pero con permisos de acceso a los repositorios que se quiera realizar el lanzamiento de issues:
+      - Issues: read and writte
+      - Contents: Read only
 
    - `RABBITMQ_USER` usuario de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
@@ -34,22 +36,24 @@ Siguiendo los pasos en orden secuencial:
    - `rsfc-heavy`:
       - Directorio desde el que crearla: `/containers/rsfc_container` 
       - Mandato: `docker build -t rsfc-heavy .`
-
+   - `sw-metadata-bot`:
+      - Directorio desde el que crearla: `/integrations/sw-metadata-bot-0.4.2`
+      
 2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
 
 3. Acceder a n8n mediante el navegador en http://localhost:5678
-
 4. En el primer acceso:
     1. Crear cuenta de usuario en n8n
     2. Importar el workflow de `/containers/n8n_container/workflow/` en un nuevo
-
 5. Editar el nodo `Input` al principio del workflow con la organización/usuario deseado
-6. Ejecutar manualmente el workflow desde el Manual Trigger inicial. Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes y enviándoselos a DashVERSE.
+6. Ejecutar manualmente
+
+Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes y enviándoselos a DashVERSE.
 
 
 
 #### 5.3 Instalación/Despliegue de DashVERSE
-Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no powershell de windows (por ejemplo Git Bash https://git-scm.com/install/windows). este proceso inicial hacerlo dentro del directorio `/integrations/DashVERSE-0.2.0`
+Todo este proceso se deberá hacer desde una terminal Unix, no powershell de windows (por ejemplo Git Bash https://git-scm.com/install/windows), este proceso inicial hacerlo dentro del directorio `/integrations/DashVERSE-2.0`
 
 1. instalar minikube,  kubectl, y helm (docker instalado de antes)
       mandato: `pip install minikube kubectl helm`
@@ -60,10 +64,10 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 3. arrancar cluster de minikube
       mandato: ``minikube start --cpus=4 --memory=4g --driver=docker``
 
-      para comprobar que  kubernetes responde usar este mandato:
-      ``kubectl get nodes`` y si funciona y se crea el nodo todo ok
+   para comprobar que  kubernetes responde usar este mandato:
+   ``kubectl get nodes`` y si funciona y se crea el nodo todo ok
 
-4. desplegar y montar el servicio con el archivo make del directorio `/integrations/DashVERSE-0.2.0`
+4. desplegar y montar el servicio con el archivo make del directorio `/integrations/DashVERSE`
       mandato: `make deploy`
 
 5. Comprobar que se haya desplegado bien todo
@@ -85,22 +89,21 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 
 9. Añadir Database a dashverse
 
-      | Campo        | Valor                              |
-      | ------------ | ---------------------------------- |
-      | HOST         | `postgresql`                       |
-      | PORT         | `5432`                             |
-      | DATABASE     | `dashverse`                        |
-      | USERNAME     | `dashverse`                        |
-      | PASSWORD     | `contraseña bbdd obtenida antes`   |
-      | DISPLAY NAME | `DashVERSE DB`                     |
+| Campo        | Valor                              |
+| ------------ | ---------------------------------- |
+| HOST         | `postgresql`                       |
+| PORT         | `5432`                             |
+| DATABASE     | `dashverse`                        |
+| USERNAME     | `dashverse`                        |
+| PASSWORD     | `contraseña bbdd obtenida antes`   |
+| DISPLAY NAME | `DashVERSE DB`                     |
 
 
 10. Se necesita un token jwt para las peticiones desde n8n. Para ello con el servicio desplegado ir a http://localhost:8000 y hacerse una cuenta EVERSE. Después hacer login y generar un token auth. Expiran tras un mes. Este token debe ponerse en los nodos que hacen peticiones http a dashVERSE del flujo n8n en el campo Authorization dentro de Headers como `Bearer TU_TOKEN`.
 
 11. Importar los dashboards encontrados en `/integrations/dashboards`
 
-
-
+   
 #### 5.4 Encendido y apagado del servicio DashVERSE:
 
 ##### apagar todo:
@@ -113,3 +116,5 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 3. forwarding de puertos desde ``/integrations/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
 
 
+
+---

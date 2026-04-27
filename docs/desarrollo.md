@@ -1,5 +1,5 @@
 ## 3. Desarrollo
-### 3.1 Dockerización entorno SOCA
+### 3.1 Dockerización de SOCA
 
 Se ha:
 
@@ -63,7 +63,6 @@ El sistema permite escalar horizontalmente el número de workers mediante docker
 ### 3.5 rate_limiter_rsfc container
 El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitMQ de tamaño 1. Los workers RSFC se esperarán a obtener un token de la cola para procesar los jobs para no saturar de peticiones GitHubAPI y no sobrepasar el RateLimit.
 
-
 ### 3.6 DashVerse Service
 El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/integrations/dashboards` existen 2 plantillas con diversos dashboards, los cuales son:
 
@@ -93,3 +92,58 @@ Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filteri
 
 Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
  *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
+
+---
+### 3.7 Integración de sw-metadata-bot
+
+Se ha:
+
+- Integrado `sw-metadata-bot` como herramienta encargada de analizar la calidad de los metadatos de los repositorios procesados
+- Preparado el uso del bot mediante una imagen Docker `sw-metadata-bot:latest`
+- Adaptado su ejecución vía `execute-command` de n8n
+- Configurado el montaje del volumen compartido de `outputs` para persistir los resultados del análisis
+- Generado dinámicamente un archivo `config.json` con la lista de repositorios obtenidos durante el workflow
+- Configurado el uso de `GITHUB_API_TOKEN` para permitir la consulta de repositorios y la publicación de issues
+- Incorporado el análisis incremental mediante `previous_report`, permitiendo reutilizar ejecuciones anteriores cuando se indique
+- Añadida la fase de publicación de issues tras la generación de los informes de metadatos
+
+El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obtener la lista de repositorios que forman parte del análisis. Para cada ejecución se crea un directorio específico dentro de:
+
+- `/outputs/sw-metadata-bot/<target>/`
+
+Dentro de ese directorio se almacena la configuración generada por n8n y las salidas producidas por el bot.
+
+El archivo `config.json` contiene:
+
+1. La lista de repositorios a analizar
+2. El mensaje personalizado que se incluirá en los issues generados
+3. La lista de repositorios excluidos de publicación mediante `opt_outs`
+4. El directorio raíz de salida
+5. El nombre de la ejecución
+6. La etiqueta temporal del snapshot generado
+
+El workflow ejecuta primero el análisis mediante:
+
+- `uv run sw-metadata-bot run-analysis`
+
+Este comando analiza los repositorios indicados en el archivo de configuración, ejecuta las comprobaciones de metadatos y genera los informes necesarios sin publicar todavía los issues.
+
+Después del análisis, el workflow ejecuta la publicación mediante:
+
+- `uv run sw-metadata-bot publish`
+
+Esta fase utiliza el snapshot generado anteriormente y crea los issues en GitHub cuando se detectan problemas o advertencias relacionados con los metadatos del repositorio.
+
+Salida generada:
+
+- `config.json` con la configuración usada en la ejecución
+- `analysis_results.json` con el resumen global del análisis
+- `run_report.json` con las decisiones tomadas para cada repositorio
+- Carpetas individuales por repositorio analizado
+- `issue_report.md` con el contenido legible del issue propuesto
+- `pitfall.jsonld` con los problemas detectados por RSMetaCheck
+- `report.json` con el resumen estructurado del análisis del repositorio
+- `somef_output.json` con la extracción de metadatos realizada
+- Issues en GitHub con sugerencias de mejora de metadatos cuando corresponde
+
+El uso de `sw-metadata-bot` permite completar el pipeline añadiendo una capa de mejora sobre los metadatos obtenidos. Mientras SOCA extrae la información del software y RSFC evalúa indicadores de calidad, el bot revisa los metadatos disponibles y genera recomendaciones accionables para que los repositorios puedan corregir carencias detectadas automáticamente.

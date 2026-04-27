@@ -1,3 +1,4 @@
+
 # 7. Issues
 
 ## NEXT STEPS:
@@ -9,15 +10,14 @@
 - pensar más dashboards para SQO-ORG
 
  ### General:
-
-
 - Añadir al diagrama de flujo sw-bot
-- Update de la documentación (sw-bot e incorporación al workflow)
 - Realizar un nuevo estudio de consumo de memoria + espacio en disco
-- Ver si merece la pena hacer un RO
-- - documentar manual de uso de usuario de dashverse (ver si hacer)
 - FAIRificar los repositorios mejorando los checks de metadatos
 - (Si da tiempo) automatizar sugerencias para mejorar los repositorios
+
+### Opcional:
+- Ver si merece la pena hacer un RO
+- documentar manual de uso de usuario de dashverse (ver si hacer)
 
 
 

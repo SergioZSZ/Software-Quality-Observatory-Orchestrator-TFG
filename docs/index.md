@@ -2,21 +2,25 @@
 
 **🚧🚧 STILL IN PROGRESS 🚧🚧**
 
+Documentación detallada en : https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/
+
 # TFG – Orquestación automatizada de evaluación de software y generación de catálogo
 
 
 
 ## 1. Objetivo del proyecto
 
-El objetivo del proyecto es diseñar e implementar un sistema reproducible que:
+El objetivo del TFG es diseñar e implementar un sistema reproducible que:
 
 1. Extraiga automáticamente repositorios de GitHub
 2. Genere metadatos estructurados del software
 3. Evalúe la calidad del software mediante indicadores automáticos
-4. Prepare la información para su integración en dashboards (DashVERSE) y catálogos (SOCA)
-5. Permita orquestar todo el proceso mediante workflows automatizados
+4. Evalúe la calidad de los metadatos del software y suba Issues automáticas a GitHub
+5. Prepare la información para su integración en dashboards (DashVERSE) y catálogos (SOCA)
+6. Permita orquestar todo el proceso mediante workflows automatizados
 
 El sistema se basa en la integración y orquestación de herramientas existentes dentro de una arquitectura desacoplada y reproducible.
+
 
 
 
@@ -25,19 +29,20 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 | Componente       | Rol                                    |
 | ---------------- | -------------------------------------- |
 | n8n              | Orquestación                           |
-| soca_container   | extracción metadatos y repos           |
-| rsfc_container   | creación de jobs                       |
+| soca_container   | extracción metadatos-repos y jobs soca |
+| rsfc_container   | creación de jobs rsfc                  |
 | rabbitmq         | message broker                         |
 | worker_rsfc      | procesamiento jobs indicadores         |
 | worker_soca      | procesamiento jobs metadatos           |
 | rate_limiter_rsfc| limitador tokens githubAPI worker_rsfc |
-| rate_limiter_soca| limitador tokens githubAPI worker_soca |
 | DashVerse        | observatorio de evaluación             |
+| sw-metadata-bot  | Generación de issues sobre metadatos   |
 
 
 ---
 
-![Diagrama de flujo del sistema](images/flujo_SQOO.png)
+
+![Diagrama de flujo del sistema](docs/images/flujo_SQOO.png)
 
 ---
 
@@ -48,6 +53,3 @@ Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 - Independencia del sistema operativo
 - Aislamiento de dependencias
 - Escalabilidad
-
-
-

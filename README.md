@@ -15,8 +15,9 @@ El objetivo del TFG es diseñar e implementar un sistema reproducible que:
 1. Extraiga automáticamente repositorios de GitHub
 2. Genere metadatos estructurados del software
 3. Evalúe la calidad del software mediante indicadores automáticos
-4. Prepare la información para su integración en dashboards (DashVERSE) y catálogos (SOCA)
-5. Permita orquestar todo el proceso mediante workflows automatizados
+4. Evalúe la calidad de los metadatos del software y suba Issues automáticas a GitHub
+5. Prepare la información para su integración en dashboards (DashVERSE) y catálogos (SOCA)
+6. Permita orquestar todo el proceso mediante workflows automatizados
 
 El sistema se basa en la integración y orquestación de herramientas existentes dentro de una arquitectura desacoplada y reproducible.
 
@@ -28,14 +29,14 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 | Componente       | Rol                                    |
 | ---------------- | -------------------------------------- |
 | n8n              | Orquestación                           |
-| soca_container   | extracción metadatos y repos           |
-| rsfc_container   | creación de jobs                       |
+| soca_container   | extracción metadatos-repos y jobs soca |
+| rsfc_container   | creación de jobs rsfc                  |
 | rabbitmq         | message broker                         |
 | worker_rsfc      | procesamiento jobs indicadores         |
 | worker_soca      | procesamiento jobs metadatos           |
 | rate_limiter_rsfc| limitador tokens githubAPI worker_rsfc |
-| rate_limiter_soca| limitador tokens githubAPI worker_soca |
 | DashVerse        | observatorio de evaluación             |
+| sw-metadata-bot  | Generación de issues sobre metadatos   |
 
 
 ---
@@ -120,10 +121,93 @@ El sistema permite escalar horizontalmente el número de workers mediante docker
 ### 3.5 rate_limiter_rsfc container
 El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitMQ de tamaño 1. Los workers RSFC se esperarán a obtener un token de la cola para procesar los jobs para no saturar de peticiones GitHubAPI y no sobrepasar el RateLimit.
 
+### 3.6 DashVerse Service
+El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/integrations/dashboards` existen 2 plantillas con diversos dashboards, los cuales son:
+
+#### SQOO-org:
+1. KPIs generales:
+   - Total de assessments procesados
+   - Total de repositorios
+   - Total de organizaciones visualizadas
+
+2. Análisis de resultados:
+    **NOTA** la importancia del indicador viene declarada en: https://everse.software/indicators/website/rs_tiers.htm (Relevant for Prototype Tool)
+
+    - Comparación de assessments que pasan los indicadores `Crucial` comparados con los assessments totales
+    - Comparación de assessments que pasan los indicadores `Recommended` comparados con los assessments totales
+    - Comparación de assessments que pasan los indicadores `Good to have` comparados con los assessments totales
 
 
 
-### 3.6 Flujo actual(container n8n)
+#### SQOO-repo:
+1. Relacionado a procesos:
+    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel total de procesos por tier
+    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel de indicador 
+    - Tabla con metadatos de los assessments procesados
+    - Tabla con los procesos fallidos del assessment + sugerencias
+
+Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
+
+Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
+ *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
+
+---
+### 3.7 Integración de sw-metadata-bot
+
+Se ha:
+
+- Integrado `sw-metadata-bot` como herramienta encargada de analizar la calidad de los metadatos de los repositorios procesados
+- Preparado el uso del bot mediante una imagen Docker `sw-metadata-bot:latest`
+- Adaptado su ejecución vía `execute-command` de n8n
+- Configurado el montaje del volumen compartido de `outputs` para persistir los resultados del análisis
+- Generado dinámicamente un archivo `config.json` con la lista de repositorios obtenidos durante el workflow
+- Configurado el uso de `GITHUB_API_TOKEN` para permitir la consulta de repositorios y la publicación de issues
+- Incorporado el análisis incremental mediante `previous_report`, permitiendo reutilizar ejecuciones anteriores cuando se indique
+- Añadida la fase de publicación de issues tras la generación de los informes de metadatos
+
+El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obtener la lista de repositorios que forman parte del análisis. Para cada ejecución se crea un directorio específico dentro de:
+
+- `/outputs/sw-metadata-bot/<target>/`
+
+Dentro de ese directorio se almacena la configuración generada por n8n y las salidas producidas por el bot.
+
+El archivo `config.json` contiene:
+
+1. La lista de repositorios a analizar
+2. El mensaje personalizado que se incluirá en los issues generados
+3. La lista de repositorios excluidos de publicación mediante `opt_outs`
+4. El directorio raíz de salida
+5. El nombre de la ejecución
+6. La etiqueta temporal del snapshot generado
+
+El workflow ejecuta primero el análisis mediante:
+
+- `uv run sw-metadata-bot run-analysis`
+
+Este comando analiza los repositorios indicados en el archivo de configuración, ejecuta las comprobaciones de metadatos y genera los informes necesarios sin publicar todavía los issues.
+
+Después del análisis, el workflow ejecuta la publicación mediante:
+
+- `uv run sw-metadata-bot publish`
+
+Esta fase utiliza el snapshot generado anteriormente y crea los issues en GitHub cuando se detectan problemas o advertencias relacionados con los metadatos del repositorio.
+
+Salida generada:
+
+- `config.json` con la configuración usada en la ejecución
+- `analysis_results.json` con el resumen global del análisis
+- `run_report.json` con las decisiones tomadas para cada repositorio
+- Carpetas individuales por repositorio analizado
+- `issue_report.md` con el contenido legible del issue propuesto
+- `pitfall.jsonld` con los problemas detectados por RSMetaCheck
+- `report.json` con el resumen estructurado del análisis del repositorio
+- `somef_output.json` con la extracción de metadatos realizada
+- Issues en GitHub con sugerencias de mejora de metadatos cuando corresponde
+
+El uso de `sw-metadata-bot` permite completar el pipeline añadiendo una capa de mejora sobre los metadatos obtenidos. Mientras SOCA extrae la información del software y RSFC evalúa indicadores de calidad, el bot revisa los metadatos disponibles y genera recomendaciones accionables para que los repositorios puedan corregir carencias detectadas automáticamente.
+
+
+### 4. Flujo actual(container n8n)
 El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
 
 A diferencia de versiones anteriores, donde el flujo estaba dividido en múltiples workflows (`soca`, `rsfc`, `dashboard`), actualmente se ha **unificado en un único workflow end-to-end**, simplificando la gestión, monitorización y control del proceso.
@@ -167,57 +251,33 @@ El workflow implementa un pipeline completo que abarca:
 - Envío de repositorios a los workers RSFC, evaluando la calidad de software
 - Control de finalización: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
 
-##### 5. Envío de assessments a DashVERSE
+##### 5. Análisis de metadatos con sw-metadata-bot
+
+n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias.
+
+Se ha:
+
+- Generado un `config.json` con los repositorios obtenidos en el workflow
+- Configurado el directorio de salida en `/outputs/sw-metadata-bot/<target>/`
+- Ejecutado el análisis mediante `sw-metadata-bot run-analysis`
+- Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
+- Publicado los issues generados mediante `sw-metadata-bot publish`
+
+Salida generada:
+
+- Informes de análisis por repositorio
+- `run_report.json` con el resumen de la ejecución
+- `issue_report.md` con el contenido del issue propuesto
+- Issues en GitHub con recomendaciones para mejorar los metadatos
+
+##### 6. Envío de assessments a DashVERSE
 
 - Lectura de los archivos generados: `rsfc_assessment.json` por cada repositorio
-- Extracción y transformación de los datos del assessment
-- Separación en tres entidades:
-   - `assessments`: información general del assessment (contexto, tipo, nombre, descripción, fecha de creación del assessment, licencia)
-   - `assessment_software`: información del software evaluado (nombre, versión, URL)
-   - `assessment_checks`: checks individuales del assessment (indicadores, evidencias, resultados)
+- Extracción y transformación de los datos del assessment añadiendo un @id y el `author` como keys del json-ld
+
 - Iteración sobre cada repositorio y sus checks mediante nodos `Split Out`
-- Envío de datos mediante peticiones HTTP POST a la API de DashVERSE:
-   - `/assessments`
-   - `/assessment_software`
-   - `/assessment_checks`
-- Uso de la cabecera `Prefer: resolution=merge-duplicates` para evitar duplicados en la base de datos
-- Persistencia final de los resultados en DashVERSE para su posterior visualización en dashboards
+- Envío de datos mediante peticiones HTTP POST a la API de DashVERSE `/assessments_raw`
 
-
-
-
-
-### 3.7 DashVerse Service
-El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/integrations/dashboards` existen 2 plantillas con diversos dashboards, los cuales son:
-
-#### SQOO-org:
-1. KPIs generales:
-   - Total de assessments procesados
-   - Total de repositorios
-   - Total de organizaciones visualizadas
-
-2. Análisis de resultados:
-    **NOTA** la importancia del indicador viene declarada en: https://everse.software/indicators/website/rs_tiers.htm (Relevant for Prototype Tool)
-
-    - Comparación de assessments que pasan los indicadores `Crucial` comparados con los assessments totales
-    - Comparación de assessments que pasan los indicadores `Recommended` comparados con los assessments totales
-    - Comparación de assessments que pasan los indicadores `Good to have` comparados con los assessments totales
-
-
-
-#### SQOO-repo:
-1. Relacionado a procesos:
-    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel total de procesos por tier
-    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel de indicador 
-    - Tabla con metadatos de los assessments procesados
-    - Tabla con los procesos fallidos del assessment + sugerencias
-
-Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
-
-Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
- *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
-
----
 
 
 
@@ -262,6 +322,9 @@ https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.0
 - DASHVERSE 0.2.0: 
 https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.2.0
 
+- sw-metadata-bot 0.4.2:
+https://github.com/SoftwareUnderstanding/sw-metadata-bot/releases/tag/v0.4.2
+
 - RsMetaCheck 0.2.1:
 https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
       
@@ -271,6 +334,9 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
 #### 5.1 Previa
  Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
    - `GITHUB_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx` siendo `xxxxxx` el token personal de github obtenido desde github
+   - `GITHUB_API_TOKEN` con el mismo formato que el anterior, siendo el `xxxxxx` el token personal de github obtenido desde github, pero con permisos de acceso a los repositorios que se quiera realizar el lanzamiento de issues:
+      - Issues: read and writte
+      - Contents: Read only
 
    - `RABBITMQ_USER` usuario de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
@@ -300,7 +366,9 @@ Siguiendo los pasos en orden secuencial:
    - `rsfc-heavy`:
       - Directorio desde el que crearla: `/containers/rsfc_container` 
       - Mandato: `docker build -t rsfc-heavy .`
-
+   - `sw-metadata-bot`:
+      - Directorio desde el que crearla: `/integrations/sw-metadata-bot-0.4.2`
+      
 2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
 
 3. Acceder a n8n mediante el navegador en http://localhost:5678
@@ -404,15 +472,14 @@ https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/e
 - pensar más dashboards para SQO-ORG
 
  ### General:
-
-
 - Añadir al diagrama de flujo sw-bot
-- Update de la documentación (sw-bot e incorporación al workflow)
 - Realizar un nuevo estudio de consumo de memoria + espacio en disco
-- Ver si merece la pena hacer un RO
-- - documentar manual de uso de usuario de dashverse (ver si hacer)
 - FAIRificar los repositorios mejorando los checks de metadatos
 - (Si da tiempo) automatizar sugerencias para mejorar los repositorios
+
+### Opcional:
+- Ver si merece la pena hacer un RO
+- documentar manual de uso de usuario de dashverse (ver si hacer)
 
 
 

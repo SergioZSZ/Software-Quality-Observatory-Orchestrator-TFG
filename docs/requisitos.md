@@ -1,5 +1,6 @@
+
 ## 4. Requisitos(Requirements)
-    
+#### Requisitos generales
    - Docker/Docker Desktop
    - Estar loggeado en Docker/Docker Desktop
 
@@ -39,6 +40,9 @@ https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.0
 - DASHVERSE 0.2.0: 
 https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.2.0
 
+- sw-metadata-bot 0.4.2:
+https://github.com/SoftwareUnderstanding/sw-metadata-bot/releases/tag/v0.4.2
+
 - RsMetaCheck 0.2.1:
 https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
-   
+      

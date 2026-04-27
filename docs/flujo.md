@@ -1,4 +1,5 @@
-### 3.7 Flujo actual(container n8n)
+
+### 4. Flujo actual(container n8n)
 El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
 
 A diferencia de versiones anteriores, donde el flujo estaba dividido en múltiples workflows (`soca`, `rsfc`, `dashboard`), actualmente se ha **unificado en un único workflow end-to-end**, simplificando la gestión, monitorización y control del proceso.
@@ -42,24 +43,29 @@ El workflow implementa un pipeline completo que abarca:
 - Envío de repositorios a los workers RSFC, evaluando la calidad de software
 - Control de finalización: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
 
-##### 5. Envío de assessments a DashVERSE
+##### 5. Análisis de metadatos con sw-metadata-bot
+
+n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias.
+
+Se ha:
+
+- Generado un `config.json` con los repositorios obtenidos en el workflow
+- Configurado el directorio de salida en `/outputs/sw-metadata-bot/<target>/`
+- Ejecutado el análisis mediante `sw-metadata-bot run-analysis`
+- Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
+- Publicado los issues generados mediante `sw-metadata-bot publish`
+
+Salida generada:
+
+- Informes de análisis por repositorio
+- `run_report.json` con el resumen de la ejecución
+- `issue_report.md` con el contenido del issue propuesto
+- Issues en GitHub con recomendaciones para mejorar los metadatos
+
+##### 6. Envío de assessments a DashVERSE
 
 - Lectura de los archivos generados: `rsfc_assessment.json` por cada repositorio
-- Extracción y transformación de los datos del assessment
-- Separación en tres entidades:
-   - `assessments`: información general del assessment (contexto, tipo, nombre, descripción, fecha de creación del assessment, licencia)
-   - `assessment_software`: información del software evaluado (nombre, versión, URL)
-   - `assessment_checks`: checks individuales del assessment (indicadores, evidencias, resultados)
+- Extracción y transformación de los datos del assessment añadiendo un @id y el `author` como keys del json-ld
+
 - Iteración sobre cada repositorio y sus checks mediante nodos `Split Out`
-- Envío de datos mediante peticiones HTTP POST a la API de DashVERSE:
-   - `/assessments`
-   - `/assessment_software`
-   - `/assessment_checks`
-- Uso de la cabecera `Prefer: resolution=merge-duplicates` para evitar duplicados en la base de datos
-- Persistencia final de los resultados en DashVERSE para su posterior visualización en dashboards
-
-
-
-
-
----
+- Envío de datos mediante peticiones HTTP POST a la API de DashVERSE `/assessments_raw`
