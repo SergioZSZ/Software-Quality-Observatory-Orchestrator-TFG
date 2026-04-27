@@ -1,4 +1,3 @@
-
 ### 4. Flujo actual(container n8n)
 El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
 
@@ -12,9 +11,10 @@ El workflow implementa un pipeline completo que abarca:
 
 1. **Extracción de repositorios**
 2. **Procesamiento de metadatos (SOCA)**
-3. **Generación de portal/**
+3. **Generación de portal software**
 4. **Evaluación de calidad (RSFC)**
-4. **Envío de indicadores a DashVERSE**
+5. **Evaluación de metadatos(sw-metadata-bot)**
+6. **Envío de indicadores a DashVERSE**
 
 ---
 
@@ -45,12 +45,10 @@ El workflow implementa un pipeline completo que abarca:
 
 ##### 5. Análisis de metadatos con sw-metadata-bot
 
-n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias.
-
-Se ha:
+n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias. Todo siguiento este proceso:
 
 - Generado un `config.json` con los repositorios obtenidos en el workflow
-- Configurado el directorio de salida en `/outputs/sw-metadata-bot/<target>/`
+
 - Ejecutado el análisis mediante `sw-metadata-bot run-analysis`
 - Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
 - Publicado los issues generados mediante `sw-metadata-bot publish`

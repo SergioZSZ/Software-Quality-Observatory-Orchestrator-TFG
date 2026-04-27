@@ -169,43 +169,6 @@ El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obt
 
 - `/outputs/sw-metadata-bot/<target>/`
 
-Dentro de ese directorio se almacena la configuración generada por n8n y las salidas producidas por el bot.
-
-El archivo `config.json` contiene:
-
-1. La lista de repositorios a analizar
-2. El mensaje personalizado que se incluirá en los issues generados
-3. La lista de repositorios excluidos de publicación mediante `opt_outs`
-4. El directorio raíz de salida
-5. El nombre de la ejecución
-6. La etiqueta temporal del snapshot generado
-
-El workflow ejecuta primero el análisis mediante:
-
-- `uv run sw-metadata-bot run-analysis`
-
-Este comando analiza los repositorios indicados en el archivo de configuración, ejecuta las comprobaciones de metadatos y genera los informes necesarios sin publicar todavía los issues.
-
-Después del análisis, el workflow ejecuta la publicación mediante:
-
-- `uv run sw-metadata-bot publish`
-
-Esta fase utiliza el snapshot generado anteriormente y crea los issues en GitHub cuando se detectan problemas o advertencias relacionados con los metadatos del repositorio.
-
-Salida generada:
-
-- `config.json` con la configuración usada en la ejecución
-- `analysis_results.json` con el resumen global del análisis
-- `run_report.json` con las decisiones tomadas para cada repositorio
-- Carpetas individuales por repositorio analizado
-- `issue_report.md` con el contenido legible del issue propuesto
-- `pitfall.jsonld` con los problemas detectados por RSMetaCheck
-- `report.json` con el resumen estructurado del análisis del repositorio
-- `somef_output.json` con la extracción de metadatos realizada
-- Issues en GitHub con sugerencias de mejora de metadatos cuando corresponde
-
-El uso de `sw-metadata-bot` permite completar el pipeline añadiendo una capa de mejora sobre los metadatos obtenidos. Mientras SOCA extrae la información del software y RSFC evalúa indicadores de calidad, el bot revisa los metadatos disponibles y genera recomendaciones accionables para que los repositorios puedan corregir carencias detectadas automáticamente.
-
 
 ### 4. Flujo actual(container n8n)
 El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
@@ -220,9 +183,10 @@ El workflow implementa un pipeline completo que abarca:
 
 1. **Extracción de repositorios**
 2. **Procesamiento de metadatos (SOCA)**
-3. **Generación de portal/**
+3. **Generación de portal software**
 4. **Evaluación de calidad (RSFC)**
-4. **Envío de indicadores a DashVERSE**
+5. **Evaluación de metadatos(sw-metadata-bot)**
+6. **Envío de indicadores a DashVERSE**
 
 ---
 
@@ -253,12 +217,10 @@ El workflow implementa un pipeline completo que abarca:
 
 ##### 5. Análisis de metadatos con sw-metadata-bot
 
-n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias.
-
-Se ha:
+n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias. Todo siguiento este proceso:
 
 - Generado un `config.json` con los repositorios obtenidos en el workflow
-- Configurado el directorio de salida en `/outputs/sw-metadata-bot/<target>/`
+
 - Ejecutado el análisis mediante `sw-metadata-bot run-analysis`
 - Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
 - Publicado los issues generados mediante `sw-metadata-bot publish`
