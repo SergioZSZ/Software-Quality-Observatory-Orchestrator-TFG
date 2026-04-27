@@ -1,0 +1,42 @@
+name: Example - Run SW Metadata Bot Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      config-file:
+        description: 'Config file path (default: assets/example_list_repo.json)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run SW Metadata Bot analysis
+        id: analysis
+        uses: ./.github/actions/run-analysis
+        with:
+          config-file: ${{ inputs.config-file || 'assets/example_list_repo.json' }}
+
+      - name: Display analysis results
+        run: |
+          echo "✅ Analysis completed successfully!"
+          echo "📁 Results stored in: ${{ steps.analysis.outputs.analysis-root }}"
+          echo "📅 Snapshot tag: ${{ steps.analysis.outputs.timestamp }}"
+          echo ""
+          echo "Generated files:"
+          ls -lah "${{ steps.analysis.outputs.analysis-root }}/" || echo "Directory not found"
+
+      - name: Upload analysis results
+        uses: actions/upload-artifact@v7
+        with:
+          name: analysis-results
+          path: ${{ steps.analysis.outputs.analysis-root }}/
+          retention-days: 30
+        if: always()

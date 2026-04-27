@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-04-27T09:58:56Z",
+  "summary": {
+    "evaluated_repositories": {
+      "github_com_sergiozsz_os_ia_pipegrobid": {
+        "url": "https://github.com/SergioZSZ/OS-IA-Pipegrobid",
+        "commit_id": "1c06da3b1f3db7090ecdc1999f4faffb0ddde05e"
+      },
+      "github_com_sergiozsz_software_quality_observatory_orchestrator_tfg": {
+        "url": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG",
+        "commit_id": "6904a8324f4ee208e84fdf8ca3c426ae39b0a139"
+      }
+    }
+  }
+}

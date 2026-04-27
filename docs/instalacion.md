@@ -21,7 +21,7 @@
     
     El token se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error).
 
-    El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/dashboard`
+    El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`
 
 
 #### 5.2 Instalación/Despliegue del orquestador
@@ -49,7 +49,7 @@ Siguiendo los pasos en orden secuencial:
 
 
 #### 5.3 Instalación/Despliegue de DashVERSE
-Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no powershell de windows (por ejemplo Git Bash https://git-scm.com/install/windows). este proceso inicial hacerlo dentro del directorio `/DashVERSE`
+Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no powershell de windows (por ejemplo Git Bash https://git-scm.com/install/windows). este proceso inicial hacerlo dentro del directorio `/integrations/DashVERSE-0.2.0`
 
 1. instalar minikube,  kubectl, y helm (docker instalado de antes)
       mandato: `pip install minikube kubectl helm`
@@ -63,7 +63,7 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
       para comprobar que  kubernetes responde usar este mandato:
       ``kubectl get nodes`` y si funciona y se crea el nodo todo ok
 
-4. desplegar y montar el servicio con el archivo make del directorio `/DashVERSE`
+4. desplegar y montar el servicio con el archivo make del directorio `/integrations/DashVERSE-0.2.0`
       mandato: `make deploy`
 
 5. Comprobar que se haya desplegado bien todo
@@ -97,7 +97,7 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 
 10. Se necesita un token jwt para las peticiones desde n8n. Para ello con el servicio desplegado ir a http://localhost:8000 y hacerse una cuenta EVERSE. Después hacer login y generar un token auth. Expiran tras un mes. Este token debe ponerse en los nodos que hacen peticiones http a dashVERSE del flujo n8n en el campo Authorization dentro de Headers como `Bearer TU_TOKEN`.
 
-11. Importar los dashboards encontrados en `/dashboards`
+11. Importar los dashboards encontrados en `/integrations/dashboards`
 
 
 
@@ -110,6 +110,6 @@ Todo lo relacionado con DashVESE se deberá hacer desde una terminal Unix, no po
 ##### encenderlo:
 1. encendemos cluster: ``minikube start`` 
 2. lo reiniciamos ``kubectl delete pods --all -n dashverse``
-3. forwarding de puertos desde ``/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
+3. forwarding de puertos desde ``/integrations/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
 
 

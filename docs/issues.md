@@ -17,7 +17,8 @@
 
  ### General:
 
-- Añadir al diagrama de flujo rsmetachek
+- Añadir al diagrama de flujo sw-bot
+- Update de la documentación (sw-bot e incorporación al workflow)
 - Realizar un nuevo estudio de consumo de memoria + espacio en disco
 - Ver si merece la pena hacer un RO
 - FAIRificar los repositorios mejorando los checks de metadatos

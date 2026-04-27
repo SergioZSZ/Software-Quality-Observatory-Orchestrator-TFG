@@ -1,0 +1,39 @@
+{
+  "run_metadata": {
+    "generated_at": "2026-04-27T09:58:29Z",
+    "dry_run": true,
+    "analysis_summary_file": "20260427\\analysis_results.json",
+    "previous_report_source": null
+  },
+  "counters": {
+    "total": 1,
+    "created": 0,
+    "simulated": 0,
+    "updated_by_comment": 0,
+    "closed": 0,
+    "skipped": 0,
+    "failed": 1
+  },
+  "records": [
+    {
+      "repo_url": "https://github.com/SergioZSZ/OS-IA-Pipegrobid",
+      "platform": "github",
+      "pitfalls_count": 0,
+      "warnings_count": 0,
+      "issue_url": null,
+      "analysis_date": "unknown",
+      "sw_metadata_bot_version": "0.4.2",
+      "rsmetacheck_version": "unknown",
+      "pitfalls_ids": [],
+      "warnings_ids": [],
+      "action": "failed",
+      "reason_code": "missing_pitfall_file",
+      "findings_signature": "",
+      "current_commit_id": "1c06da3b1f3db7090ecdc1999f4faffb0ddde05e",
+      "dry_run": true,
+      "issue_persistence": "none",
+      "file": "20260427\\github_com_sergiozsz_os_ia_pipegrobid\\pitfall.jsonld",
+      "error": "Missing pitfall file: C:\\Users\\jzaba\\Documents\\GitHub\\SQOO_TFG\\integrations\\sw-metadata-bot-0.4.2\\assets\\example_run\\20260427\\github_com_sergiozsz_os_ia_pipegrobid\\pitfall.jsonld"
+    }
+  ]
+}

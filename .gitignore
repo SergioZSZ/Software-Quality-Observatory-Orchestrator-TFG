@@ -35,4 +35,6 @@ postgres_data/
 .DS_Store
 Thumbs.db
 
-AGENTS.md
+
+# integrations
+integrations/ignore.md

@@ -1,0 +1,16 @@
+{
+  "repositories": [
+    "https://github.com/SergioZSZ/OS-IA-Pipegrobid",
+    "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG"
+  ],
+  "issues": {
+    "custom_message": "This issue was created automatically after running metadata quality checks. Several warnings or pitfalls were detected and may be worth reviewing.",
+    "opt_outs": []
+  },
+  "outputs": {
+    "root_dir": "assets",
+    "run_name": "example_run",
+    "snapshot_tag_format": "%Y%m%d"
+  },
+  "target": "SergioZSZ"
+}

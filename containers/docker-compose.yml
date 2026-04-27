@@ -22,6 +22,7 @@ services:
     environment:
       # *** Privadas ***
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
       - OUTPUTS=${OUTPUTS}
       # *** General ***
       - GENERIC_TIMEZONE=Europe/Madrid

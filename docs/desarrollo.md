@@ -65,7 +65,7 @@ El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitM
 
 
 ### 3.6 DashVerse Service
-El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/DashVERSE_dashboard` existen 2 plantillas con diversos dashboards, los cuales son:
+El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/integrations/dashboards` existen 2 plantillas con diversos dashboards, los cuales son:
 
 #### SQOO-org:
 1. KPIs generales:
@@ -89,7 +89,7 @@ El servicio DashVerse sirve para la creación y visualización de los dashboards
     - Tabla con metadatos de los assessments procesados
     - Tabla con los procesos fallidos del assessment + sugerencias
 
-Con las plantillas dada en `/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
+Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
 
 Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
  *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
