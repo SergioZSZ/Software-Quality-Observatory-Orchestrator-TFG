@@ -32,7 +32,7 @@
         "Windows",
         "macOS"
     ],
-    "programmingLanguage": "python>=3.11",
+    "programmingLanguage": "Python 3.11",
     "relatedLink": [
         "https://github.com/oeg-upm/soca",
         "https://github.com/oeg-upm/soca",
