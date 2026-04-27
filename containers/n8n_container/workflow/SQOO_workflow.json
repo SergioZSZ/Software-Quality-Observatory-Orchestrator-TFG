@@ -88,19 +88,6 @@
     },
     {
       "parameters": {
-        "command": "=find /root/.n8n-files/rsfc/{{$node[\"Target\"].json.target}}/ -type f -name \"*.json\" | wc -l"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        512,
-        240
-      ],
-      "id": "494fc188-126f-4abc-9416-889fed03ba53",
-      "name": "find assessments"
-    },
-    {
-      "parameters": {
         "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
@@ -169,7 +156,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        96,
+        144,
         112
       ],
       "id": "2536b6fa-79d2-4cee-82f4-28ef508fb3c4",
@@ -185,7 +172,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        2064,
+        2736,
         -128
       ],
       "id": "553108b9-d35e-4c80-800f-ac5aabac976d",
@@ -198,7 +185,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1328,
+        1296,
         -128
       ],
       "id": "0ab9b08a-3212-4ac4-a95e-79e8a9ca3c21",
@@ -207,7 +194,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "{\n  \"target\": \"SergioZSZ\",\n  \"type\": \"user\",\n  \"mode\": \"auto\",\n  \"repos\": \"\" \n}",
+        "jsonOutput": "{\n  \"target\": \"SergioZSZ\",\n  \"type\": \"user\",\n  \"mode\": \"auto\",\n  \"repos\": \"\" ,\n  \"previous_report\": \"\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -298,7 +285,7 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        2320,
+        2960,
         -128
       ],
       "id": "6f56ea12-db0d-4107-b6e6-0c7b6fcb460b",
@@ -364,50 +351,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        2720,
+        3488,
         -128
       ],
       "id": "df270f38-44de-49c6-8fa3-d661f611f835",
       "name": "Post assessments_raw"
-    },
-    {
-      "parameters": {
-        "mode": "raw",
-        "jsonOutput": "  {\n    \"repos_url\": [\n\"https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG\",\n\"https://github.com/oeg-upm/soca\",\n\"https://github.com/oeg-upm/rsfc\",\n\"https://github.com/FAIR2Adapt/ro-crate-generation-notebooks\"\n    ],\n    \"repo_count\": 5\n  }",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        1248,
-        -496
-      ],
-      "id": "16a233c5-cf8b-47ce-a437-7dfb7272f0bd",
-      "name": "Edit Fields"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -1856,
-        112
-      ],
-      "id": "c421dbb5-7f90-4fde-9d77-6b9253a97629",
-      "name": "When clicking ‘Execute workflow’"
-    },
-    {
-      "parameters": {
-        "jsCode": "const target = \"oeg-fair-sergio\"\n\nreturn $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      target,\n      repo_name: url.split(\"/\").pop(),\n    }\n  };\n});"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1728,
-        -512
-      ],
-      "id": "68a60f43-4b39-468d-b4bf-afb0261b037d",
-      "name": "Code url->target-name"
     },
     {
       "parameters": {
@@ -417,8 +365,8 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1488,
-        -512
+        1520,
+        -576
       ],
       "id": "a24e3b97-955f-4e15-82e3-0179af2c77a0",
       "name": "Split Out"
@@ -430,7 +378,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2480,
+        3152,
         -128
       ],
       "id": "7a66df7d-058b-4a55-b504-a17916310ab0",
@@ -445,11 +393,175 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2304,
-        -496
+        3280,
+        -624
       ],
       "id": "6e34bf5d-4392-4945-a8cd-0f6b5250528e",
       "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "command": "=find /root/.n8n-files/rsfc/{{$node[\"Target\"].json.target}}/ -type f -name \"*.json\" | wc -l"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        512,
+        240
+      ],
+      "id": "494fc188-126f-4abc-9416-889fed03ba53",
+      "name": "find rsfc assessments"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "  {\n    \"repos_url\": [\n\"https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG\"\n    ],\n    \"repo_count\": 1\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        -576
+      ],
+      "id": "16a233c5-cf8b-47ce-a437-7dfb7272f0bd",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "const target = \"oeg-fair-sergio\";\n\nreturn $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      target,\n      repo_name: url.split(\"/\").pop(),\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        -544
+      ],
+      "id": "ffe582c5-bb16-4cac-b94b-a4e0e0fb9df2",
+      "name": "Code url->target-name"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        144
+      ],
+      "id": "f4b6f479-075d-407f-aaed-d74d995efa4a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "=mkdir -p /root/.n8n-files/sw-metadata-bot/{{$node[\"Target\"].json.target}}/"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1872,
+        400
+      ],
+      "id": "78ff5856-dc18-4b28-9caf-be3abf0aa915",
+      "name": "Create bot target dir"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        384
+      ],
+      "id": "021f4135-b99e-4853-bff5-3c2d89776a9d",
+      "name": "json -> config.json"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/root/.n8n-files/sw-metadata-bot/{{$node[\"Target\"].json.target}}/config.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        2608,
+        384
+      ],
+      "id": "6cb9a751-a84c-4d45-a2ec-0b45c75c1dd0",
+      "name": "Write config.json"
+    },
+    {
+      "parameters": {
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot:latest \\\nuv run sw-metadata-bot run-analysis \\\n--config-file /app/outputs/sw-metadata-bot/{{$node[\"Target\"].json.target}}/config.json --snapshot-tag {{ $node[\"set config file\"].json.outputs.snapshot_tag }} \\\n{{ $node[\"Target\"].json.previous_report && $node[\"Target\"].json.previous_report.trim() !== \"\" ? \"--previous-report /app/outputs/sw-metadata-bot/\" + $node[\"Target\"].json.target + \"/runs/\" + $node[\"Target\"].json.previous_report + \"/run_report.json\" : \"\" }}\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2816,
+        384
+      ],
+      "id": "7d881cab-7a60-4884-9647-761693e1826a",
+      "name": "bot run analysis"
+    },
+    {
+      "parameters": {
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot:latest \\\nuv run sw-metadata-bot publish \\\n--analysis-root /app/outputs/sw-metadata-bot/{{$node[\"Target\"].json.target}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        3056,
+        384
+      ],
+      "id": "612eacc1-252d-49be-a877-fea6d519facd",
+      "name": "bot publish issues"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2080,
+        384
+      ],
+      "id": "c277466b-bc0e-4821-a617-3899b14db5d3",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"repositories\": {{$json.repositories}},\n  \"issues\": {\n    \"custom_message\": \"This issue was created automatically after running metadata quality checks. Several warnings or pitfalls were detected and may be worth reviewing.\",\n    \"opt_outs\": []\n  },\n  \"outputs\": {\n   \"root_dir\": \"/app/outputs/sw-metadata-bot/{{$json.target}}\",\n    \"run_name\": \"runs\",\n  \"snapshot_tag\": \"{{ $now.format('yyyyMMdd_HHmmss') }}\"\n  },\n  \"target\": {{$json.target}}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2240,
+        384
+      ],
+      "id": "9550c494-43ea-4c7a-8e94-f41753f5af22",
+      "name": "set config file"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"repositories\": {{$json.repos_url}},\n  \"target\": {{ $node[\"Target\"].json.target }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1648,
+        224
+      ],
+      "id": "7f431ab8-dd86-48ce-96bd-6bee8fc982a5",
+      "name": "change repos_url -> repositories"
     }
   ],
   "pinData": {},
@@ -502,12 +614,12 @@
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "find metadatas json",
             "type": "main",
             "index": 0
           },
           {
-            "node": "find metadatas json",
+            "node": "Merge",
             "type": "main",
             "index": 0
           },
@@ -523,18 +635,7 @@
       "main": [
         [
           {
-            "node": "find assessments",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "find assessments": {
-      "main": [
-        [
-          {
-            "node": "Process repocount",
+            "node": "find rsfc assessments",
             "type": "main",
             "index": 0
           }
@@ -556,7 +657,7 @@
       "main": [
         [
           {
-            "node": "find assessments",
+            "node": "find rsfc assessments",
             "type": "main",
             "index": 0
           }
@@ -621,6 +722,11 @@
     "Merge3": {
       "main": [
         [
+          {
+            "node": "change repos_url -> repositories",
+            "type": "main",
+            "index": 0
+          },
           {
             "node": "Split Out1",
             "type": "main",
@@ -709,28 +815,6 @@
         ]
       ]
     },
-    "Edit Fields": {
-      "main": [
-        [
-          {
-            "node": "Split Out",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Target",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Split Out": {
       "main": [
         [
@@ -740,11 +824,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Code url->target-name": {
-      "main": [
-        []
       ]
     },
     "Post assessments_raw": {
@@ -767,6 +846,126 @@
       "main": [
         []
       ]
+    },
+    "find rsfc assessments": {
+      "main": [
+        [
+          {
+            "node": "Process repocount",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code url->target-name": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Target",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create bot target dir": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "json -> config.json": {
+      "main": [
+        [
+          {
+            "node": "Write config.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write config.json": {
+      "main": [
+        [
+          {
+            "node": "bot run analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bot run analysis": {
+      "main": [
+        [
+          {
+            "node": "bot publish issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "set config file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set config file": {
+      "main": [
+        [
+          {
+            "node": "json -> config.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "change repos_url -> repositories": {
+      "main": [
+        [
+          {
+            "node": "Create bot target dir",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -775,7 +974,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "6a9fafd1-9296-4436-9697-0de2a24d8992",
+  "versionId": "2187f6f2-c468-46ba-9178-087ed8534ca8",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
