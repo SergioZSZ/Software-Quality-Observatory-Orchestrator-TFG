@@ -9,7 +9,6 @@
 - pensar más dashboards para SQO-ORG
 
  ### General:
-- Añadir al diagrama de flujo sw-bot
 - (Si da tiempo) automatizar sugerencias para mejorar los repositorios
 
 ### Opcional:
