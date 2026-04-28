@@ -383,6 +383,13 @@ class Metadata(object):
 
         license = self.license()
         if license:
+            
+            # nuevo
+            license_url = safe_dic(license, "value")
+            if not (license_url and str(license_url).startswith("https://api.github.com/licenses/")):
+                license_url = safe_dic(license, "url")
+            ##
+            
             html += self.icon_wrapper(
                 icon_html=f"""<img src="{self.base}repo_icons/license.png" 
                             class="repo-icon"
@@ -392,7 +399,9 @@ class Metadata(object):
                     title='License',
                     body=self.html_license(license),
                     markdown_translation=False),
-                other_field=f'data-url="{safe_dic(license, "url")}"',
+                
+                
+                other_field=f'data-url="{license_url}"',# antes era un safe dict de license, url
                 extra_class='ref-license'
             )
 
@@ -856,7 +865,7 @@ class Metadata(object):
                         """
 
                 body += "<br>"
-                body += "</div>"
+            body += "</div>"
             html += self.icon_wrapper(
                 icon_html=f"""<img src="{self.base}repo_icons/requirements.png"  
                         class="repo-icon" 
