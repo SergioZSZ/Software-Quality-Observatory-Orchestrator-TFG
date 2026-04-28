@@ -1057,9 +1057,24 @@ class Metadata(object):
         usage = None
         if usage_list:
             usage = ''
+            '''
             for u in usage_list:
                 usage += u['result']['value'] + '\n'
-        
+            '''
+        # ipmlementacion propia, añade los títulos del markdown
+            for u in usage_list:
+                result = safe_dic(u, 'result')
+                value = safe_dic(result, 'value')
+                header = safe_dic(result, 'original_header')
+
+                if header and header.lower() != 'usage':
+                    usage += f'\n### {header}\n\n'
+
+                if value:
+                    usage += value.rstrip() + '\n\n'
+            ###
+            
+            
         run_list = safe_dic(safe_dic(self.md, 'inspect4py'), 'run') # TODO:  inspect4py & run are not keys in the new Results class
         if run_list:
             if isinstance(run_list, list):
