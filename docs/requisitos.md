@@ -31,11 +31,11 @@
 - SOCA 0.0.3: 
 https://github.com/oeg-upm/soca/releases/tag/0.0.3
 
-- RSFC 0.1.3: 
-https://github.com/oeg-upm/rsfc/releases/tag/v0.1.3
+- RSFC 0.1.5: 
+https://github.com/oeg-upm/rsfc/releases/tag/v0.1.5
 
-- SOMEF 0.10.0:
-https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.0
+- SOMEF 0.10.3:
+https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.3
 
 - DASHVERSE 0.2.0: 
 https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.2.0

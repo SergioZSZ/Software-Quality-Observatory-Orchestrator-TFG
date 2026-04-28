@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18879858.svg)](https://doi.org/10.5281/zenodo.18879858)[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)[![GitHub release](https://img.shields.io/github/v/release/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG?include_prereleases)](https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/releases)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18879858.svg)](https://doi.org/10.5281/zenodo.18879858)[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)[![GitHub release](https://img.shields.io/github/v/release/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG?include_prereleases)](https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/releases)[![RSFC score](https://img.shields.io/badge/rsfc-coverage_79%25-green)]
 
 **🚧🚧 STILL IN PROCRESS 🚧🚧**
 
@@ -275,11 +275,11 @@ Salida generada:
 - SOCA 0.0.3: 
 https://github.com/oeg-upm/soca/releases/tag/0.0.3
 
-- RSFC 0.1.3: 
-https://github.com/oeg-upm/rsfc/releases/tag/v0.1.3
+- RSFC 0.1.5: 
+https://github.com/oeg-upm/rsfc/releases/tag/v0.1.5
 
-- SOMEF 0.10.0:
-https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.0
+- SOMEF 0.10.3:
+https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.3
 
 - DASHVERSE 0.2.0: 
 https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.2.0

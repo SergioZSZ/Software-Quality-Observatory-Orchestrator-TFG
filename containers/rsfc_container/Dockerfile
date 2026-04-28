@@ -15,8 +15,8 @@ RUN poetry install --no-root
 
 
 # rsfc 
-COPY rsfc-main ./rsfc-main
-RUN pip install -e ./rsfc-main
+COPY rsfc-0.1.5 ./rsfc-0.1.5
+RUN pip install -e ./rsfc-0.1.5
 
 
 # instalacion de nltk para somef de soca
