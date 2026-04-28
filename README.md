@@ -429,7 +429,6 @@ https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/e
 ### DASHVERSE:
 
 #### Dashboards:
-- cambiar top quality assessments por ranking tabla, ver nuevas scores
 - pensar más dashboards para SQO-ORG
 
  ### General:
