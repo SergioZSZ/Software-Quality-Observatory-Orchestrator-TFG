@@ -441,6 +441,8 @@ https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/e
 - documentar manual de uso de usuario de dashverse
 
 
-
+# 8. Support
+Para cualquier problema escribir una issue en:
+https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/issues
 
 
