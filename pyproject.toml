@@ -17,5 +17,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
 soca = {path = "containers/soca_container/soca", develop = true}
-rsfc = {path = "containers/rsfc_container/rsfc-main", develop = true}
+rsfc = {path = "containers/rsfc_container/rsfc-0.1.5", develop = true}
 
