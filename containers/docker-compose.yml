@@ -21,7 +21,6 @@ services:
       - "998"
     environment:
       # *** Privadas ***
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
       - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
       - OUTPUTS=${OUTPUTS}
       # *** General ***
@@ -64,7 +63,7 @@ services:
     networks:
       - net
     environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_TOKEN=${GITHUB_API_TOKEN}
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
@@ -96,7 +95,7 @@ services:
     volumes:
       - ./outputs:/app/outputs
     environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_TOKEN=${GITHUB_API_TOKEN}
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}

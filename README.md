@@ -1,6 +1,6 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18879858.svg)](https://doi.org/10.5281/zenodo.18879858)[![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)[![GitHub release](https://img.shields.io/github/v/release/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG?include_prereleases)](https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/releases)
 
-**🚧🚧 STILL IN PROGRESS 🚧🚧**
+**🚧🚧 STILL IN PROCRESS 🚧🚧**
 
 Documentación detallada en : https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/
 
@@ -295,8 +295,7 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
 
 #### 5.1 Previa
  Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
-   - `GITHUB_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx` siendo `xxxxxx` el token personal de github obtenido desde github
-   - `GITHUB_API_TOKEN` con el mismo formato que el anterior, siendo el `xxxxxx` el token personal de github obtenido desde github, pero con permisos de acceso a los repositorios que se quiera realizar el lanzamiento de issues:
+   - `GITHUB_API_TOKEN`: siguiendo el formato `GITHUB_TOKEN=xxxxxx`, siendo el `xxxxxx` el token personal obtenido desde github, pero con permisos de acceso a los repositorios que se quiera realizar el lanzamiento de issues:
       - Issues: read and writte
       - Contents: Read only
 

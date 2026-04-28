@@ -3,8 +3,8 @@
 
 #### 5.1 Previa
  Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
-   - `GITHUB_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx` siendo `xxxxxx` el token personal de github obtenido desde github
-   - `GITHUB_API_TOKEN` con el mismo formato que el anterior, siendo el `xxxxxx` el token personal de github obtenido desde github, pero con permisos de acceso a los repositorios que se quiera realizar el lanzamiento de issues:
+
+   - `GITHUB_API_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx`, siendo el `xxxxxx` el token personal de github obtenido desde github, pero con permisos de acceso a los repositorios que se quiera realizar el lanzamiento de issues:
       - Issues: read and writte
       - Contents: Read only
 
