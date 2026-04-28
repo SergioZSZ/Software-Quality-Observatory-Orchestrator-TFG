@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{ $json.target }} \\\n-e TYPE={{ $json.type }} \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest \\\npython -m soca_runner.main \\\n{{ $json.mode === \"manual\" \n    ? \"--repos /app/outputs/\" + $json.repos + \" --name \" + $json.target \n    : \"\" \n}}"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{ $json.target }} \\\n-e TYPE={{ $json.type }} \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest \\\npython -m soca_runner.main \\\n{{ $json.mode === \"manual\" \n    ? \"--repos /app/outputs/\" + $json.repos + \" --name \" + $json.target \n    : \"\" \n}}"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -49,7 +49,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Target\"].json.target \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Target\"].json.target \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -62,7 +62,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Target\"].json.target}} \\\n-e TYPE={{$node[\"Target\"].json.type}} \\\n-e GITHUB_TOKEN={{ $env.GITHUB_TOKEN }} \\\n-e RABBITMQ_HOST=rabbitmq \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Target\"].json.target}} \\\n-e TYPE={{$node[\"Target\"].json.type}} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -351,7 +351,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3488,
+        3408,
         -128
       ],
       "id": "df270f38-44de-49c6-8fa3-d661f611f835",
@@ -974,7 +974,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "2187f6f2-c468-46ba-9178-087ed8534ca8",
+  "versionId": "7c24c8c5-861d-4ddc-a9be-1c5b3ee0a8cd",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
