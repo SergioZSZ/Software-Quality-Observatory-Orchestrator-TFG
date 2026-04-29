@@ -20,12 +20,12 @@ El objetivo del TFG es diseñar e implementar un sistema reproducible que:
 6. Permita orquestar todo el proceso mediante workflows automatizados
 
 El sistema se basa en la integración y orquestación de herramientas existentes dentro de una arquitectura desacoplada y reproducible.
-
+---
 
 
 
 ## 2. Arquitectura del sistema
----
+
 | Componente       | Rol                                    |
 | ---------------- | -------------------------------------- |
 | n8n              | Orquestación                           |
@@ -39,12 +39,12 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 | sw-metadata-bot  | Generación de issues sobre metadatos   |
 
 
----
+
 
 
 ![Diagrama de flujo del sistema](docs/images/flujo_SQOO.png)
 
----
+
 
 Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 
@@ -53,7 +53,7 @@ Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 - Independencia del sistema operativo
 - Aislamiento de dependencias
 - Escalabilidad
-
+---
 
 
 ## 3. Desarrollo
@@ -151,7 +151,7 @@ Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filteri
 Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
  *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
 
----
+
 ### 3.7 Integración de sw-metadata-bot
 
 Se ha:
@@ -168,6 +168,7 @@ Se ha:
 El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obtener la lista de repositorios que forman parte del análisis. Para cada ejecución se crea un directorio específico dentro de:
 
 - `/outputs/sw-metadata-bot/<target>/`
+---
 
 
 ### 4. Flujo actual(container n8n)
@@ -175,7 +176,7 @@ El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecuci
 
 A diferencia de versiones anteriores, donde el flujo estaba dividido en múltiples workflows (`soca`, `rsfc`, `dashboard`), actualmente se ha **unificado en un único workflow end-to-end**, simplificando la gestión, monitorización y control del proceso.
 
----
+
 
 #### Descripción general del flujo
 
@@ -239,7 +240,7 @@ Salida generada:
 
 - Iteración sobre cada repositorio y sus checks mediante nodos `Split Out`
 - Envío de datos mediante peticiones HTTP POST a la API de DashVERSE `/assessment_raw`
-
+---
 
 
 
@@ -290,6 +291,8 @@ https://github.com/SoftwareUnderstanding/sw-metadata-bot/releases/tag/v0.4.2
 - RsMetaCheck 0.2.1:
 https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
       
+---
+
 
 ## 5. Instalación/Despliegue
 
@@ -405,10 +408,8 @@ Todo este proceso se deberá hacer desde una terminal Unix, no powershell de win
 1. encendemos cluster: ``minikube start`` 
 2. lo reiniciamos ``kubectl delete pods --all -n dashverse``
 3. forwarding de puertos desde ``/integrations/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
-
-
-
 ---
+
 
 
 ## 6. Estudios sobre el proyecto
@@ -420,6 +421,8 @@ https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/e
 
 **Estudio sobre RAM y espacio del dispositivo:**
 *In progress*
+---
+
 
 
 # 7. Issues
@@ -438,6 +441,8 @@ https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/e
 - Ver si merece la pena hacer un RO
 - Realizar un nuevo estudio de consumo de memoria + espacio en disco
 - documentar manual de uso de usuario de dashverse
+---
+
 
 
 # 8. Support
