@@ -18,11 +18,11 @@
       - Windows:  ``winget install -e --id Kubernetes.minikube``
       
    - Helm      
-      - Linux:    ``sudo snap install kubectl --classic``
+      - Linux:    ``sudo snap install helm --classic``
       - Windows:  ``winget install -e --id Helm.Helm``
 
    - Kubectl
-      - Linux:    ``sudo snap install helm --classic``
+      - Linux:    ``sudo snap install kubectl --classic``
       - Windows:  ``winget install -e --id Kubernetes.kubectl``
       
 

@@ -249,6 +249,7 @@ Salida generada:
 
 
 
+
 ## 4. Requisitos(Requirements)
 #### Requisitos generales
    - Docker/Docker Desktop
@@ -268,11 +269,11 @@ Salida generada:
       - Windows:  ``winget install -e --id Kubernetes.minikube``
       
    - Helm      
-      - Linux:    ``sudo snap install kubectl --classic``
+      - Linux:    ``sudo snap install helm --classic``
       - Windows:  ``winget install -e --id Helm.Helm``
 
    - Kubectl
-      - Linux:    ``sudo snap install helm --classic``
+      - Linux:    ``sudo snap install kubectl --classic``
       - Windows:  ``winget install -e --id Kubernetes.kubectl``
       
 
@@ -296,6 +297,7 @@ https://github.com/SoftwareUnderstanding/sw-metadata-bot/releases/tag/v0.4.2
 
 - RsMetaCheck 0.2.1:
 https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
+      
       
 ---
 
