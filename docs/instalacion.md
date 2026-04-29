@@ -1,10 +1,8 @@
-
 ## 5. Instalación/Despliegue
 
 #### 5.1 Previa
  Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
-
-   - `GITHUB_API_TOKEN` siguiendo el formato `GITHUB_TOKEN=xxxxxx`, siendo el `xxxxxx` el token personal de github obtenido desde github, pero con permisos de acceso a los repositorios que se quiera realizar el lanzamiento de issues:
+   - `GITHUB_API_TOKEN`: siguiendo el formato `GITHUB_TOKEN=xxxxxx`, siendo el `xxxxxx` el token personal obtenido desde github, pero con permisos de acceso a los repositorios que se quiera realizar el lanzamiento de issues:
       - Issues: read and writte
       - Contents: Read only
 
@@ -19,11 +17,12 @@
 
    - `DASHBOARD_REPO_URL` la URL al dashboard repo desplegado, `http://localhost:8088/superset/dashboard/nº_de_dashboard/` en caso de seguir las indicaciones del README y lanzarlo en local
 
-    ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS` y `DASHBOARD_URL`. 
-    
-    El token se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error).
+      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS` y `DASHBOARD_URL`. 
 
-    El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`
+**A tener en cuenta**:  
+-  El token se debe obtener desde GitHub y generarlo con la opción 'All repositories' o seleccionar los repositorios sobre los que se va a querer interactuar y subir las Issues. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
+
+-  El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`
 
 
 #### 5.2 Instalación/Despliegue del orquestador
@@ -114,7 +113,3 @@ Todo este proceso se deberá hacer desde una terminal Unix, no powershell de win
 1. encendemos cluster: ``minikube start`` 
 2. lo reiniciamos ``kubectl delete pods --all -n dashverse``
 3. forwarding de puertos desde ``/integrations/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
-
-
-
----

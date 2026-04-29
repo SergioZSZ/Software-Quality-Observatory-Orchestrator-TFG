@@ -20,6 +20,7 @@ El objetivo del TFG es diseñar e implementar un sistema reproducible que:
 6. Permita orquestar todo el proceso mediante workflows automatizados
 
 El sistema se basa en la integración y orquestación de herramientas existentes dentro de una arquitectura desacoplada y reproducible.
+
 ---
 
 
@@ -53,6 +54,7 @@ Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 - Independencia del sistema operativo
 - Aislamiento de dependencias
 - Escalabilidad
+
 ---
 
 
@@ -168,6 +170,7 @@ Se ha:
 El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obtener la lista de repositorios que forman parte del análisis. Para cada ejecución se crea un directorio específico dentro de:
 
 - `/outputs/sw-metadata-bot/<target>/`
+
 ---
 
 
@@ -189,7 +192,7 @@ El workflow implementa un pipeline completo que abarca:
 5. **Evaluación de metadatos(sw-metadata-bot)**
 6. **Envío de indicadores a DashVERSE**
 
----
+
 
 ####  Etapas del workflow
 
@@ -240,6 +243,7 @@ Salida generada:
 
 - Iteración sobre cada repositorio y sus checks mediante nodos `Split Out`
 - Envío de datos mediante peticiones HTTP POST a la API de DashVERSE `/assessment_raw`
+
 ---
 
 
@@ -313,11 +317,12 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
 
    - `DASHBOARD_REPO_URL` la URL al dashboard repo desplegado, `http://localhost:8088/superset/dashboard/nº_de_dashboard/` en caso de seguir las indicaciones del README y lanzarlo en local
 
-    ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS` y `DASHBOARD_URL`. 
-    
-    El token se debe obtener desde GitHub y generarlo con la opción 'All repositories', si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error).
+      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS` y `DASHBOARD_URL`. 
 
-    El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`
+**A tener en cuenta**:  
+-  El token se debe obtener desde GitHub y generarlo con la opción 'All repositories' o seleccionar los repositorios sobre los que se va a querer interactuar y subir las Issues. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
+
+-  El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`
 
 
 #### 5.2 Instalación/Despliegue del orquestador
@@ -408,6 +413,7 @@ Todo este proceso se deberá hacer desde una terminal Unix, no powershell de win
 1. encendemos cluster: ``minikube start`` 
 2. lo reiniciamos ``kubectl delete pods --all -n dashverse``
 3. forwarding de puertos desde ``/integrations/DashVERSE-2.0`` en un terminal linux(GitBash por ejemplo): `make port-forward`
+
 ---
 
 
@@ -421,6 +427,7 @@ https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/e
 
 **Estudio sobre RAM y espacio del dispositivo:**
 *In progress*
+
 ---
 
 

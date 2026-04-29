@@ -3,7 +3,7 @@ El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecuci
 
 A diferencia de versiones anteriores, donde el flujo estaba dividido en múltiples workflows (`soca`, `rsfc`, `dashboard`), actualmente se ha **unificado en un único workflow end-to-end**, simplificando la gestión, monitorización y control del proceso.
 
----
+
 
 #### Descripción general del flujo
 
@@ -16,7 +16,7 @@ El workflow implementa un pipeline completo que abarca:
 5. **Evaluación de metadatos(sw-metadata-bot)**
 6. **Envío de indicadores a DashVERSE**
 
----
+
 
 ####  Etapas del workflow
 

@@ -36,9 +36,10 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 
 
 
----
+
 ![Diagrama de flujo](images/flujo_SQOO.png)
----
+
+
 
 
 Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
