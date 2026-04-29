@@ -1,6 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18879858.svg)](https://doi.org/10.5281/zenodo.18879858)[![Project Status: Active ](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)[![GitHub release](https://img.shields.io/github/v/release/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG?include_prereleases)](https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/releases)![RSFC_Coverage](https://img.shields.io/badge/rsfc-coverage_83%25-green)
 
-**🚧🚧 STILL IN PROCRESS 🚧🚧**
 
 Documentación detallada en : https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/
 
@@ -150,8 +149,7 @@ El servicio DashVerse sirve para la creación y visualización de los dashboards
 
 Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
 
-Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
- *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
+
 
 
 ### 3.7 Integración de sw-metadata-bot
@@ -306,9 +304,7 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
 
 #### 5.1 Previa
  Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
-   - `GITHUB_API_TOKEN`: siguiendo el formato `GITHUB_TOKEN=xxxxxx`, siendo el `xxxxxx` el token personal obtenido desde github, pero con permisos de acceso a los repositorios que se quiera realizar el lanzamiento de issues:
-      - Issues: read and writte
-      - Contents: Read only
+   - `GITHUB_API_TOKEN`: siguiendo el formato `GITHUB_TOKEN=xxxxxx`, siendo el `xxxxxx` el token personal obtenido desde github ( token classic) marcándo el scope 'public_repo' 
 
    - `RABBITMQ_USER` usuario de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
@@ -324,7 +320,7 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
       ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS` y `DASHBOARD_URL`. 
 
 **A tener en cuenta**:  
--  El token se debe obtener desde GitHub y generarlo con la opción 'All repositories' o seleccionar los repositorios sobre los que se va a querer interactuar y subir las Issues. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
+-  El token (classic) se debe obtener desde GitHub y seleccionando el sope 'public_repo'. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
 
 -  El nº de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`
 

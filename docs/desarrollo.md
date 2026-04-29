@@ -91,8 +91,6 @@ El servicio DashVerse sirve para la creación y visualización de los dashboards
 
 Con las plantillas dadas en `/integrations/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
 
-Para filtrar por organizaciones es necesario crear un filtro de la siguiente manera:
- *in progress_ filtros de orgs para dashboard, cross-filtering... EN MANUAL DE USUARIO*
 
 
 ### 3.7 Integración de sw-metadata-bot

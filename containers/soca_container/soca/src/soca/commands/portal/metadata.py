@@ -830,7 +830,6 @@ class Metadata(object):
 
             for filetype, items in grouped_reqs.items():
 
-                body += f"<b>{filetype}</b><br>"
 
                 for r in items:
 
@@ -851,7 +850,7 @@ class Metadata(object):
                                 font-size:0.9em;
                                 margin-bottom:10px;
                             ">
-                            {html_md}
+                            {html_md} (source: README.md)
                         </div>
                         """
 
@@ -859,9 +858,9 @@ class Metadata(object):
                     else:
                         display = self.get_repo_relative_path(source)
                         github_url = self.raw_to_github_url(source)
-
+                        source_label = filetype.lower()
                         body += f"""
-                        <a href="{github_url}" target="_blank">{display}</a><br>
+                        <a href="{github_url}" target="_blank">{display}</a> ({source_label})<br>
                         """
 
                 body += "<br>"
