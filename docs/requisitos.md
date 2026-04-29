@@ -14,16 +14,17 @@
       - Windows:  ``winget install --exact --id=OpenTofu.Tofu``
 
    - Minikube
-      - Windows:  ``winget install -e --id Kubernetes.minikube``
       - Linux:    ``sudo snap install minikube --classic``
-
+      - Windows:  ``winget install -e --id Kubernetes.minikube``
+      
    - Helm      
-      - Windows:  ``winget install -e --id Helm.Helm``
       - Linux:    ``sudo snap install kubectl --classic``
+      - Windows:  ``winget install -e --id Helm.Helm``
 
    - Kubectl
-      - Windows:  ``winget install -e --id Kubernetes.kubectl``
       - Linux:    ``sudo snap install helm --classic``
+      - Windows:  ``winget install -e --id Kubernetes.kubectl``
+      
 
 
 
