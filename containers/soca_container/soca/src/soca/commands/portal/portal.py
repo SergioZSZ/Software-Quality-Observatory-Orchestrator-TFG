@@ -12,15 +12,16 @@ from .metadata import Metadata
 from ... import base_dir, __version__
 
 
+#######################Embebido de dashboards
 
 #funcion para insertar de env link dashverse
 def add_dashverse_link(soup, target=None):
     import os
 
 
-    DASHBOARD_ORG_URL = os.getenv("DASHBOARD_ORG_URL", "http://localhost:8088/superset/dashboard/8/")
-    DASHBOARD_REPO_URL = os.getenv("DASHBOARD_REPO_URL", "http://localhost:8088/superset/dashboard/9/")
-
+    DASHBOARD_ORG_URL = "dashboard-org.html"
+    DASHBOARD_REPO_URL = "dashboard-repo.html"
+    
     link_org = soup.find(id="dashverse-org-link")
     link_user = soup.find(id="dashverse-user-link")
     
@@ -29,9 +30,120 @@ def add_dashverse_link(soup, target=None):
 
     if link_user and DASHBOARD_REPO_URL:
         link_user["href"] = DASHBOARD_REPO_URL
-        
-        
-        
+            
+            
+# generación e archivos html del portal
+from pathlib import Path
+import os
+
+def create_embedded_dashboard_pages(portal_output_dir):
+    portal_output_dir = Path(portal_output_dir)
+
+    # URL pública que ve el navegador para cargar Superset
+    superset_public_url = os.getenv("SUPERSET_DOMAIN", "http://localhost:8088")
+
+    # URL pública que ve el navegador para llamar a emb_api
+    emb_api_url = "http://localhost:9001"
+
+    org_embed_id = os.getenv("DASHBOARD_ORG_EMBED_ID", "")
+    repo_embed_id = os.getenv("DASHBOARD_REPO_EMBED_ID", "")
+
+    create_dashboard_page(
+        output_file=portal_output_dir / "dashboard-org.html",
+        title="SQOO Organization Dashboard",
+        dashboard_id=org_embed_id,
+        token_endpoint=f"{emb_api_url}/superset/guest-token/org",
+        superset_domain=superset_public_url,
+    )
+
+    create_dashboard_page(
+        output_file=portal_output_dir / "dashboard-repo.html",
+        title="SQOO Repository Dashboard",
+        dashboard_id=repo_embed_id,
+        token_endpoint=f"{emb_api_url}/superset/guest-token/repo",
+        superset_domain=superset_public_url,
+    )
+
+
+def create_dashboard_page(output_file, title, dashboard_id, token_endpoint, superset_domain):
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{title}</title>
+
+  <script src="https://unpkg.com/@superset-ui/embedded-sdk"></script>
+
+  <style>
+    body {{
+      margin: 0;
+      background: #f4f4f4;
+      font-family: Arial, sans-serif;
+    }}
+
+    header {{
+      height: 50px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      box-sizing: border-box;
+    }}
+
+    header a {{
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+    }}
+
+    #dashboard-container {{
+      width: 100vw;
+      height: calc(100vh - 50px);
+    }}
+
+    #dashboard-container iframe {{
+      width: 100%;
+      height: 100%;
+      border: none;
+    }}
+  </style>
+</head>
+
+<body>
+  <header>
+    <a href="index.html">← Back to Software Catalog</a>
+  </header>
+
+  <div id="dashboard-container"></div>
+
+  <script>
+    supersetEmbeddedSdk.embedDashboard({{
+      id: "{dashboard_id}",
+      supersetDomain: "{superset_domain}",
+      mountPoint: document.getElementById("dashboard-container"),
+      fetchGuestToken: () =>
+        fetch("{token_endpoint}")
+          .then(response => {{
+            if (!response.ok) {{
+              throw new Error("Guest token request failed");
+            }}
+            return response.json();
+          }})
+          .then(data => data.token),
+      dashboardUiConfig: {{
+        hideTitle: false,
+        hideChartControls: false,
+        hideTab: false
+      }}
+    }});
+  </script>
+</body>
+</html>
+"""
+
+    output_file.write_text(html, encoding="utf-8")
+#####################################################3
 
 def generate(repo_metadata_dir, output, title, favicon):
 
@@ -91,6 +203,7 @@ def generate(repo_metadata_dir, output, title, favicon):
     add_favicon(soup, favicon, output)
     
     # insertar links dashverse
+    create_embedded_dashboard_pages(output)
     add_dashverse_link(soup)
 
     # Save index.html

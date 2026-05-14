@@ -5,6 +5,8 @@
 # Soca
 - Mejorada visualización de metadatos de portal software generado por soca
 - Actualizado somef dentro de soca a 0.10.3
+- Añadido filtrado por software por defecto (que no se vean ni ontologías ni webs)
+- Añadido botón `quality` en los cards, incluyendo el report de rsfc y pitfalls/warnings de sw-metadata-bot + link a la Issue generada por él.
 
 
 # RSFC
@@ -13,5 +15,8 @@
 
 # DashVERSE
 - Actualizado dashboard SQOO-ORG con chart TOP 5 softwares
+- Configurado Superset/DashVERSE para permitir dashboards embebidos mediante `EMBEDDED_SUPERSET` y uso del rol `Gamma` y `Public` para usuarios invitados
+- Publicados los dashboards y añadidos los roles `Gamma` y `Public` en la configuración de acceso para permitir visualización
+- Habilitada la visualización embebida del dashboard SQOO-ORG restringida al dominio autorizado http://localhost:8030
 
 

@@ -2,12 +2,8 @@
 
 ## NEXT STEPS:
 
-### DASHVERSE:
-
-#### Dashboards:
-- pensar más dashboards para SQO-ORG
-
  ### General:
+- Update de la documentación completa
 - (Si da tiempo) automatizar sugerencias para mejorar los repositorios
 
 ### Opcional:

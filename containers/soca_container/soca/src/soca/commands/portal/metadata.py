@@ -10,6 +10,7 @@ from pygments.lexers.scdoc import ScdocLexer
 from pygments.formatters import HtmlFormatter
 import mistune
 import os
+import json
 
 
 # from cffconvert import Citation
@@ -27,6 +28,206 @@ class Metadata(object):
 
 ######################################################
 # auxs
+
+#################### QUALITY REPOTS ###############################
+# RSFC
+    #busqueda del directorio output rsfc
+    def rsfc_output_path(self):
+
+        metadata_dir = Path(self.repo_metadata_dir).resolve()
+
+        # /app/outputs/soca/oeg-fair-sergio/metadata
+        target_name = metadata_dir.parent.name
+
+        # /app/outputs
+        outputs_dir = metadata_dir.parent.parent.parent
+
+        repo_url = self.repo_url()
+        if not repo_url:
+            return None
+
+        repo_name = repo_url.rstrip("/").split("/")[-1]
+
+        candidate = outputs_dir / "rsfc" / target_name / repo_name
+
+        return candidate if candidate.exists() else None
+    
+    
+    # return del report
+    def rsfc_report_path(self):
+        rsfc_dir = self.rsfc_output_path()
+        if not rsfc_dir:
+            return None
+
+
+        return rsfc_dir / "RSFC_REPORT.md"
+    
+    # lectura en markdown de rsfc report
+    def rsfc_report_markdown(self):
+        report_path = self.rsfc_report_path()
+        
+        if not report_path:
+            return None
+        try:
+            return report_path.read_text(encoding="utf-8")
+        except Exception:
+            return None
+        
+    # busuqeda del assessment json generado del software
+    def rsfc_assessment_json(self):
+        rsfc_dir = self.rsfc_output_path()
+        if not rsfc_dir:
+            return None
+        
+        # si existe el output cogemos de el el json
+        rsfc_output_dir = rsfc_dir / "rsfc_output"
+        if rsfc_output_dir.exists():
+            
+            file = rsfc_output_dir / "rsfc_assessment.json"
+            if file.exists():
+                data = json.loads(file.read_text(encoding="utf-8"))
+            return data 
+        
+        return None
+            
+            
+    # nº de checks pasados por el assessment
+    def rsfc_report_score(self):
+        assessment = self.rsfc_assessment_json()
+        if not assessment:
+            return None
+
+        checks = assessment.get("checks",[])
+        
+        if not checks:
+            return None
+
+        total = len(checks)
+
+        passed = sum(
+        1
+        for check in checks
+        if str(check.get("output", "")).lower() == "true"
+    )
+        return passed, total
+    
+
+
+# sw-metadata-bot
+
+    def sw_metadata_bot_runs_dir(self):
+        metadata_dir = Path(self.repo_metadata_dir).resolve()
+
+        # Ejemplo:
+        # .../outputs/soca/oeg-fair-sergio/metadata
+        target_name = metadata_dir.parent.name
+
+        # .../outputs
+        outputs_dir = metadata_dir.parent.parent.parent
+
+        return outputs_dir / "sw-metadata-bot" / target_name / "runs"
+
+
+    def sw_metadata_bot_latest_record(self):
+        """
+        Busca el último run_report.json del target actual y devuelve
+        el record correspondiente al repo actual.
+        """
+
+        runs_dir = self.sw_metadata_bot_runs_dir()
+
+        if not runs_dir.exists():
+            return None
+
+        repo_url = self.repo_url()
+        if not repo_url:
+            return None
+
+        repo_url = repo_url.rstrip("/")
+
+        # Coger runs ordenados por nombre descendente.
+        # Con formato yyyyMMdd_HHmmss, el último nombre es el más reciente.
+        run_dirs = [
+            p for p in runs_dir.iterdir()
+            if p.is_dir()
+        ]
+
+        run_dirs = sorted(run_dirs, key=lambda p: p.name, reverse=True)
+
+        for run_dir in run_dirs:
+            report_file = run_dir / "run_report.json"
+
+            if not report_file.exists():
+                continue
+
+            try:
+                report_data = json.loads(report_file.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+
+            records = report_data.get("records", [])
+            run_metadata = report_data.get("run_metadata", {})
+
+            for record in records:
+                record_repo_url = str(record.get("repo_url", "")).rstrip("/")
+
+                if record_repo_url == repo_url:
+                    return {
+                        "record": record,
+                        "run_metadata": run_metadata,
+                        "report_path": report_file
+                    }
+
+        return None
+
+
+
+    def sw_metadata_bot_report_html(self):
+        data = self.sw_metadata_bot_latest_record()
+
+        if not data:
+            return ""
+
+        record = data["record"]
+
+        pitfalls_count = record.get("pitfalls_count", 0) or 0
+        warnings_count = record.get("warnings_count", 0) or 0
+
+        codemeta_status = record.get("codemeta_status")
+        issue_url = record.get("issue_url") or record.get("previous_issue_url")
+
+        # Si no hay codemeta, no mostramos 0/0 porque sería engañoso
+        if codemeta_status == "missing":
+            label = "No CodeMeta metadata available"
+        else:
+            label = f"{pitfalls_count} pitfalls / {warnings_count} warnings"
+
+        help_text = "click to open the related GitHub issue"
+
+        if issue_url:
+            report_text = f"""
+            <a href="{issue_url}" target="_blank" rel="noopener noreferrer"
+            style="text-decoration: underline;">
+                {label}
+                <span style="font-size:0.9em; color:#555;">
+                    ({help_text})
+                </span>
+            </a>
+            """
+        else:
+            report_text = f"""
+            {label}
+            <span style="font-size:0.9em; color:#555;">
+                (no related GitHub issue available)
+            </span>
+            """
+
+        return f"""
+    <div style="margin-top:8px;">
+        <b>sw-metadata-bot report:</b> {report_text}
+    </div>
+    """
+######################################################################################
     #agrupacion de tipos de requirements
     def group_requirement_files(self, reqs):
         if not reqs:
@@ -721,6 +922,7 @@ class Metadata(object):
         identifier = self.identifier()
         
         if identifier:
+            identifier = str(identifier)
             doi_url = identifier
 
             # si no viene como URL → construirla
@@ -965,8 +1167,70 @@ class Metadata(object):
                             {self.add_tooltip('bottom', 'Download')}>
                         </a>"""
             )
+            
+            
+        # quality report
+        rsfc_report_md = self.rsfc_report_markdown()
+        rsfc_score = self.rsfc_report_score()
+        sw_bot_html = self.sw_metadata_bot_report_html()
+
+        if (rsfc_report_md and rsfc_score) or sw_bot_html:
+
+            body_parts = []
+            tooltip_parts = []
+
+            if rsfc_report_md and rsfc_score:
+                passed, total = rsfc_score
+                score_text = f"{passed}/{total} checks"
+
+                report_html = mistune.html(rsfc_report_md)
+
+                tooltip_parts.append(f"RSFC: {score_text}")
+
+                body_parts.append(f"""
+        <b>RSFC metadata report:</b> {score_text}<br>
+
+        <details>
+            <summary style="cursor:pointer;">Show RSFC report</summary>
+
+            <div style="
+                margin-top:8px;
+                max-height:500px;
+                overflow:auto;
+                padding:8px;
+                background:#f7f7f7;
+                border-radius:6px;
+            ">
+                {report_html}
+            </div>
+        </details>
+        """)
+
+            if sw_bot_html:
+                tooltip_parts.append("sw-metadata-bot available")
+                body_parts.append(sw_bot_html)
+
+            body = "<hr>".join(body_parts)
+
+            tooltip = " | ".join(tooltip_parts) if tooltip_parts else "Quality report"
+
+            html += self.icon_wrapper(
+                icon_html=f"""<img src="{self.base}repo_icons/quality.png" 
+                        class="repo-icon" 
+                        {self.add_tooltip('bottom', tooltip)}>""",
+
+                modal_html=self.modal(
+                    title="Quality report",
+                    body=body,
+                    markdown_translation=False
+                )
+            )
+            
 
         return html
+
+
+
 
     def _is_valid_url(self, url):
         """Private function to check if a string is a valid URL."""
@@ -1025,9 +1289,9 @@ class Metadata(object):
 
     # TODO
     def repo_type(self):
-
+        
         ######################
-
+        #print (self.md.keys())
         if "type" in self.md.keys():
             return self.md["type"]
 

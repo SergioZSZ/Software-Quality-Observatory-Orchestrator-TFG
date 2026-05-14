@@ -4,7 +4,7 @@ const loadCardsData = async () => {
     try {
         const res = await fetch('cards_data.json');
         cards = await res.json();
-        displayCards(cards);
+        search();
     } catch (error) {
         console.error(error);
     }
@@ -34,6 +34,7 @@ const help = document.getElementById('help');
 const paper = document.getElementById('paper');
 const web = document.getElementById('web');
 const ontology = document.getElementById('ontology');
+const software = document.getElementById('isSoftware');
 
 const title = document.getElementById('title');
 const stars = document.getElementById('stars');
@@ -184,6 +185,15 @@ ontology.addEventListener('click', () => {
     search(); 
 });
 
+software.addEventListener('click', () => { 
+    state_software = !state_software; 
+    if (state_software)
+        software.classList.add("filter-selected");
+    else software.classList.remove("filter-selected");
+    current_page = 1;
+    search(); 
+});
+
 title.addEventListener('click', () => { 
     state_title = !state_title; state_stars = false; state_releases = false; state_last_updated = false; 
     if (state_title){ title.classList.add("filter-selected"); }
@@ -253,6 +263,9 @@ let state_help = false;
 let state_paper = false;
 let state_web = false;
 let state_ontology = false;
+let state_software = true;
+
+software.classList.add("filter-selected");
 
 let state_title = false;
 let state_stars = false;
@@ -278,6 +291,7 @@ function search() {
                 && ((state_paper)? card.paper : true)
                 && ((state_ontology)? card.isOntology : true)
                 && ((state_web)? card.isWeb : true)
+                && ((state_software)? card.isSoftware : true)
                 && ((state_requirements)? card.requirement : true)
                 && ((state_usage)? card.usage : true)
                 && ((state_help)? card.help : true)

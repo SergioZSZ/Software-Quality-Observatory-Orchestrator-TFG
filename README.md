@@ -313,11 +313,16 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
 
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
 
-   - `DASHBOARD_ORG_URL` la URL al dashboard org desplegado, `http://localhost:8088/superset/dashboard/nº_de_dashboard/` en caso de seguir las indicaciones del README y lanzarlo en local
+   - `DASHBOARD_ORG_EMBED_ID` el embed id sacado tras configurar el dashboard SQOO-ORG para su embebido
+   - `DASHBOARD_ORG_EMBED_ID` el embed id sacado tras configurar el dashboard SQOO-REPO para su embebido
 
-   - `DASHBOARD_REPO_URL` la URL al dashboard repo desplegado, `http://localhost:8088/superset/dashboard/nº_de_dashboard/` en caso de seguir las indicaciones del README y lanzarlo en local
+   - ``SUPERSET_DOMAIN`` el dominio donde se haya lanzado superset (por defecto http://host.docker.internal:8088 ya que se accede a él desde un contenedor docker)
 
-      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN` y `OUTPUTS` y `DASHBOARD_URL`. 
+   - ``SUPERSET_USERNAME`` username del administrador de superset (necesitado para embebido de dashboards)
+
+   - ``SUPERSET_PASSWORD`` password del administrador de superset (necesitado para embebido de dashboards)
+
+      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`, `OUTPUTS`, `SUPERSET_DOMAIN` y `SUPERSET_USERNAME`. 
 
 **A tener en cuenta**:  
 -  El token (classic) se debe obtener desde GitHub y seleccionando el sope 'public_repo'. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
@@ -436,10 +441,8 @@ https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/e
 
 ## NEXT STEPS:
 
-### DASHVERSE:
 
-#### Dashboards:
-- pensar más dashboards para SQO-ORG
+
 
  ### General:
 - (Si da tiempo) automatizar sugerencias para mejorar los repositorios

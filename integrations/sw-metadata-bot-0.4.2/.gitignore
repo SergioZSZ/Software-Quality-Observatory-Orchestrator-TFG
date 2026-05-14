@@ -15,3 +15,7 @@ somef_outputs/*
 # docs
 docs/_build/
 site/
+
+#cache y tmp
+.pytest_cache/
+.pytest-tmp/

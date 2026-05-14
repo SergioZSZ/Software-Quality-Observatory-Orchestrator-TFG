@@ -62,13 +62,13 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Target\"].json.target}} \\\n-e TYPE={{$node[\"Target\"].json.type}} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Target\"].json.target}} \\\n-e TYPE={{$node[\"Target\"].json.type}} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\n-e DASHBOARD_ORG_URL=\"{{ $env.DASHBOARD_ORG_URL }}\" \\\n-e DASHBOARD_REPO_URL=\"{{ $env.DASHBOARD_REPO_URL }}\" \\\n-e DASHBOARD_ORG_EMBED_ID=\"{{ $env.DASHBOARD_ORG_EMBED_ID }}\" \\\n-e DASHBOARD_ORG_TOKEN_URL=\"{{ $env.DASHBOARD_ORG_TOKEN_URL }}\" \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -112,
-        288
+        3744,
+        384
       ],
       "id": "98752616-a07f-4fac-a0ce-79c8ca5d1330",
       "name": "Execute soca portal"
@@ -194,7 +194,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "{\n  \"target\": \"SergioZSZ\",\n  \"type\": \"user\",\n  \"mode\": \"auto\",\n  \"repos\": \"\" ,\n  \"previous_report\": \"\"\n}",
+        "jsonOutput": "{\n  \"target\": \"oeg-fair-sergio\",\n  \"type\": \"user\",\n  \"mode\": \"manual\",\n  \"repos\": \"repos.txt\" ,\n  \"previous_report\": \"\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -351,7 +351,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3408,
+        3360,
         -128
       ],
       "id": "df270f38-44de-49c6-8fa3-d661f611f835",
@@ -446,7 +446,7 @@
       "typeVersion": 1,
       "position": [
         -1840,
-        144
+        112
       ],
       "id": "f4b6f479-075d-407f-aaed-d74d995efa4a",
       "name": "When clicking ‘Execute workflow’"
@@ -601,13 +601,7 @@
     },
     "Execute soca portal": {
       "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 1
-          }
-        ]
+        []
       ]
     },
     "Code repo_url list & repo count": {
@@ -726,11 +720,6 @@
             "node": "change repos_url -> repositories",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Split Out1",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -750,9 +739,9 @@
       "main": [
         [
           {
-            "node": "Execute soca portal",
+            "node": "Merge",
             "type": "main",
-            "index": 0
+            "index": 1
           }
         ],
         [
@@ -966,6 +955,17 @@
           }
         ]
       ]
+    },
+    "bot publish issues": {
+      "main": [
+        [
+          {
+            "node": "Execute soca portal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -974,7 +974,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "7c24c8c5-861d-4ddc-a9be-1c5b3ee0a8cd",
+  "versionId": "e3ffbfb7-165e-43a6-bd75-f448a225b462",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

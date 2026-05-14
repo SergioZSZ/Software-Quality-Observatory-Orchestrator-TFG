@@ -23,6 +23,8 @@ services:
       # *** Privadas ***
       - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
       - OUTPUTS=${OUTPUTS}
+      - DASHBOARD_ORG_EMBED_ID=${DASHBOARD_ORG_EMBED_ID}
+      - DASHBOARD_REPO_EMBED_ID=${DASHBOARD_REPO_EMBED_ID}
       # *** General ***
       - GENERIC_TIMEZONE=Europe/Madrid
       - TZ=Europe/Madrid
@@ -67,24 +69,26 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-      - DASHBOARD_ORG_URL=${DASHBOARD_ORG_URL}
-      - DASHBOARD_REPO_URL=${DASHBOARD_REPO_URL}
+      - DASHBOARD_ORG_EMBED_ID=${DASHBOARD_ORG_EMBED_ID}
+      - DASHBOARD_REPO_EMBED_ID=${DASHBOARD_REPO_EMBED_ID}
 
 
-  # rate_limiter_soca:
-  #   image: soca-heavy
-  #   command: python -m soca_runner.rabbitmq.rate_limiter
-  #   depends_on:
-  #     - rabbitmq
-  #   environment:
-  #     - RABBITMQ_HOST=rabbitmq
-  #     - RABBITMQ_USER=${RABBITMQ_USER}
-  #     - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-  #     - RATE_LIMIT_SOCA_ENABLED=${RATE_LIMIT_SOCA_ENABLED}
-  #   networks:
-  #     - net
-
-
+  guest_tokenapi:
+    build: ./guest_tokenApi
+    container_name: emb_api
+    ports:
+      - "9001:9001"
+    networks:
+      - net
+    environment:
+      - DASHBOARD_ORG_EMBED_ID=${DASHBOARD_ORG_EMBED_ID}
+      - DASHBOARD_REPO_EMBED_ID=${DASHBOARD_REPO_EMBED_ID}
+      - SUPERSET_DOMAIN=${SUPERSET_DOMAIN}
+      - SUPERSET_USERNAME=${SUPERSET_USERNAME}
+      - SUPERSET_PASSWORD=${SUPERSET_PASSWORD}
+      
+      - PORTAL_ORIGIN=http://localhost:8030
+      
 # *** RSFC ***
 
   worker_rsfc:

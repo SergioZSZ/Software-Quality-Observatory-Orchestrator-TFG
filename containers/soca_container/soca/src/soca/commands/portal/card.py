@@ -19,6 +19,7 @@ def cards_data_dump(repo_metadata_dir):
                 print(f"Creating card for '{filename}'")
                 repo_metadata = json.load(json_metadata)
                 md = Metadata(repo_metadata_dir, repo_metadata)
+                repo_type = md.repo_type()
                 try:
                     citations = md.citations()
                     cards_data.append({
@@ -53,8 +54,10 @@ def cards_data_dump(repo_metadata_dir):
                     'repoStatus': md.status() is not None,
                     'acknowledgement': md.acknowledgement() is not None,
                     'downloadUrl': md.downloadUrl() is not None,
-                    'isOntology': md.repo_type() == 'ontology',
-                    'isWeb': md.repo_type() == 'web',
+                    'repoType': repo_type,
+                    'isOntology': repo_type == 'ontology',
+                    'isWeb': repo_type == 'web',
+                    'isSoftware': repo_type not in ['web', 'ontology'],
                     'owner': md.owner()
                 })
                 except Exception as e:

@@ -1,7 +1,8 @@
 
 ## 4. Requisitos(Requirements)
 #### Requisitos generales
-   - Docker/Docker Desktop
+   - Docker/Docker Desktop (29.0.1)
+   - Docker compose (v2.40.3-desktop.1)
    - Estar loggeado en Docker/Docker Desktop
 
 #### Instalaciones necesarias para desplegar DashVERSE:
