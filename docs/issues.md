@@ -4,7 +4,6 @@
 
  ### General:
 - Update de la documentación completa
-- (Si da tiempo) automatizar sugerencias para mejorar los repositorios
 
 ### Opcional:
 - Ver si merece la pena hacer un RO
