@@ -1188,7 +1188,7 @@ class Metadata(object):
                 tooltip_parts.append(f"RSFC: {score_text}")
 
                 body_parts.append(f"""
-        <b>RSFC metadata report:</b> {score_text}<br>
+        <b>RSFC FAIR report:</b> {score_text}<br>
 
         <details>
             <summary style="cursor:pointer;">Show RSFC report</summary>
@@ -1315,20 +1315,44 @@ class Metadata(object):
 
         return None
 
+    def metadata_item_value(self, item):
+        result = safe_dic(item, 'result')
+        return safe_dic(result, 'value') or safe_dic(item, 'excerpt')
+
+    def metadata_item_header(self, item):
+        result = safe_dic(item, 'result')
+        return (
+            safe_dic(result, 'original_header')
+            or safe_dic(result, 'originalHeader')
+            or safe_dic(item, 'original_header')
+            or safe_dic(item, 'originalHeader')
+        )
+
+    def metadata_item_source_name(self, item):
+        source = safe_dic(item, 'source') or safe_dic(safe_dic(item, 'result'), 'source')
+        if not source:
+            return None
+        return source.rstrip('/').split('/')[-1]
+
+    def source_markdown(self, item):
+        source_name = self.metadata_item_source_name(item)
+        return f"**Source {source_name}:** \n\n" if source_name else ''
+
     def usage(self):
         usage_list = safe_dic(self.md, 'usage')
         usage = None
         if usage_list:
             usage = ''
+            source_item = next((u for u in usage_list if self.metadata_item_source_name(u)), usage_list[0])
+            usage += self.source_markdown(source_item)
             '''
             for u in usage_list:
                 usage += u['result']['value'] + '\n'
             '''
         # ipmlementacion propia, añade los títulos del markdown
             for u in usage_list:
-                result = safe_dic(u, 'result')
-                value = safe_dic(result, 'value')
-                header = safe_dic(result, 'original_header')
+                value = self.metadata_item_value(u)
+                header = self.metadata_item_header(u)
 
                 if header and header.lower() != 'usage':
                     usage += f'\n### {header}\n\n'
@@ -1356,16 +1380,17 @@ class Metadata(object):
 
     # TODO cannot find correct implementation
     def help(self):
-        support = safe_dic(safe_dic(
-            safe_list(safe_dic(self.md, 'support'), 0), 'result'), 'value')
-        faq = safe_dic(
-            safe_dic(safe_list(safe_dic(self.md, 'faq'), 0), 'result'), 'value')
-        supportChannels = safe_dic(safe_dic(
-            safe_list(safe_dic(self.md, 'supportChannels'), 0), 'result'), 'value')
+        support_item = safe_list(safe_dic(self.md, 'support'), 0)
+        faq_item = safe_list(safe_dic(self.md, 'faq'), 0)
+        supportChannels_item = safe_list(safe_dic(self.md, 'supportChannels'), 0)
 
-        support_md = ('### Support  \n' + support) if support else ''
-        faq_md = ('### FAQ  \n' + faq) if faq else ''
-        supportChannels_md = ('### Support Channels  \n' +
+        support = self.metadata_item_value(support_item)
+        faq = self.metadata_item_value(faq_item)
+        supportChannels = self.metadata_item_value(supportChannels_item)
+
+        support_md = (self.source_markdown(support_item) + '### Support  \n' + support) if support else ''
+        faq_md = (self.source_markdown(faq_item) + '### FAQ  \n' + faq) if faq else ''
+        supportChannels_md = (self.source_markdown(supportChannels_item) + '### Support Channels  \n' +
                               supportChannels) if supportChannels else ''
 
         return support_md + faq_md + supportChannels_md if support or faq or supportChannels else None
@@ -1525,7 +1550,14 @@ class Metadata(object):
         langs = safe_dic(self.md, 'programming_languages')
         if not langs:
             return None
-        return [str(safe_dic(safe_dic(lang, 'result'), 'value')).lower() for lang in langs]
+
+        values = [
+            str(safe_dic(safe_dic(lang, 'result'), 'value')).lower()
+            for lang in langs
+            if safe_dic(safe_dic(lang, 'result'), 'value')
+        ]
+
+        return list(dict.fromkeys(values))
 
     def repo_url(self):
         return safe_dic(safe_list(safe_dic(safe_dic(self.md, 'code_repository'), 0), 'result'), 'value')

@@ -1,6 +1,7 @@
 # VSCode
 .vscode/
 
+AGENTS.md
 # jsons generated
 client/**.json
 

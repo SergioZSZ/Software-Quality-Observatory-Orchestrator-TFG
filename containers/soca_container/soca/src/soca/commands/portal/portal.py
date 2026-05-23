@@ -187,7 +187,7 @@ def generate(repo_metadata_dir, output, title, favicon):
         html_parsed = BeautifulSoup(f"""
         <div data-toggle="tooltip" data-placement="bottom" title="Filter by User/Organization"><img src="repo_icons/owner.svg" class="sort-filter-icon grey-color-svg"/></div>
 			<select id="owner" class="owner-dropdown">
-				<option value="all">All</option>
+				<option value="all">All orgs</option>
                 {l}
 			</select>
         """, 'html.parser')
