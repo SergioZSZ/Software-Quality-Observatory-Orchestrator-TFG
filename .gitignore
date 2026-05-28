@@ -29,6 +29,12 @@ output/
 # Carpetas ignoradas manualmente
 ignore/
 
+# Graphify local artifacts
+.graphifyignore
+graphify-out/
+.graphify/
+.codex/
+
 # Docker volumes (si aparecen)
 postgres_data/
 
@@ -36,5 +42,5 @@ postgres_data/
 .DS_Store
 Thumbs.db
 
-
+.codex
 containers/nginx/nginx.md
