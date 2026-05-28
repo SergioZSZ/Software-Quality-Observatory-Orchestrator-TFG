@@ -11,9 +11,9 @@ El workflow implementa un pipeline completo que abarca:
 
 1. **Extracción de repositorios**
 2. **Procesamiento de metadatos (SOCA)**
-3. **Generación de portal software**
-4. **Evaluación de calidad (RSFC)**
-5. **Evaluación de metadatos(sw-metadata-bot)**
+3. **Evaluación de calidad (RSFC)**
+4. **Evaluación de metadatos(sw-metadata-bot)**
+5. **Generación y publicacion de portal software enriquecido**
 6. **Envío de indicadores a DashVERSE**
 
 
@@ -36,14 +36,11 @@ El workflow implementa un pipeline completo que abarca:
 - Control de finalización procesamiento de repositorios: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
 
 
-##### 3. Generación del portal
-- Generación del portal software mediante nodo Execute-command lanzando un contenedor docker ejecutando el script `genportal.py`, generándose el portal software.
-
-##### 4. Evaluación RSFC
+##### 3. Evaluación RSFC
 - Envío de repositorios a los workers RSFC, evaluando la calidad de software
 - Control de finalización: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
 
-##### 5. Análisis de metadatos con sw-metadata-bot
+##### 4. Análisis de metadatos con sw-metadata-bot
 
 n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias. Todo siguiento este proceso:
 
@@ -53,12 +50,18 @@ n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los r
 - Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
 - Publicado los issues generados mediante `sw-metadata-bot publish`
 
+##### 5. Generación y publicacion del portal
+
+- Se ejecuta `genportal.py` cuando ya existen los reportes de RSFC y sw-metadata-bot.
+- El portal incorpora metadatos SOCA, indicadores RSFC e informes/issues de sw-metadata-bot.
+- El portal queda persistido en `outputs/soca/<target>/portal/`.
+- El servicio `nginx` publica ese directorio en `http://localhost:8030/portals/<target>/`.
+- Las paginas embebidas usan `/api/superset/guest-token/...`, que Nginx reenvia a `guest_tokenapi`.
+
 Salida generada:
 
-- Informes de análisis por repositorio
-- `run_report.json` con el resumen de la ejecución
-- `issue_report.md` con el contenido del issue propuesto
-- Issues en GitHub con recomendaciones para mejorar los metadatos
+- Portal HTML/JSON enriquecido con reportes y metadatos
+- Dashboards embebidos publicados junto al catálogo
 
 ##### 6. Envío de assessments a DashVERSE
 

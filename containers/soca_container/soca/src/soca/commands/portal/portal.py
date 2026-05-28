@@ -40,11 +40,9 @@ def create_embedded_dashboard_pages(portal_output_dir):
     portal_output_dir = Path(portal_output_dir)
 
     # URL pública que ve el navegador para cargar Superset
-    superset_public_url = os.getenv("SUPERSET_DOMAIN", "http://localhost:8088")
+    superset_public_url = os.getenv("SUPERSET_PUBLIC_DOMAIN", "http://localhost:8088")
 
     # URL pública que ve el navegador para llamar a emb_api
-    emb_api_url = "http://localhost:9001"
-
     org_embed_id = os.getenv("DASHBOARD_ORG_EMBED_ID", "")
     repo_embed_id = os.getenv("DASHBOARD_REPO_EMBED_ID", "")
 
@@ -52,7 +50,7 @@ def create_embedded_dashboard_pages(portal_output_dir):
         output_file=portal_output_dir / "dashboard-org.html",
         title="SQOO Organization Dashboard",
         dashboard_id=org_embed_id,
-        token_endpoint=f"{emb_api_url}/superset/guest-token/org",
+        token_endpoint="/api/superset/guest-token/org",
         superset_domain=superset_public_url,
     )
 
@@ -60,7 +58,7 @@ def create_embedded_dashboard_pages(portal_output_dir):
         output_file=portal_output_dir / "dashboard-repo.html",
         title="SQOO Repository Dashboard",
         dashboard_id=repo_embed_id,
-        token_endpoint=f"{emb_api_url}/superset/guest-token/repo",
+        token_endpoint="/api/superset/guest-token/repo",
         superset_domain=superset_public_url,
     )
 
@@ -150,6 +148,7 @@ def generate(repo_metadata_dir, output, title, favicon):
 
         
     copy_assets(output)
+    portal_cache_version = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
 
     # Load html template
     with open(f"{base_dir}/assets/template.html") as template:
@@ -205,6 +204,13 @@ def generate(repo_metadata_dir, output, title, favicon):
     # insertar links dashverse
     create_embedded_dashboard_pages(output)
     add_dashverse_link(soup)
+
+    app_script = soup.find("script", src=lambda src: src and src.startswith("app.js"))
+    if app_script:
+        version_script = soup.new_tag("script")
+        version_script.string = f'window.SOCA_PORTAL_VERSION = "{portal_cache_version}";'
+        app_script.insert_before(version_script)
+        app_script["src"] = f"app.js?v={portal_cache_version}"
 
     # Save index.html
     with open(f"{output}/index.html", "w") as index:

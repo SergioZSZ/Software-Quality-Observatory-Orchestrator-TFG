@@ -11,6 +11,7 @@ from pygments.formatters import HtmlFormatter
 import mistune
 import os
 import json
+from urllib.parse import unquote, urlparse
 
 
 # from cffconvert import Citation
@@ -1332,11 +1333,12 @@ class Metadata(object):
         source = safe_dic(item, 'source') or safe_dic(safe_dic(item, 'result'), 'source')
         if not source:
             return None
-        return source.rstrip('/').split('/')[-1]
+        source_path = urlparse(source).path if '://' in source else source
+        return unquote(os.path.basename(source_path.rstrip('/'))) or source
 
     def source_markdown(self, item):
         source_name = self.metadata_item_source_name(item)
-        return f"**Source {source_name}:** \n\n" if source_name else ''
+        return f"**source {source_name}**\n\n" if source_name else ''
 
     def usage(self):
         usage_list = safe_dic(self.md, 'usage')

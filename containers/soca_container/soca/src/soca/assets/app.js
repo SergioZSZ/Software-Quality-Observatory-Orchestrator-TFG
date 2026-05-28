@@ -2,7 +2,8 @@
 let cards = [];
 const loadCardsData = async () => {
     try {
-        const res = await fetch('cards_data.json');
+        const portalVersion = window.SOCA_PORTAL_VERSION || 'dev';
+        const res = await fetch(`cards_data.json?v=${encodeURIComponent(portalVersion)}`);
         cards = await res.json();
         search();
     } catch (error) {

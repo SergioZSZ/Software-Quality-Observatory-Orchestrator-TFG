@@ -10,17 +10,20 @@
    - `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI
 
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
+   - `PORTAL_PORT` puerto del host desde el que Nginx publica los portales SOCA (por defecto `8030`)
+   - `PORTAL_ORIGIN` origen publico del portal para CORS de `guest_tokenapi` (por defecto `http://localhost:8030`)
 
    - `DASHBOARD_ORG_EMBED_ID` el embed id sacado tras configurar el dashboard SQOO-ORG para su embebido
-   - `DASHBOARD_ORG_EMBED_ID` el embed id sacado tras configurar el dashboard SQOO-REPO para su embebido
+   - `DASHBOARD_REPO_EMBED_ID` el embed id sacado tras configurar el dashboard SQOO-REPO para su embebido
 
-   - ``SUPERSET_DOMAIN`` el dominio donde se haya lanzado superset (por defecto http://host.docker.internal:8088 ya que se accede a él desde un contenedor docker)
+   - ``SUPERSET_DOMAIN`` el dominio interno que usa `guest_tokenapi` para llamar a Superset desde Docker (por defecto http://host.docker.internal:8088)
+   - ``SUPERSET_PUBLIC_DOMAIN`` el dominio publico que usa el navegador para cargar los dashboards embebidos de Superset/DashVERSE (por defecto http://localhost:8088)
 
    - ``SUPERSET_USERNAME`` username del administrador de superset (necesitado para embebido de dashboards)
 
    - ``SUPERSET_PASSWORD`` password del administrador de superset (necesitado para embebido de dashboards)
 
-      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`, `OUTPUTS`, `SUPERSET_DOMAIN` y `SUPERSET_USERNAME`. 
+      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`, `OUTPUTS`, `SUPERSET_DOMAIN`, `SUPERSET_PUBLIC_DOMAIN` y `SUPERSET_USERNAME`.
 
 
 **A tener en cuenta**:  
@@ -51,7 +54,7 @@ Siguiendo los pasos en orden secuencial:
 5. Editar el nodo `Input` al principio del workflow con la organización/usuario deseado
 6. Ejecutar manualmente
 
-Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes y enviándoselos a DashVERSE.
+Tras ello se ejecutará el workflow obteniendo en `outputs` las extracciones, reportes RSFC, informes de sw-metadata-bot y el portal final enriquecido antes del envío a DashVERSE. Los portales generados por SOCA se sirven con Nginx en `http://localhost:8030/portals/<target>/`, donde `<target>` coincide con la organizacion o usuario configurado en el workflow. Las paginas `dashboard-org.html` y `dashboard-repo.html` del portal solicitan los guest tokens a traves de `http://localhost:8030/api/`.
 
 
 

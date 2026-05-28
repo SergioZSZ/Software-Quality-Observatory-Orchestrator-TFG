@@ -35,6 +35,7 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 | worker_rsfc      | procesamiento jobs indicadores         |
 | worker_soca      | procesamiento jobs metadatos           |
 | rate_limiter_rsfc| limitador tokens githubAPI worker_rsfc |
+| nginx            | publicacion del portal SOCA y proxy de guest tokens |
 | DashVerse        | observatorio de evaluación             |
 | sw-metadata-bot  | Generación de issues sobre metadatos   |
 
@@ -68,7 +69,7 @@ Se ha:
 - Encapsulado en un contenedor Docker
 - Configurado volúmenes para persistencia de resultados
 - Orquestado mediante lanzamiento de jobs para la extracción de metadatos por workers en paralelo
-- Configurado un script para la generación del portal ejecutado por n8n
+- Configurado `genportal.py` para crear el portal final tras RSFC y sw-metadata-bot
 Salida generada:
 
 - Fetch de los repositorios y envío a n8n
@@ -78,9 +79,9 @@ Salida generada:
 
 
 ### 3.2 worker_soca container
-El contenedor worker se encarga de la extracción de metadatos de los repositorios obtenidos en el fetch y generación del portal de manera asíncrona con el resto del workflow.
+El contenedor worker se encarga de la extracción de metadatos de los repositorios obtenidos en el fetch; el portal se genera al final con los reportes.
 
-Mientras que soca_container publica en una cola de trabajo en RabbitMQ con el usuario/organización del cual se va a general el portal software.
+Mientras que soca_container publica en una cola de trabajo en RabbitMQ con el usuario/organización del cual se van a extraer metadatos.
 
 Cada worker ejecuta el módulo `python -u -m soca_runner.worker` que se dedica a:
 
@@ -185,9 +186,9 @@ El workflow implementa un pipeline completo que abarca:
 
 1. **Extracción de repositorios**
 2. **Procesamiento de metadatos (SOCA)**
-3. **Generación de portal software**
-4. **Evaluación de calidad (RSFC)**
-5. **Evaluación de metadatos(sw-metadata-bot)**
+3. **Evaluación de calidad (RSFC)**
+4. **Evaluación de metadatos(sw-metadata-bot)**
+5. **Generación de portal software enriquecido**
 6. **Envío de indicadores a DashVERSE**
 
 
@@ -210,14 +211,11 @@ El workflow implementa un pipeline completo que abarca:
 - Control de finalización procesamiento de repositorios: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
 
 
-##### 3. Generación del portal
-- Generación del portal software mediante nodo Execute-command lanzando un contenedor docker ejecutando el script `genportal.py`, generándose el portal software.
-
-##### 4. Evaluación RSFC
+##### 3. Evaluación RSFC
 - Envío de repositorios a los workers RSFC, evaluando la calidad de software
 - Control de finalización: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
 
-##### 5. Análisis de metadatos con sw-metadata-bot
+##### 4. Análisis de metadatos con sw-metadata-bot
 
 n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias. Todo siguiento este proceso:
 
@@ -227,12 +225,15 @@ n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los r
 - Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
 - Publicado los issues generados mediante `sw-metadata-bot publish`
 
-Salida generada:
+##### 5. Generación del portal
 
-- Informes de análisis por repositorio
-- `run_report.json` con el resumen de la ejecución
-- `issue_report.md` con el contenido del issue propuesto
-- Issues en GitHub con recomendaciones para mejorar los metadatos
+- Se ejecuta `genportal.py` cuando ya existen los reportes de RSFC y sw-metadata-bot.
+- El portal incorpora metadatos SOCA, indicadores RSFC e informes/issues de sw-metadata-bot.
+- Portal persistido en `outputs/soca/<target>/portal/` y publicado por Nginx.
+- Incluye dashboards embebidos y guest tokens a traves de `/api/`.
+
+Salida generada: portal software enriquecido con reportes y metadatos
+
 
 ##### 6. Envío de assessments a DashVERSE
 
@@ -312,17 +313,20 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
    - `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI
 
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
+   - `PORTAL_PORT` puerto del host desde el que Nginx publica los portales SOCA (por defecto `8030`)
+   - `PORTAL_ORIGIN` origen publico del portal para CORS de `guest_tokenapi` (por defecto `http://localhost:8030`)
 
    - `DASHBOARD_ORG_EMBED_ID` el embed id sacado tras configurar el dashboard SQOO-ORG para su embebido
-   - `DASHBOARD_ORG_EMBED_ID` el embed id sacado tras configurar el dashboard SQOO-REPO para su embebido
+   - `DASHBOARD_REPO_EMBED_ID` el embed id sacado tras configurar el dashboard SQOO-REPO para su embebido
 
-   - ``SUPERSET_DOMAIN`` el dominio donde se haya lanzado superset (por defecto http://host.docker.internal:8088 ya que se accede a él desde un contenedor docker)
+   - ``SUPERSET_DOMAIN`` el dominio interno que usa `guest_tokenapi` para llamar a Superset desde Docker (por defecto http://host.docker.internal:8088)
+   - ``SUPERSET_PUBLIC_DOMAIN`` el dominio publico que usa el navegador para cargar los dashboards embebidos de Superset/DashVERSE (por defecto http://localhost:8088)
 
    - ``SUPERSET_USERNAME`` username del administrador de superset (necesitado para embebido de dashboards)
 
    - ``SUPERSET_PASSWORD`` password del administrador de superset (necesitado para embebido de dashboards)
 
-      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`, `OUTPUTS`, `SUPERSET_DOMAIN` y `SUPERSET_USERNAME`. 
+      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`, `OUTPUTS`, `SUPERSET_DOMAIN`, `SUPERSET_PUBLIC_DOMAIN` y `SUPERSET_USERNAME`.
 
 **A tener en cuenta**:  
 -  El token (classic) se debe obtener desde GitHub y seleccionando el sope 'public_repo'. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
@@ -352,7 +356,7 @@ Siguiendo los pasos en orden secuencial:
 5. Editar el nodo `Input` al principio del workflow con la organización/usuario deseado
 6. Ejecutar manualmente
 
-Tras ello se ejecutará el workflow obteniendo en el directorio outputs declarado las extracciones, portal, metadatos e indicadores correspondientes y enviándoselos a DashVERSE.
+Tras ello se ejecutará el workflow obteniendo en `outputs` las extracciones, reportes RSFC, informes de sw-metadata-bot y el portal final enriquecido antes del envío a DashVERSE. Los portales generados por SOCA se sirven con Nginx en `http://localhost:8030/portals/<target>/`, donde `<target>` coincide con la organizacion o usuario configurado en el workflow. Las paginas `dashboard-org.html` y `dashboard-repo.html` del portal solicitan los guest tokens a traves de `http://localhost:8030/api/`.
 
 
 

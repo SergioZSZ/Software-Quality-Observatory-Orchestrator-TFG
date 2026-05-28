@@ -62,7 +62,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Target\"].json.target}} \\\n-e TYPE={{$node[\"Target\"].json.type}} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\n-e DASHBOARD_ORG_URL=\"{{ $env.DASHBOARD_ORG_URL }}\" \\\n-e DASHBOARD_REPO_URL=\"{{ $env.DASHBOARD_REPO_URL }}\" \\\n-e DASHBOARD_ORG_EMBED_ID=\"{{ $env.DASHBOARD_ORG_EMBED_ID }}\" \\\n-e DASHBOARD_ORG_TOKEN_URL=\"{{ $env.DASHBOARD_ORG_TOKEN_URL }}\" \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Target\"].json.target}} \\\n-e TYPE={{$node[\"Target\"].json.type}} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\n-e DASHBOARD_ORG_URL=\"{{ $env.DASHBOARD_ORG_URL }}\" \\\n-e DASHBOARD_REPO_URL=\"{{ $env.DASHBOARD_REPO_URL }}\" \\\n-e DASHBOARD_ORG_EMBED_ID=\"{{ $env.DASHBOARD_ORG_EMBED_ID }}\" \\\n-e DASHBOARD_REPO_EMBED_ID=\"{{ $env.DASHBOARD_REPO_EMBED_ID }}\" \\\n-e SUPERSET_PUBLIC_DOMAIN=\"{{ $env.SUPERSET_PUBLIC_DOMAIN }}\" \\\n-e DASHBOARD_ORG_TOKEN_URL=\"{{ $env.DASHBOARD_ORG_TOKEN_URL }}\" \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,

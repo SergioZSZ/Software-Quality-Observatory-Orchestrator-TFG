@@ -10,7 +10,7 @@ Se ha:
 - Encapsulado en un contenedor Docker
 - Configurado volúmenes para persistencia de resultados
 - Orquestado mediante lanzamiento de jobs para la extracción de metadatos por workers en paralelo
-- Configurado un script para la generación del portal ejecutado por n8n
+- Configurado `genportal.py` para crear el portal final tras RSFC y sw-metadata-bot
 Salida generada:
 
 - Fetch de los repositorios y envío a n8n
@@ -20,9 +20,9 @@ Salida generada:
 
 
 ### 3.2 worker_soca container
-El contenedor worker se encarga de la extracción de metadatos de los repositorios obtenidos en el fetch y generación del portal de manera asíncrona con el resto del workflow.
+El contenedor worker se encarga de la extracción de metadatos de los repositorios obtenidos en el fetch; el portal se genera al final con los reportes.
 
-Mientras que soca_container publica en una cola de trabajo en RabbitMQ con el usuario/organización del cual se va a general el portal software.
+Mientras que soca_container publica en una cola de trabajo en RabbitMQ con el usuario/organización del cual se van a extraer metadatos.
 
 Cada worker ejecuta el módulo `python -u -m soca_runner.worker` que se dedica a:
 
