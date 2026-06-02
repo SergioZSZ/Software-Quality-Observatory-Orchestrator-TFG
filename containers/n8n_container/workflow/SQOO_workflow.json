@@ -12,10 +12,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        -1072,
-        112
+        -4496,
+        784
       ],
-      "id": "730a0b65-3441-4900-b245-c79f8f94f68c",
+      "id": "7127a336-2032-4e48-8a6d-87324171c775",
       "name": "Extract from File"
     },
     {
@@ -25,10 +25,10 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -1424,
-        112
+        -4848,
+        784
       ],
-      "id": "7b490b1f-aa0e-427a-94ad-214eee0af787",
+      "id": "2861f59b-028d-4fed-950b-042aa3f6e83f",
       "name": "Execute soca-runner"
     },
     {
@@ -41,10 +41,10 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        -1232,
-        112
+        -4656,
+        784
       ],
-      "id": "7e63a351-25a5-4a75-8c82-d31d42794f11",
+      "id": "b63480e2-d464-4410-96e2-02d5cf1c972f",
       "name": "Read target repos"
     },
     {
@@ -54,23 +54,23 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        320,
-        112
+        -3104,
+        784
       ],
-      "id": "1f1a0f0e-bd00-426f-b9f3-3ca756a50872",
+      "id": "52d08d43-9b0a-471e-b226-b4d194d95f4a",
       "name": "Execute rsfc-runner"
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Target\"].json.target}} \\\n-e TYPE={{$node[\"Target\"].json.type}} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\n-e DASHBOARD_ORG_URL=\"{{ $env.DASHBOARD_ORG_URL }}\" \\\n-e DASHBOARD_REPO_URL=\"{{ $env.DASHBOARD_REPO_URL }}\" \\\n-e DASHBOARD_ORG_EMBED_ID=\"{{ $env.DASHBOARD_ORG_EMBED_ID }}\" \\\n-e DASHBOARD_REPO_EMBED_ID=\"{{ $env.DASHBOARD_REPO_EMBED_ID }}\" \\\n-e SUPERSET_PUBLIC_DOMAIN=\"{{ $env.SUPERSET_PUBLIC_DOMAIN }}\" \\\n-e DASHBOARD_ORG_TOKEN_URL=\"{{ $env.DASHBOARD_ORG_TOKEN_URL }}\" \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Target\"].json.target}} \\\n-e TYPE={{$node[\"Target\"].json.type}} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\n-e DASHBOARD_ORG_EMBED_ID=\"{{ $env.DASHBOARD_ORG_EMBED_ID }}\" \\\n-e DASHBOARD_REPO_EMBED_ID=\"{{ $env.DASHBOARD_REPO_EMBED_ID }}\" \\\n-e SUPERSET_PUBLIC_DOMAIN=\"{{ $env.SUPERSET_PUBLIC_DOMAIN }}\" \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        3744,
-        384
+        -368,
+        816
       ],
-      "id": "98752616-a07f-4fac-a0ce-79c8ca5d1330",
+      "id": "624ae60e-c73c-40e7-aa73-ddef24bfe686",
       "name": "Execute soca portal"
     },
     {
@@ -80,10 +80,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -896,
-        112
+        -4320,
+        784
       ],
-      "id": "389881f8-54f8-403a-80a2-9a7df438d186",
+      "id": "e02628a9-29c8-4fd1-a5ce-25d81239a802",
       "name": "Code repo_url list & repo count"
     },
     {
@@ -93,10 +93,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        672,
-        240
+        -2752,
+        912
       ],
-      "id": "4d0e4321-b3b0-41a4-9e0c-bd2f1044e585",
+      "id": "464fa60e-8901-4f0a-8bd6-e59da631508a",
       "name": "Process repocount"
     },
     {
@@ -104,10 +104,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1040,
-        368
+        -2384,
+        1040
       ],
-      "id": "de79dfc0-36d5-46e7-a811-579c999ec58e",
+      "id": "3d284829-6662-45cc-ba5b-ee2dee3a11c4",
       "name": "Wait1",
       "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
     },
@@ -116,10 +116,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -128,
-        704
+        -3552,
+        1376
       ],
-      "id": "44810db1-181d-4192-8fb3-bf8a9607715a",
+      "id": "57f6b9d4-ea9d-4ef2-9d41-3ad1b4f5f25a",
       "name": "Wait",
       "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
     },
@@ -130,10 +130,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -528,
-        512
+        -3952,
+        1184
       ],
-      "id": "332790a7-62eb-4543-a6cb-ee1c2112c709",
+      "id": "18c036c2-8197-4c38-98b3-d00060625e9f",
       "name": "Process metadata count"
     },
     {
@@ -143,10 +143,10 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -720,
-        512
+        -4144,
+        1184
       ],
-      "id": "1c4727c2-8fed-4f71-8005-b37b0502087a",
+      "id": "ef3a3ed2-4175-4ad6-ae23-044553b43dff",
       "name": "find metadatas json"
     },
     {
@@ -156,10 +156,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        144,
-        112
+        -3280,
+        784
       ],
-      "id": "2536b6fa-79d2-4cee-82f4-28ef508fb3c4",
+      "id": "dea57c06-67bb-4747-b7ec-650bd1956634",
       "name": "Merge"
     },
     {
@@ -172,10 +172,10 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        2736,
-        -128
+        48,
+        544
       ],
-      "id": "553108b9-d35e-4c80-800f-ac5aabac976d",
+      "id": "0effccd9-979f-47d2-9642-d2851f250653",
       "name": "Read/Write Files from Disk"
     },
     {
@@ -185,10 +185,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1296,
-        -128
+        -2128,
+        544
       ],
-      "id": "0ab9b08a-3212-4ac4-a95e-79e8a9ca3c21",
+      "id": "1d6cbd89-5ccf-4a99-a0b8-38bbed1d6f09",
       "name": "Merge3"
     },
     {
@@ -200,10 +200,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1648,
-        112
+        -5072,
+        784
       ],
-      "id": "810aed55-2aa6-4caf-ab9d-1bb31b6af513",
+      "id": "f1e43664-4f74-4f59-8444-ee09ff900f9a",
       "name": "Target"
     },
     {
@@ -234,10 +234,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -320,
-        512
+        -3744,
+        1184
       ],
-      "id": "537bd535-7a69-4e38-b054-121a17e90ee9",
+      "id": "d5fc1483-c873-458d-8c18-a30dc78ef501",
       "name": "If completed soca jobs",
       "alwaysOutputData": false
     },
@@ -269,10 +269,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        848,
-        240
+        -2576,
+        912
       ],
-      "id": "3d9ab1d7-a6a0-4cce-9ee0-e9b707798691",
+      "id": "66d28e6e-a88c-4373-91e5-3dabb1972a1f",
       "name": "If completed rsfc jobs",
       "alwaysOutputData": false
     },
@@ -285,10 +285,10 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        2960,
-        -128
+        272,
+        544
       ],
-      "id": "6f56ea12-db0d-4107-b6e6-0c7b6fcb460b",
+      "id": "4f3d1f87-5c0e-415f-acca-95f3689ad2de",
       "name": "Extract assessments"
     },
     {
@@ -299,10 +299,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1552,
-        -128
+        -1872,
+        544
       ],
-      "id": "fa54ee4f-d622-42fe-9587-783ca522ff58",
+      "id": "5b34af0b-7a9d-44b7-bb46-46d4a6d6f7cb",
       "name": "Split Out1"
     },
     {
@@ -312,10 +312,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1808,
-        -128
+        -1616,
+        544
       ],
-      "id": "f63fd288-ee28-4e91-9611-fb8466e163de",
+      "id": "e6cfcbc8-6d20-4e10-ac65-a95e9dc0c06a",
       "name": "Code url->target-name1"
     },
     {
@@ -327,7 +327,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJTZXJnaW9aU1oiLCJpc19zdXBlcnVzZXIiOmZhbHNlLCJyb2xlIjoid2ViX3VzZXIiLCJhdWQiOiJwb3N0Z3Jlc3QiLCJleHAiOjE3NzkwMDU3MDAsImlhdCI6MTc3NjQxMzcwMCwianRpIjoiZWE3YzUwOGUtNDRjNC00ZTliLTg3YTQtNjY2MWFjNjU5N2Q1In0.LTQDSaQqZ5FsZrUlHJL3XtuDx4Abt5DuYUMtgfZidrg"
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJTZXJnaW9aU1oiLCJpc19zdXBlcnVzZXIiOmZhbHNlLCJyb2xlIjoid2ViX3VzZXIiLCJhdWQiOiJwb3N0Z3Jlc3QiLCJleHAiOjE3ODI5MzY3NjIsImlhdCI6MTc4MDM0NDc2MiwianRpIjoiZjI3NTUxN2ItZmVjYy00ODJkLWI4MGEtOTg4MGI3YTVlM2NjIn0.tskzBJ5B3FmIxbCeMxMKNjzOBKVVhr9pIvA4jqzsMbw"
             },
             {
               "name": "Content-Type",
@@ -351,10 +351,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        3360,
-        -128
+        672,
+        544
       ],
-      "id": "df270f38-44de-49c6-8fa3-d661f611f835",
+      "id": "2dc156f5-7266-4382-8595-c8152a9f69e6",
       "name": "Post assessments_raw"
     },
     {
@@ -365,10 +365,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1520,
-        -576
+        -544,
+        288
       ],
-      "id": "a24e3b97-955f-4e15-82e3-0179af2c77a0",
+      "id": "3fa53091-0291-4285-84ad-eac1664ded1b",
       "name": "Split Out"
     },
     {
@@ -378,10 +378,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3152,
-        -128
+        464,
+        544
       ],
-      "id": "7a66df7d-058b-4a55-b504-a17916310ab0",
+      "id": "f04d7106-7479-4a69-8490-2031c0b46bb3",
       "name": "Code input @id + author in json-ld"
     },
     {
@@ -393,10 +393,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3280,
-        -624
+        -144,
+        48
       ],
-      "id": "6e34bf5d-4392-4945-a8cd-0f6b5250528e",
+      "id": "473c6c0d-337b-4058-a6ca-464dba735155",
       "name": "Edit Fields1"
     },
     {
@@ -406,25 +406,25 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        512,
-        240
+        -2912,
+        912
       ],
-      "id": "494fc188-126f-4abc-9416-889fed03ba53",
+      "id": "16633637-b98f-40ec-8591-a703bb8d23bf",
       "name": "find rsfc assessments"
     },
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "  {\n    \"repos_url\": [\n\"https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG\"\n    ],\n    \"repo_count\": 1\n  }",
+        "jsonOutput": "  {\n    \"repos_url\": [\n\"https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG\",\n\"https://github.com/oeg-upm/soca\",\n\"https://github.com/oeg-upm/rsfc\",\n\"https://github.com/FAIR2Adapt/ro-crate-generation-notebooks\"\n    ],\n    \"repo_count\": 4\n  }",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1280,
-        -576
+        -784,
+        288
       ],
-      "id": "16a233c5-cf8b-47ce-a437-7dfb7272f0bd",
+      "id": "c011ec76-1ca1-4eb9-8c04-37741eb31d11",
       "name": "Edit Fields"
     },
     {
@@ -434,10 +434,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1824,
-        -544
+        -240,
+        320
       ],
-      "id": "ffe582c5-bb16-4cac-b94b-a4e0e0fb9df2",
+      "id": "ae7c50bf-a672-45fb-a6f9-c9ccf721eb49",
       "name": "Code url->target-name"
     },
     {
@@ -445,10 +445,10 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1840,
-        112
+        -5328,
+        784
       ],
-      "id": "f4b6f479-075d-407f-aaed-d74d995efa4a",
+      "id": "d5ed2107-7ae9-4a45-9b2f-c64ead6d4df2",
       "name": "When clicking ‘Execute workflow’"
     },
     {
@@ -458,10 +458,10 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1872,
-        400
+        -1728,
+        1008
       ],
-      "id": "78ff5856-dc18-4b28-9caf-be3abf0aa915",
+      "id": "2dd5d706-cf0d-4523-a973-77432a430248",
       "name": "Create bot target dir"
     },
     {
@@ -473,10 +473,10 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        2400,
-        384
+        -1200,
+        992
       ],
-      "id": "021f4135-b99e-4853-bff5-3c2d89776a9d",
+      "id": "e45b00cd-9492-492c-9f23-7c0d403d11f1",
       "name": "json -> config.json"
     },
     {
@@ -488,10 +488,10 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        2608,
-        384
+        -992,
+        992
       ],
-      "id": "6cb9a751-a84c-4d45-a2ec-0b45c75c1dd0",
+      "id": "7effaf38-1c0a-4de4-9f98-bbf2e4377f18",
       "name": "Write config.json"
     },
     {
@@ -501,10 +501,10 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        2816,
-        384
+        -784,
+        992
       ],
-      "id": "7d881cab-7a60-4884-9647-761693e1826a",
+      "id": "1f5c1cc4-8ece-48ba-ad21-0a7115e246a3",
       "name": "bot run analysis"
     },
     {
@@ -514,10 +514,10 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        3056,
-        384
+        -544,
+        992
       ],
-      "id": "612eacc1-252d-49be-a877-fea6d519facd",
+      "id": "dbce6bd2-a9eb-4165-8b86-c81939c4d4a9",
       "name": "bot publish issues"
     },
     {
@@ -527,10 +527,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        2080,
-        384
+        -1520,
+        992
       ],
-      "id": "c277466b-bc0e-4821-a617-3899b14db5d3",
+      "id": "c6dcc84d-8538-4cb7-af6e-e934537a09e5",
       "name": "Merge1"
     },
     {
@@ -542,10 +542,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2240,
-        384
+        -1360,
+        992
       ],
-      "id": "9550c494-43ea-4c7a-8e94-f41753f5af22",
+      "id": "54b54636-ced3-4b86-ac5b-3b7f5f9e63bd",
       "name": "set config file"
     },
     {
@@ -557,11 +557,24 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1648,
-        224
+        -1952,
+        832
       ],
-      "id": "7f431ab8-dd86-48ce-96bd-6bee8fc982a5",
+      "id": "82e0f91a-0b0f-427c-9093-fd3837c3271d",
       "name": "change repos_url -> repositories"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -176,
+        560
+      ],
+      "id": "15a22337-5849-4f8c-a3ec-d04bdfd0c3bf",
+      "name": "Merge4"
     }
   ],
   "pinData": {},
@@ -597,11 +610,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Execute soca portal": {
-      "main": [
-        []
       ]
     },
     "Code repo_url list & repo count": {
@@ -720,6 +728,11 @@
             "node": "change repos_url -> repositories",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -797,7 +810,7 @@
       "main": [
         [
           {
-            "node": "Read/Write Files from Disk",
+            "node": "Merge4",
             "type": "main",
             "index": 0
           }
@@ -815,11 +828,6 @@
         ]
       ]
     },
-    "Post assessments_raw": {
-      "main": [
-        []
-      ]
-    },
     "Code input @id + author in json-ld": {
       "main": [
         [
@@ -829,11 +837,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Edit Fields1": {
-      "main": [
-        []
       ]
     },
     "find rsfc assessments": {
@@ -856,11 +859,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "Code url->target-name": {
-      "main": [
-        []
       ]
     },
     "When clicking ‘Execute workflow’": {
@@ -966,18 +964,44 @@
           }
         ]
       ]
+    },
+    "Execute soca portal": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code url->target-name": {
+      "main": [
+        []
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate",
-    "availableInMCP": false
+    "binaryMode": "separate"
   },
-  "versionId": "e3ffbfb7-165e-43a6-bd75-f448a225b462",
+  "versionId": "2948916a-16f7-4ab2-922e-a8bbb1e800e3",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
-  "id": "Wyxi7BMi5j9sHIHs",
+  "id": "irNrm2kO6dmnBiBR",
   "tags": []
 }

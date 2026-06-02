@@ -66,8 +66,6 @@ configOverrides:
         "EMBEDDED_SUPERSET": True,
         "DASHBOARD_RBAC": True
     }
-    
-    GUEST_ROLE_NAME = "Gamma"
 
 extraEnv:
   DB_HOST: "${db_host}"

@@ -19,17 +19,17 @@ def add_dashverse_link(soup, target=None):
     import os
 
 
-    DASHBOARD_ORG_URL = "dashboard-org.html"
-    DASHBOARD_REPO_URL = "dashboard-repo.html"
+    DASHBOARD_ORG_PAGE = "dashboard-org.html"
+    DASHBOARD_REPO_PAGE = "dashboard-repo.html"
     
     link_org = soup.find(id="dashverse-org-link")
     link_user = soup.find(id="dashverse-user-link")
     
-    if link_org and DASHBOARD_ORG_URL:
-        link_org["href"] = DASHBOARD_ORG_URL
+    if link_org and DASHBOARD_ORG_PAGE:
+        link_org["href"] = DASHBOARD_ORG_PAGE
 
-    if link_user and DASHBOARD_REPO_URL:
-        link_user["href"] = DASHBOARD_REPO_URL
+    if link_user and DASHBOARD_REPO_PAGE:
+        link_user["href"] = DASHBOARD_REPO_PAGE
             
             
 # generación e archivos html del portal
@@ -40,37 +40,45 @@ def create_embedded_dashboard_pages(portal_output_dir):
     portal_output_dir = Path(portal_output_dir)
 
     # URL pública que ve el navegador para cargar Superset
-    superset_public_url = os.getenv("SUPERSET_PUBLIC_DOMAIN", "http://localhost:8088")
+    superset_public_url = os.getenv("SUPERSET_PUBLIC_DOMAIN", "http://host.docker.internal:8088")
 
-    # URL pública que ve el navegador para llamar a emb_api
-    org_embed_id = os.getenv("DASHBOARD_ORG_EMBED_ID", "")
-    repo_embed_id = os.getenv("DASHBOARD_REPO_EMBED_ID", "")
+    org_dashboard_id = os.getenv("DASHBOARD_ORG_EMBED_ID", "")
+    repo_dashboard_id = os.getenv("DASHBOARD_REPO_EMBED_ID", "")
 
     create_dashboard_page(
         output_file=portal_output_dir / "dashboard-org.html",
         title="SQOO Organization Dashboard",
-        dashboard_id=org_embed_id,
-        token_endpoint="/api/superset/guest-token/org",
+        dashboard_ref=org_dashboard_id,
         superset_domain=superset_public_url,
     )
 
     create_dashboard_page(
         output_file=portal_output_dir / "dashboard-repo.html",
         title="SQOO Repository Dashboard",
-        dashboard_id=repo_embed_id,
-        token_endpoint="/api/superset/guest-token/repo",
+        dashboard_ref=repo_dashboard_id,
         superset_domain=superset_public_url,
     )
 
 
-def create_dashboard_page(output_file, title, dashboard_id, token_endpoint, superset_domain):
+def dashboard_url(superset_domain, dashboard_ref):
+    dashboard_ref = (dashboard_ref or "").strip()
+    if dashboard_ref.startswith("http://") or dashboard_ref.startswith("https://"):
+        base_url = dashboard_ref
+    else:
+        superset_domain = (superset_domain or "http://host.docker.internal:8088").rstrip("/")
+        base_url = f"{superset_domain}/superset/dashboard/{dashboard_ref.strip('/')}/"
+
+    separator = "&" if "?" in base_url else "?"
+    return f"{base_url}{separator}standalone=2"
+
+
+def create_dashboard_page(output_file, title, dashboard_ref, superset_domain):
+    iframe_src = dashboard_url(superset_domain, dashboard_ref)
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>{title}</title>
-
-  <script src="https://unpkg.com/@superset-ui/embedded-sdk"></script>
 
   <style>
     body {{
@@ -95,15 +103,11 @@ def create_dashboard_page(output_file, title, dashboard_id, token_endpoint, supe
       font-weight: bold;
     }}
 
-    #dashboard-container {{
+    .dashboard-frame {{
       width: 100vw;
       height: calc(100vh - 50px);
-    }}
-
-    #dashboard-container iframe {{
-      width: 100%;
-      height: 100%;
       border: none;
+      display: block;
     }}
   </style>
 </head>
@@ -113,29 +117,12 @@ def create_dashboard_page(output_file, title, dashboard_id, token_endpoint, supe
     <a href="index.html">← Back to Software Catalog</a>
   </header>
 
-  <div id="dashboard-container"></div>
-
-  <script>
-    supersetEmbeddedSdk.embedDashboard({{
-      id: "{dashboard_id}",
-      supersetDomain: "{superset_domain}",
-      mountPoint: document.getElementById("dashboard-container"),
-      fetchGuestToken: () =>
-        fetch("{token_endpoint}")
-          .then(response => {{
-            if (!response.ok) {{
-              throw new Error("Guest token request failed");
-            }}
-            return response.json();
-          }})
-          .then(data => data.token),
-      dashboardUiConfig: {{
-        hideTitle: false,
-        hideChartControls: false,
-        hideTab: false
-      }}
-    }});
-  </script>
+  <iframe
+    class="dashboard-frame"
+    src="{iframe_src}"
+    title="{title}"
+    allowfullscreen>
+  </iframe>
 </body>
 </html>
 """

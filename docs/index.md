@@ -29,7 +29,7 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 | worker_rsfc      | procesamiento jobs indicadores         |
 | worker_soca      | procesamiento jobs metadatos           |
 | rate_limiter_rsfc| limitador tokens githubAPI worker_rsfc |
-| nginx            | publicacion del portal SOCA y proxy de guest tokens |
+| nginx            | publicacion del portal SOCA |
 | DashVerse        | observatorio de evaluación             |
 | sw-metadata-bot  | Generación de issues sobre metadatos   |
 

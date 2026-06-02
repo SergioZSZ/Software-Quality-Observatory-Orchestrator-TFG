@@ -106,8 +106,8 @@ module "demo_portal" {
 
   namespace_name = module.namespace.name
   common_labels  = var.common_labels
-  superset_url = module.superset.url
-  }
+  superset_url   = module.superset.url
+}
 
 # api documentation for postgrest
 module "postgrest_docs" {

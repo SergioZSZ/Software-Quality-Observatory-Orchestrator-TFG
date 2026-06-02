@@ -6,26 +6,39 @@
    - Estar loggeado en Docker/Docker Desktop
 
 #### Instalaciones necesarias para desplegar DashVERSE:
+Si se usa Windows, DashVERSE se despliega desde Ubuntu en WSL. Ansible no funciona como control node nativo en Windows y conviene que `kubectl`, `make port-forward` y `make setup-dashboards` se ejecuten en el mismo entorno para que no haya problemas con `localhost`.
+
+Antes de empezar en Windows hay que tener Docker Desktop instalado, abierto y con la integracion WSL activada para Ubuntu.
+
    - make 
-      - Linux:   ``sudo apt install make --classic``
-      - Windows: ``winget install -e --id GnuWin32.Make``
+      - Linux/WSL:   ``sudo apt install make``
 
    - Terraform/OpenTofu 
-      - Linux:    ``sudo snap install opentofu --classic`` 
-      - Windows:  ``winget install --exact --id=OpenTofu.Tofu``
+      - Linux/WSL:    ``sudo snap install opentofu --classic`` 
 
    - Minikube
-      - Linux:    ``sudo snap install minikube --classic``
-      - Windows:  ``winget install -e --id Kubernetes.minikube``
+      - Linux/WSL:
+        ```bash
+        curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+        sudo install minikube-linux-amd64 /usr/local/bin/minikube
+        rm minikube-linux-amd64
+        minikube version
+        ```
       
    - Helm      
-      - Linux:    ``sudo snap install helm --classic``
-      - Windows:  ``winget install -e --id Helm.Helm``
+      - Linux/WSL:    ``sudo snap install helm --classic``
 
    - Kubectl
-      - Linux:    ``sudo snap install kubectl --classic``
-      - Windows:  ``winget install -e --id Kubernetes.kubectl``
-      
+      - Linux/WSL:    instalarlo dentro de WSL y comprobar que `which kubectl` apunta al binario de linux
+   
+   - Ansible
+      - Linux/WSL:
+        ```bash
+        sudo apt update
+        sudo apt install -y python3 python3-pip
+        python3 -m pip install --user ansible
+        ansible --version
+        ```
 
 
 

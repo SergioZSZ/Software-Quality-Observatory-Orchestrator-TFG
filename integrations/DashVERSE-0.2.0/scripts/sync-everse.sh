@@ -17,7 +17,7 @@ fetch_with_retry() {
     local delay=1
 
     while [[ $attempt -le $MAX_RETRIES ]]; do
-        if curl -sfL "$url" -o "$output"; then
+        if curl -fL "$url" -o "$output"; then
             return 0
         fi
         echo "Retry $attempt/$MAX_RETRIES for $url" >&2
@@ -29,14 +29,14 @@ fetch_with_retry() {
 }
 
 echo "Fetching dimensions..."
-DIMS=$(curl -sf "$GITHUB_API/dimensions" | jq -r '.[].name | select(endswith(".json"))')
+DIMS=$(curl -sf "$GITHUB_API/dimensions" | jq -r '.[].name | select(endswith(".json"))' | tr -d '\r')
 for dim in $DIMS; do
     echo "  $dim"
     fetch_with_retry "$GITHUB_RAW/dimensions/$dim" "$OUTPUT_DIR/dimensions/$dim"
 done
 
 echo "Fetching indicators..."
-INDS=$(curl -sf "$GITHUB_API/indicators" | jq -r '.[].name | select(endswith(".json"))')
+INDS=$(curl -sf "$GITHUB_API/indicators" | jq -r '.[].name | select(endswith(".json"))' | tr -d '\r')
 for ind in $INDS; do
     echo "  $ind"
     fetch_with_retry "$GITHUB_RAW/indicators/$ind" "$OUTPUT_DIR/indicators/$ind"

@@ -1,4 +1,4 @@
-import time, os, json
+import time, os, json, shutil
 
 from .rabbitmq.client import rabbit_connect, publish_job
 from .cruds.functions import soca_extract, soca_portal
@@ -49,6 +49,18 @@ def wait_for_token(channel):
     
     
 ### logica interna del worker
+def cleanup_repo_dir(metadata_dir, repo_name):
+    repo_dir = os.path.join(metadata_dir, repo_name)
+
+    if not os.path.isdir(repo_dir):
+        timestamp(f"[CLEANUP] Repo dir not found: {repo_dir}")
+        return
+
+    try:
+        shutil.rmtree(repo_dir)
+        timestamp(f"[CLEANUP] Deleted repo dir: {repo_dir}")
+    except Exception as e:
+        timestamp(f"[CLEANUP] Error deleting repo dir {repo_dir}: {str(e)}")
 
 # extraccion de metadata
 def handle_extract_metadata(target, repo_url):
@@ -72,18 +84,23 @@ def handle_extract_metadata(target, repo_url):
         failed_file = os.path.join(metadata_dir, f"failed_{repo_name}.json")
         with open(failed_file, "w") as f:
             json.dump({"detail": response.status}, f, indent=2)
+        
             
     else:
-
+        
         total_time = time.time() - start
         timestamp(f"[{target} - {repo_name}]  Metadata extracted in {total_time:.2f}s ")
 
+
+
     # conteo de repos procesados
     metadata_dir = os.path.join(BASE_DIR, "outputs", "soca", target, "metadata")
-    
     processed = count_processed(metadata_dir)
-
+    
+    # eliminacion de repositorio extraido 
+    cleanup_repo_dir(metadata_dir, repo_name)
     repo_count = get_repo_count(target)
+    
     timestamp(f"[SOCA] {target} Progress: {processed}/{repo_count} repos processed")
 
     # si todo procesado genera fichero ok

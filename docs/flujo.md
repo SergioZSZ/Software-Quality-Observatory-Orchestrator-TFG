@@ -56,7 +56,7 @@ n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los r
 - El portal incorpora metadatos SOCA, indicadores RSFC e informes/issues de sw-metadata-bot.
 - El portal queda persistido en `outputs/soca/<target>/portal/`.
 - El servicio `nginx` publica ese directorio en `http://localhost:8030/portals/<target>/`.
-- Las paginas embebidas usan `/api/superset/guest-token/...`, que Nginx reenvia a `guest_tokenapi`.
+- Las paginas embebidas cargan los dashboards de DashVERSE/Superset mediante iframe directo usando `SUPERSET_PUBLIC_DOMAIN`.
 
 Salida generada:
 

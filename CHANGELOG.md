@@ -1,6 +1,8 @@
 # General
 
 
+# nginx
+- añadido contenedor nginx de despliegue de los portales soca generados
 
 # Soca
 - Mejorada visualización de metadatos de portal software generado por soca

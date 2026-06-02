@@ -3,6 +3,7 @@ from pathlib import Path
 from os import listdir
 from os.path import isfile, join
 from datetime import datetime
+from html import escape
 import re
 import sys
 from pygments import highlight
@@ -800,7 +801,7 @@ class Metadata(object):
                 </div>
                 
                 <div style="margin-bottom:15px; max-height:350px; overflow:auto;">
-                    <b style="font-size:1.1em;">Source by BibTeX</b><br><br>
+                    {self.source_anchor("Source by BibTeX", safe_dic(citations, "bibtex_source"), bold=True)}<br><br>
                     <div style="font-size:0.9em;">
                         {bib_clean}
                     </div>
@@ -828,7 +829,7 @@ class Metadata(object):
                     </div>
                     
                     <div style="margin-bottom:15px; max-height:350px; overflow:auto;">
-                        <b style="font-size:1.1em;">Source by .cff</b><br><br>
+                        {self.source_anchor("Source by .cff", safe_dic(citations, "cff_source"), bold=True)}<br><br>
 
                         {f"<b>Title:</b> {parsed['title']}<br>" if parsed['title'] else ""}
                         {f"<b>Authors:</b> {parsed['authors']}<br>" if parsed['authors'] else ""}
@@ -875,8 +876,9 @@ class Metadata(object):
                 
 
                 citation = safe_list(safe_dic(citations, 'citation'), 0)
+                citation_source = safe_list(safe_dic(citations, 'citation_sources'), 0)
                 body += f"""
-                <b style="font-size:1.1em;">Source by documentation</b><br><br>
+                {self.source_anchor("Source by documentation", citation_source, bold=True)}<br><br>
                 <div style="
                     font-size:0.95em;
                     line-height:1.5;
@@ -977,7 +979,8 @@ class Metadata(object):
             source = installation[0].get("source")
             if source:
                 filename = source.split("/")[-1]
-                md_text += f"**Source {filename}:** \n\n"
+                github_url = self.raw_to_github_url(source)
+                md_text += f"**[Source {filename}]({github_url})** \n\n"
             for item in installation:
                 # header de la instalacion
                 header = safe_dic(safe_dic(item, "result"), "original_header")
@@ -1045,6 +1048,7 @@ class Metadata(object):
                     if "readme.md" in filename and value:
 
                         html_md = mistune.html(value).replace("<p>", "").replace("</p>", "")
+                        source_link = self.source_anchor("source README.md", source)
                         body += f"""
                         <div style="
                                 background:#f7f7f7;
@@ -1053,7 +1057,7 @@ class Metadata(object):
                                 font-size:0.9em;
                                 margin-bottom:10px;
                             ">
-                            {html_md} (source: README.md)
+                            {html_md} ({source_link})
                         </div>
                         """
 
@@ -1062,8 +1066,9 @@ class Metadata(object):
                         display = self.get_repo_relative_path(source)
                         github_url = self.raw_to_github_url(source)
                         source_label = filetype.lower()
+                        link_text = f"{display} ({source_label})"
                         body += f"""
-                        <a href="{github_url}" target="_blank">{display}</a> ({source_label})<br>
+                        <a href="{github_url}" target="_blank">{escape(link_text)}</a><br>
                         """
 
                 body += "<br>"
@@ -1189,7 +1194,7 @@ class Metadata(object):
                 tooltip_parts.append(f"RSFC: {score_text}")
 
                 body_parts.append(f"""
-        <b>RSFC FAIR report:</b> {score_text}<br>
+        <b>RSFC FAIRness report:</b> {score_text}<br>
 
         <details>
             <summary style="cursor:pointer;">Show RSFC report</summary>
@@ -1336,8 +1341,22 @@ class Metadata(object):
         source_path = urlparse(source).path if '://' in source else source
         return unquote(os.path.basename(source_path.rstrip('/'))) or source
 
+    def metadata_item_source_url(self, item):
+        source = safe_dic(item, 'source') or safe_dic(safe_dic(item, 'result'), 'source')
+        return self.raw_to_github_url(source) if source else None
+
+    def source_anchor(self, label, source, bold=False):
+        if not source:
+            return escape(label)
+        github_url = self.raw_to_github_url(source)
+        text = f"<strong>{escape(label)}</strong>" if bold else escape(label)
+        return f'<a href="{escape(github_url, quote=True)}" target="_blank">{text}</a>'
+
     def source_markdown(self, item):
         source_name = self.metadata_item_source_name(item)
+        source_url = self.metadata_item_source_url(item)
+        if source_name and source_url:
+            return f"**[source {source_name}]({source_url})**\n\n"
         return f"**source {source_name}**\n\n" if source_name else ''
 
     def usage(self):
@@ -1656,6 +1675,7 @@ class Metadata(object):
         citations = {'citation': []}
 
         for c in all_citations:
+            source = safe_dic(c, 'source') or safe_dic(safe_dic(c, 'result'), 'source')
             try:
                 type = ""
                 type = c['result']['format']
@@ -1663,13 +1683,19 @@ class Metadata(object):
                 try:
                     if c['result']['type'] == 'Text_excerpt':
                         citations['citation'].append(c['result']['value'])
+                        if source:
+                            citations.setdefault('citation_sources', []).append(source)
                 except:
                     continue
             match type:
                 case 'cff':
                     citations['cff'] = c['result']['value']
+                    if source:
+                        citations['cff_source'] = source
                 case 'bibtex':
                     citations['bibtex'] = c['result']['value']
+                    if source:
+                        citations['bibtex_source'] = source
                 case _:
                     continue
         # return citations if len(citations) > 0 else None
