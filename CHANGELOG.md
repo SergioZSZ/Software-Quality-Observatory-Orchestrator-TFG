@@ -20,8 +20,8 @@
 
 # DashVERSE
 - Actualizado dashboard SQOO-ORG con chart TOP 5 softwares
-- Configurado Superset/DashVERSE para permitir dashboards embebidos mediante `EMBEDDED_SUPERSET` y uso del rol `Gamma` y `Public` para usuarios invitados
-- Publicados los dashboards y añadidos los roles `Gamma` y `Public` en la configuración de acceso para permitir visualización
-- Habilitada la visualización embebida del dashboard SQOO-ORG restringida al dominio autorizado http://localhost:8030
+- Configurado Superset/DashVERSE para permitir dashboards embebidos mediante `iframe` de superset y uso del rol `Public` para usuarios invitados
+- Publicados los dashboards y añadidos los roles  `Public` en la configuración de acceso para permitir visualización
+- Habilitada la visualización embebida del dashboard SQOO-ORG restringida al dominio autorizado (http://localhost:8030 en caso local, caso desplegable poner dominio desde donde se visualizará)
 
 
