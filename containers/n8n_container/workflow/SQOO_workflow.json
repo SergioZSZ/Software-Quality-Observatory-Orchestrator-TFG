@@ -67,8 +67,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -336,
-        848
+        240,
+        688
       ],
       "id": "624ae60e-c73c-40e7-aa73-ddef24bfe686",
       "name": "Execute soca portal"
@@ -172,8 +172,8 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        48,
-        544
+        768,
+        448
       ],
       "id": "0effccd9-979f-47d2-9642-d2851f250653",
       "name": "Read/Write Files from Disk"
@@ -270,8 +270,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        272,
-        544
+        992,
+        448
       ],
       "id": "4f3d1f87-5c0e-415f-acca-95f3689ad2de",
       "name": "Extract assessments"
@@ -336,8 +336,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        672,
-        544
+        1392,
+        448
       ],
       "id": "2dc156f5-7266-4382-8595-c8152a9f69e6",
       "name": "Post assessments_raw"
@@ -350,8 +350,8 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        -544,
-        288
+        112,
+        192
       ],
       "id": "3fa53091-0291-4285-84ad-eac1664ded1b",
       "name": "Split Out"
@@ -363,8 +363,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        464,
-        544
+        1184,
+        448
       ],
       "id": "f04d7106-7479-4a69-8490-2031c0b46bb3",
       "name": "Code input @id + author in json-ld"
@@ -378,8 +378,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -144,
-        48
+        512,
+        -48
       ],
       "id": "473c6c0d-337b-4058-a6ca-464dba735155",
       "name": "Edit Fields1"
@@ -406,8 +406,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -784,
-        288
+        -128,
+        192
       ],
       "id": "c011ec76-1ca1-4eb9-8c04-37741eb31d11",
       "name": "Edit Fields"
@@ -419,8 +419,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -240,
-        320
+        416,
+        224
       ],
       "id": "ae7c50bf-a672-45fb-a6f9-c9ccf721eb49",
       "name": "Code url->target-name"
@@ -470,7 +470,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot:latest \\\nuv run sw-metadata-bot run-analysis \\\n--config-file /app/outputs/sw-metadata-bot/{{$node[\"Target\"].json.target}}/config.json --snapshot-tag {{ $node[\"set config file\"].json.outputs.snapshot_tag }} \\\n{{ $node[\"Target\"].json.previous_report && $node[\"Target\"].json.previous_report.trim() !== \"\" ? \"--previous-report /app/outputs/sw-metadata-bot/\" + $node[\"Target\"].json.target + \"/runs/\" + $node[\"Target\"].json.previous_report + \"/run_report.json\" : \"\" }}\n"
+        "command": "=docker run -d --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot-conf:latest \\\nuv run sw-metadata-bot run-analysis \\\n--config-file /app/outputs/sw-metadata-bot/{{$node[\"Target\"].json.target}}/config.json \\\n--snapshot-tag {{ $node[\"set config file\"].json.outputs.snapshot_tag }}"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -479,17 +479,18 @@
         992
       ],
       "id": "1f5c1cc4-8ece-48ba-ad21-0a7115e246a3",
-      "name": "bot run analysis"
+      "name": "bot run analysis",
+      "alwaysOutputData": false
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot:latest \\\nuv run sw-metadata-bot publish \\\n--analysis-root /app/outputs/sw-metadata-bot/{{$node[\"Target\"].json.target}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}\n"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot-conf:latest \\\nuv run sw-metadata-bot publish \\\n--analysis-root /app/outputs/sw-metadata-bot/{{$node[\"Target\"].json.target}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}\n"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -512,
-        992
+        -16,
+        976
       ],
       "id": "dbce6bd2-a9eb-4165-8b86-c81939c4d4a9",
       "name": "bot publish issues"
@@ -544,8 +545,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -176,
-        560
+        544,
+        464
       ],
       "id": "15a22337-5849-4f8c-a3ec-d04bdfd0c3bf",
       "name": "Merge4"
@@ -564,29 +565,104 @@
       "name": "extract bot config"
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -5264,
-        768
-      ],
-      "id": "6935017c-a1d0-41eb-8dcc-ec45986142fb",
-      "name": "When clicking ‘Execute workflow’"
-    },
-    {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "{\n  \"target\": \"oeg-fair-sergio\",\n  \"type\": \"user\",\n  \"mode\": \"manual\",\n  \"repos\": \"repos.txt\" ,\n  \"previous_report\": \"\"\n}",
+        "jsonOutput": "={\n  \"repositories\": [\n    \"https://github.com/FAIR2Adapt/fair2adapt.github.io\",\n    \"https://github.com/FAIR2Adapt/Hack4RiOMAR\",\n    \"https://github.com/FAIR2Adapt/fair2adapt-helpdesk\",\n    \"https://github.com/FAIR2Adapt/jupyterhub-singleuser-pangeo-notebook\",\n    \"https://github.com/FAIR2Adapt/arctic-radioisotopes\",\n    \"https://github.com/FAIR2Adapt/events-calendar\",\n    \"https://github.com/FAIR2Adapt/biscayan-riomar\",\n    \"https://github.com/FAIR2Adapt/case-study-template\",\n    \"https://github.com/FAIR2Adapt/city-of-hamburg\",\n    \"https://github.com/FAIR2Adapt/fair-national-adaptation-hub\",\n    \"https://github.com/FAIR2Adapt/weADAPT-connectivity-hub\",\n    \"https://github.com/FAIR2Adapt/fair-risk-data-for-businesses\",\n    \"https://github.com/FAIR2Adapt/saarland-flooding\",\n    \"https://github.com/FAIR2Adapt/NRDA-example\",\n    \"https://github.com/FAIR2Adapt/fairification-framework\",\n    \"https://github.com/FAIR2Adapt/maia\",\n    \"https://github.com/FAIR2Adapt/variable-extraction-from-osc-products\",\n    \"https://github.com/FAIR2Adapt/knowledge-services\",\n    \"https://github.com/FAIR2Adapt/flood-risk-toolbox-jupytergis\",\n    \"https://github.com/FAIR2Adapt/softwares_RIOMAR\",\n    \"https://github.com/FAIR2Adapt/systematic-review-pipeline\",\n    \"https://github.com/FAIR2Adapt/cca-crate-profile\",\n    \"https://github.com/FAIR2Adapt/ro-crate-generation-notebooks\",\n    \"https://github.com/FAIR2Adapt/fair2adapt-claim-demo\",\n    \"https://github.com/FAIR2Adapt/fair_solutions_demos\",\n    \"https://github.com/FAIR2Adapt/gridlook\",\n    \"https://github.com/FAIR2Adapt/riomar-dashboard\",\n    \"https://github.com/FAIR2Adapt/FDO2map\",\n    \"https://github.com/FAIR2Adapt/fdo-resolver\",\n    \"https://github.com/FAIR2Adapt/fair-data-access\",\n    \"https://github.com/FAIR2Adapt/loom2nanopub\",\n    \"https://github.com/FAIR2Adapt/.github\"\n  ],\n  \"target\": {{ $node[\"Target\"].json.target }}\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -5072,
+        -1872,
+        1328
+      ],
+      "id": "6b9f31d9-3adc-4b38-a578-7703c2c3e7c3",
+      "name": "change repos_url -> repositories1"
+    },
+    {
+      "parameters": {
+        "command": "=test -f \"/root/.n8n-files/sw-metadata-bot/{{$node[\"Target\"].json.target}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}/run_report.json\" && echo 1 || echo 0"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        1136
+      ],
+      "id": "4c2a6a9e-4e2f-4c3d-a15a-8746f0b0f644",
+      "name": "find  run_report.json"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
+              "leftValue": "={{ $json.stdout.trim() }}",
+              "rightValue": "=1",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -304,
+        1136
+      ],
+      "id": "010108f6-34a5-448f-8e9d-c51c9bc230c6",
+      "name": "if found run_report.json",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -144,
+        1296
+      ],
+      "id": "6828e3b6-f2a0-41a1-a237-88d9bfafb1ef",
+      "name": "Wait2",
+      "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -5280,
+        768
+      ],
+      "id": "680e9cca-b032-4f0e-940b-1d2fc3576a57",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"target\": \"FAIR2ADAPT\",\n  \"type\": \"org\",\n  \"mode\": \"auto\",\n  \"repos\": \"\" \n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5088,
         784
       ],
-      "id": "f1e43664-4f74-4f59-8444-ee09ff900f9a",
+      "id": "14745f36-1ab5-4b4b-9490-09537034baa4",
       "name": "Target"
     }
   ],
@@ -900,7 +976,7 @@
       "main": [
         [
           {
-            "node": "bot publish issues",
+            "node": "find  run_report.json",
             "type": "main",
             "index": 0
           }
@@ -994,6 +1070,51 @@
         ]
       ]
     },
+    "change repos_url -> repositories1": {
+      "main": [
+        []
+      ]
+    },
+    "find  run_report.json": {
+      "main": [
+        [
+          {
+            "node": "if found run_report.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if found run_report.json": {
+      "main": [
+        [
+          {
+            "node": "bot publish issues",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "find  run_report.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "When clicking ‘Execute workflow’": {
       "main": [
         [
@@ -1022,7 +1143,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "59645820-de03-4594-bec9-9593b2bf4f4a",
+  "versionId": "cb68101d-d52b-4eea-a0a6-1ecaedc4379e",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

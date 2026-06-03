@@ -29,6 +29,8 @@
 #### 5.2 Instalación/Despliegue del orquestador
 Siguiendo los pasos en orden secuencial:
 
+**NOTA** el paso 1 actualmente está compactado en los `/scripts/build-docker-images.sh` para terminales WSL/Linux y `/scripts/build-docker-images.ps1` para powershell de windows. Ejecutando dichos scripts se instalan automáticamente las imágenes docker.
+
 1. Generar imágenes  docker:
    - `soca-heavy`:
       - Directorio desde el que crearla: `/containers/soca_container` 
@@ -37,7 +39,12 @@ Siguiendo los pasos en orden secuencial:
       - Directorio desde el que crearla: `/containers/rsfc_container` 
       - Mandato: `docker build -t rsfc-heavy .`
    - `sw-metadata-bot`:
-      - Directorio desde el que crearla: `/integrations/sw-metadata-bot-0.4.2`
+      - Directorio desde el que crearla: `/integrations/sw-metadata-bot-0.5.0`
+      - Mandato: `docker build -t sw-metadata-bot .`
+   - `sw-metadata-bot-conf`:
+      - Directorio desde el que crearla: `/containers/sw-metadata-bot_container` 
+      - Mandato: `docker build -t sw-metadata-bot-conf .`
+
       
 2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
 

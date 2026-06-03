@@ -158,7 +158,7 @@ Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filteri
 Se ha:
 
 - Integrado `sw-metadata-bot` como herramienta encargada de analizar la calidad de los metadatos de los repositorios procesados
-- Preparado el uso del bot mediante una imagen Docker `sw-metadata-bot:latest`
+- Preparado el uso del bot mediante una imagen Docker `sw-metadata-bot:latest` y posteriormente creado `sw-metadata-bot-nltk:latest` con los recursos necesarios nltk para su ejecución.
 - Adaptado su ejecución vía `execute-command` de n8n
 - Configurado el montaje del volumen compartido de `outputs` para persistir los resultados del análisis
 - Generado dinámicamente un archivo `config.json` con la lista de repositorios obtenidos durante el workflow
@@ -305,8 +305,8 @@ https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.3
 - DASHVERSE 0.2.0: 
 https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.2.0
 
-- sw-metadata-bot 0.4.2:
-https://github.com/SoftwareUnderstanding/sw-metadata-bot/releases/tag/v0.4.2
+- sw-metadata-bot 0.5.0:
+https://github.com/SoftwareUnderstanding/sw-metadata-bot/releases/tag/v0.5.0
 
 - RsMetaCheck 0.2.1:
 https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
@@ -346,6 +346,8 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
 #### 5.2 Instalación/Despliegue del orquestador
 Siguiendo los pasos en orden secuencial:
 
+**NOTA** el paso 1 actualmente está compactado en los `/scripts/build-docker-images.sh` para terminales WSL/Linux y `/scripts/build-docker-images.ps1` para powershell de windows. Ejecutando dichos scripts se instalan automáticamente las imágenes docker.
+
 1. Generar imágenes  docker:
    - `soca-heavy`:
       - Directorio desde el que crearla: `/containers/soca_container` 
@@ -354,8 +356,12 @@ Siguiendo los pasos en orden secuencial:
       - Directorio desde el que crearla: `/containers/rsfc_container` 
       - Mandato: `docker build -t rsfc-heavy .`
    - `sw-metadata-bot`:
-      - Directorio desde el que crearla: `/integrations/sw-metadata-bot-0.4.2`
-      
+      - Directorio desde el que crearla: `/integrations/sw-metadata-bot-0.5.0`
+      - Mandato: `docker build -t sw-metadata-bot .`
+   - `sw-metadata-bot-conf`:
+      - Directorio desde el que crearla: `/containers/sw-metadata-bot_container` 
+      - Mandato: `docker build -t sw-metadata-bot-conf .`
+
 2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
 
 3. Acceder a n8n mediante el navegador en http://localhost:5678
