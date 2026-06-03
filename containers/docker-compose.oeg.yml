@@ -1,0 +1,125 @@
+
+
+services:
+
+# *** Gestión del wokflow ***
+  n8n:
+    build: ./n8n_container
+    container_name: n8n
+    user: root
+    #nework_mode: host
+    ports:
+      - "5678:5678"
+    volumes:
+      - ./n8n_container/n8n_data:/home/node/.n8n
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .//outputs:/root/.n8n-files
+    depends_on:
+      - rabbitmq
+    networks:
+      - net
+    group_add:
+      - "998"
+    environment:
+      # *** Privadas ***
+      - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
+      - OUTPUTS=${OUTPUTS}
+      - DASHBOARD_ORG_EMBED_ID=${DASHBOARD_ORG_EMBED_ID}
+      - DASHBOARD_REPO_EMBED_ID=${DASHBOARD_REPO_EMBED_ID}
+      - SUPERSET_PUBLIC_DOMAIN=${SUPERSET_PUBLIC_DOMAIN:-http://host.docker.internal:8088}
+      # *** General ***
+      - GENERIC_TIMEZONE=Europe/Madrid
+      - TZ=Europe/Madrid
+      - NODE_ENV=production
+      # *** Settings ***
+      - N8N_SECURE_COOKIE=false
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_RUNNERS_ENABLED=true
+      - NODES_EXCLUDE=[]
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - N8N_USER_FOLDER=/home/node/.n8n
+      # *** RabbitMQ ***
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RATE_LIMIT_RSFC_ENABLED=${RATE_LIMIT_RSFC_ENABLED}
+      
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+    - "5672:5672"
+    - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password123
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbit consumer_timeout 7200000"
+    networks:
+    - net
+
+# *** SOCA ***
+  worker_soca:
+    image: soca-heavy
+    command: python -u -m soca_runner.worker
+    volumes:
+      - ./outputs:/app/outputs
+    networks:
+      - net
+    environment:
+      - GITHUB_TOKEN=${GITHUB_API_TOKEN}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - DASHBOARD_ORG_EMBED_ID=${DASHBOARD_ORG_EMBED_ID}
+      - DASHBOARD_REPO_EMBED_ID=${DASHBOARD_REPO_EMBED_ID}
+      - SUPERSET_PUBLIC_DOMAIN=${SUPERSET_PUBLIC_DOMAIN:-http://host.docker.internal:8088}
+
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: sqoo_nginx
+    ports:
+      - "${PORTAL_PORT:-8030}:80"
+    volumes:
+      - ./outputs/soca:/usr/share/nginx/html/soca:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - net
+      
+# *** RSFC ***
+
+  worker_rsfc:
+    image: rsfc-heavy
+    command: python -u -m rsfc_runner.worker
+    networks:
+      - net
+    volumes:
+      - ./outputs:/app/outputs
+    environment:
+      - GITHUB_TOKEN=${GITHUB_API_TOKEN}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
+
+  rate_limiter_rsfc:
+    image: rsfc-heavy
+    command: python -m rsfc_runner.rabbitmq.rate_limiter
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RATE_LIMIT_RSFC_ENABLED=${RATE_LIMIT_RSFC_ENABLED}
+
+    networks:
+      - net
+
+
+
+
+networks:
+  net:
+    driver: bridge

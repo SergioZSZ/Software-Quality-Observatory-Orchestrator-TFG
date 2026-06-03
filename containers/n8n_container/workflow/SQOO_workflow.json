@@ -67,8 +67,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -368,
-        816
+        -336,
+        848
       ],
       "id": "624ae60e-c73c-40e7-aa73-ddef24bfe686",
       "name": "Execute soca portal"
@@ -190,21 +190,6 @@
       ],
       "id": "1d6cbd89-5ccf-4a99-a0b8-38bbed1d6f09",
       "name": "Merge3"
-    },
-    {
-      "parameters": {
-        "mode": "raw",
-        "jsonOutput": "{\n  \"target\": \"oeg-fair-sergio\",\n  \"type\": \"user\",\n  \"mode\": \"manual\",\n  \"repos\": \"repos.txt\" ,\n  \"previous_report\": \"\"\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -5072,
-        784
-      ],
-      "id": "f1e43664-4f74-4f59-8444-ee09ff900f9a",
-      "name": "Target"
     },
     {
       "parameters": {
@@ -441,24 +426,13 @@
       "name": "Code url->target-name"
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -5328,
-        784
-      ],
-      "id": "d5ed2107-7ae9-4a45-9b2f-c64ead6d4df2",
-      "name": "When clicking ‘Execute workflow’"
-    },
-    {
       "parameters": {
         "command": "=mkdir -p /root/.n8n-files/sw-metadata-bot/{{$node[\"Target\"].json.target}}/"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -1728,
+        -1792,
         1008
       ],
       "id": "2dd5d706-cf0d-4523-a973-77432a430248",
@@ -473,7 +447,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        -1200,
+        -1120,
         992
       ],
       "id": "e45b00cd-9492-492c-9f23-7c0d403d11f1",
@@ -488,7 +462,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        -992,
+        -928,
         992
       ],
       "id": "7effaf38-1c0a-4de4-9f98-bbf2e4377f18",
@@ -501,7 +475,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -784,
+        -704,
         992
       ],
       "id": "1f5c1cc4-8ece-48ba-ad21-0a7115e246a3",
@@ -514,7 +488,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -544,
+        -512,
         992
       ],
       "id": "dbce6bd2-a9eb-4165-8b86-c81939c4d4a9",
@@ -527,7 +501,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -1520,
+        -1584,
         992
       ],
       "id": "c6dcc84d-8538-4cb7-af6e-e934537a09e5",
@@ -536,13 +510,13 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "={\n  \"repositories\": {{$json.repositories}},\n  \"issues\": {\n    \"custom_message\": \"This issue was created automatically after running metadata quality checks. Several warnings or pitfalls were detected and may be worth reviewing.\",\n    \"opt_outs\": []\n  },\n  \"outputs\": {\n   \"root_dir\": \"/app/outputs/sw-metadata-bot/{{$json.target}}\",\n    \"run_name\": \"runs\",\n  \"snapshot_tag\": \"{{ $now.format('yyyyMMdd_HHmmss') }}\"\n  },\n  \"target\": {{$json.target}}\n}\n",
+        "jsonOutput": "={\n  \"outputs\": {\n    \"snapshot_tag\": \"{{ $now.format('yyyyMMdd_HHmmss') }}\"\n  },\n  \"bot_config\": {\n    \"analysis\": {\n      \"repositories\": {{$json.repositories}},\n      \"generate_codemeta_if_missing\": true\n    },\n    \"issues\": {\n      \"custom_issue_message\": \"This issue was created automatically after running metadata quality checks. Several warnings or pitfalls were detected and may be worth reviewing.\",\n      \"opt_outs\": []\n    },\n    \"outputs\": {\n      \"output_root_dir\": \"/app/outputs/sw-metadata-bot/{{$json.target}}\",\n      \"run_name\": \"runs\"\n    }\n  }\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1360,
+        -1424,
         992
       ],
       "id": "54b54636-ced3-4b86-ac5b-3b7f5f9e63bd",
@@ -557,8 +531,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1952,
-        832
+        -2000,
+        816
       ],
       "id": "82e0f91a-0b0f-427c-9093-fd3837c3271d",
       "name": "change repos_url -> repositories"
@@ -575,6 +549,45 @@
       ],
       "id": "15a22337-5849-4f8c-a3ec-d04bdfd0c3bf",
       "name": "Merge4"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: $json.bot_config\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1280,
+        992
+      ],
+      "id": "f9985190-fd13-4b09-8d3c-92600341b33a",
+      "name": "extract bot config"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -5264,
+        768
+      ],
+      "id": "6935017c-a1d0-41eb-8dcc-ec45986142fb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"target\": \"oeg-fair-sergio\",\n  \"type\": \"user\",\n  \"mode\": \"manual\",\n  \"repos\": \"repos.txt\" ,\n  \"previous_report\": \"\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5072,
+        784
+      ],
+      "id": "f1e43664-4f74-4f59-8444-ee09ff900f9a",
+      "name": "Target"
     }
   ],
   "pinData": {},
@@ -616,7 +629,7 @@
       "main": [
         [
           {
-            "node": "find metadatas json",
+            "node": "Merge3",
             "type": "main",
             "index": 0
           },
@@ -626,7 +639,7 @@
             "index": 0
           },
           {
-            "node": "Merge3",
+            "node": "find metadatas json",
             "type": "main",
             "index": 0
           }
@@ -725,23 +738,12 @@
       "main": [
         [
           {
-            "node": "change repos_url -> repositories",
+            "node": "Split Out1",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Split Out1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Target": {
-      "main": [
-        [
-          {
-            "node": "Execute soca-runner",
+            "node": "change repos_url -> repositories",
             "type": "main",
             "index": 0
           }
@@ -861,17 +863,6 @@
         ]
       ]
     },
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Target",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Create bot target dir": {
       "main": [
         [
@@ -931,7 +922,7 @@
       "main": [
         [
           {
-            "node": "json -> config.json",
+            "node": "extract bot config",
             "type": "main",
             "index": 0
           }
@@ -991,6 +982,39 @@
           }
         ]
       ]
+    },
+    "extract bot config": {
+      "main": [
+        [
+          {
+            "node": "json -> config.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Target",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Target": {
+      "main": [
+        [
+          {
+            "node": "Execute soca-runner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -998,7 +1022,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "2948916a-16f7-4ab2-922e-a8bbb1e800e3",
+  "versionId": "59645820-de03-4594-bec9-9593b2bf4f4a",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
