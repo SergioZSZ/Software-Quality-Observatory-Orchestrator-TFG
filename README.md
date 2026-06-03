@@ -336,8 +336,9 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
 
       ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`, `OUTPUTS`, `DASHBOARD_ORG_EMBED_ID` y `DASHBOARD_REPO_EMBED_ID`.
 
+
 **A tener en cuenta**:  
--  El token (classic) se debe obtener desde GitHub y seleccionando el sope 'public_repo'. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
+-  El token (classic) se debe obtener desde GitHub y seleccionando el scope 'public_repo'. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
 
 -  El nº o slug de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`. Los dashboards deben estar publicados y permitir embebido desde el portal.
 
@@ -369,6 +370,9 @@ Tras ello se ejecutará el workflow obteniendo en `outputs` las extracciones, re
 
 
 #### 5.3 Instalación/Despliegue de DashVERSE
+**PREVIA**
+Todos los scripts de `/integrations/DashVERSE-0.2.0/scripts` deben tener permisos de ejecución para la instalación de DashVERSE en Linux `chmod +x *.sh`
+
 Todo este proceso, si se usa Windows, se debe hacer desde Ubuntu en WSL, no desde PowerShell ni Git Bash. Ansible no corre de forma nativa en Windows y es importante que `kubectl`, `make port-forward` y `make setup-dashboards` se ejecuten en el mismo entorno.
 
 Tambien es recomendable copiar DashVERSE al sistema de archivos de WSL para evitar problemas de permisos con Ansible al trabajar desde `/mnt/c`:
@@ -395,33 +399,37 @@ cd ~/projects/SQOO_TFG/integrations/DashVERSE-0.2.0
    para comprobar que  kubernetes responde usar este mandato:
    ``kubectl get nodes`` y si funciona y se crea el nodo todo ok
 
+
 5. desplegar y montar el servicio con el archivo make del directorio de DashVERSE. Primero hay que instalar superset con helm.
       mandatos: `helm repo add Superset https://apache.github.io/superset --force-update`
       `helm repo update`
 y posteriormente hacer el deploy
       mandato: `make deploy`
+tras ello, realizar `make sync-apply` para importar los indicadores y dimensiones EVERSE en la base de datos (tener en cuenta las modificaciones dashverse si no se usa el DASHVERSE del repositorio)
 
-6. realizar `make sync-apply` para importar los indicadores y dimensiones EVERSE en la base de datos (tener en cuenta las modificaciones dashverse si no se usa el DASHVERSE del repositorio)
-
-7. Comprobar que se haya desplegado bien todo
+6. Comprobar que se haya desplegado bien todo
       mandato: `kubectl get all -n dashverse`
 
-8. Port-forward de los puertos del servicio (en un terminal WSL mantenerlo abierto):
-      mandato: `make port-forward`
+7. Port-forward de los puertos del servicio (en un terminal WSL mantenerlo abierto):
+      mandato: `make port-forward` 
+      **NOTA:** si se esta desplegando en servidores y no en local, si se quiere tener accesible el subdominio para acceder se debe sustituir la línea 21 por `--address 0.0.0.0 -n "$NS" "svc/$svc" "$local_port:$remote_port" 2>/dev/null || true` en el script `/integrations/DashVERSE-0.2.0/scripts/port-forward.sh.sh`
 
    Desde Windows se puede acceder en el navegador a `http://localhost:8088`, `http://localhost:8080`, `http://localhost:3000` y `http://localhost:8000` mientras ese terminal siga abierto.
 
-9. Obtener credenciales de acceso a Superset
+8. Obtener credenciales de acceso a Superset
       desde terminal linux, ejecutar desde este mismo directorio
       `bash ./scripts/show-access.sh` pudiendo obtener así todas las credenciales necesarias
+
+
+9. Conectarse a superset en http://localhost:8088
+      login con user: admin   pwd: la obtenida desde el script anterior
 
 10. generar conexión a la BBDD y dashboards base de DashVERSE:
       mandato: ``make setup-dashboards``
 
-
 11. Se necesita un token jwt para las peticiones desde n8n. Para ello con el servicio desplegado ir a http://localhost:8000 y hacerse una cuenta EVERSE. Después hacer login y generar un token auth. Expiran tras un mes. Este token debe ponerse en los nodos que hacen peticiones http a dashVERSE del flujo n8n en el campo Authorization dentro de Headers como `Bearer TU_TOKEN`.
 
-12. Importar los dashboards encontrados en `/integrations/dashboards` si se quieren mantener tambien los dashboards SQOO antiguos (será necesario la contraseña PostgreSQL sacada de show-access.sh)
+12. Importar los dashboards encontrados en `/integrations/dashboards` si se quieren mantener tambien los dashboards SQOO antiguos. También editarlos desde la pestaña de navegación `Dashboards` para darle acceso a los roles que se quieran configurar (Admin y Public por ejemplo). También habrá que configurar los permisos de los roles. Para ello acceder a `Settings/list roles` y editar los permisos de los roles, mínimo del Public.
 
    
 #### 5.4 Encendido y apagado del servicio DashVERSE:

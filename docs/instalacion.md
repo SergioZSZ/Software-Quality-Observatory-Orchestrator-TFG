@@ -21,7 +21,7 @@
 
 
 **A tener en cuenta**:  
--  El token (classic) se debe obtener desde GitHub y seleccionando el sope 'public_repo'. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
+-  El token (classic) se debe obtener desde GitHub y seleccionando el scope 'public_repo'. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
 
 -  El nº o slug de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`. Los dashboards deben estar publicados y permitir embebido desde el portal.
 
@@ -53,6 +53,9 @@ Tras ello se ejecutará el workflow obteniendo en `outputs` las extracciones, re
 
 
 #### 5.3 Instalación/Despliegue de DashVERSE
+**PREVIA**
+Todos los scripts de `/integrations/DashVERSE-0.2.0/scripts` deben tener permisos de ejecución para la instalación de DashVERSE en Linux `chmod +x *.sh`
+
 Todo este proceso, si se usa Windows, se debe hacer desde Ubuntu en WSL, no desde PowerShell ni Git Bash. Ansible no corre de forma nativa en Windows y es importante que `kubectl`, `make port-forward` y `make setup-dashboards` se ejecuten en el mismo entorno.
 
 Tambien es recomendable copiar DashVERSE al sistema de archivos de WSL para evitar problemas de permisos con Ansible al trabajar desde `/mnt/c`:
@@ -91,7 +94,8 @@ tras ello, realizar `make sync-apply` para importar los indicadores y dimensione
       mandato: `kubectl get all -n dashverse`
 
 7. Port-forward de los puertos del servicio (en un terminal WSL mantenerlo abierto):
-      mandato: `make port-forward`
+      mandato: `make port-forward` 
+      **NOTA:** si se esta desplegando en servidores y no en local, si se quiere tener accesible el subdominio para acceder se debe sustituir la línea 21 por `--address 0.0.0.0 -n "$NS" "svc/$svc" "$local_port:$remote_port" 2>/dev/null || true` en el script `/integrations/DashVERSE-0.2.0/scripts/port-forward.sh.sh`
 
    Desde Windows se puede acceder en el navegador a `http://localhost:8088`, `http://localhost:8080`, `http://localhost:3000` y `http://localhost:8000` mientras ese terminal siga abierto.
 

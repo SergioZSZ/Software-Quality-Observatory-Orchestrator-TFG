@@ -1,0 +1,17 @@
+__pycache__/
+
+.env
+
+# package files
+*.egg
+*.egg-info/
+dist/
+build/
+
+# generated files
+outputs/*
+somef_outputs/*
+
+# docs
+docs/_build/
+site/
