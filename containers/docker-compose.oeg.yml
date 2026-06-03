@@ -7,7 +7,7 @@ services:
     build: ./n8n_container
     container_name: n8n
     user: root
-    #nework_mode: host
+    nework_mode: host
     ports:
       - "5678:5678"
     volumes:
