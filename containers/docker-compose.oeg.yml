@@ -7,17 +7,13 @@ services:
     build: ./n8n_container
     container_name: n8n
     user: root
-    nework_mode: host
-    ports:
-      - "5678:5678"
+    network_mode: host
     volumes:
       - ./n8n_container/n8n_data:/home/node/.n8n
       - /var/run/docker.sock:/var/run/docker.sock
       - .//outputs:/root/.n8n-files
     depends_on:
       - rabbitmq
-    networks:
-      - net
     group_add:
       - "998"
     environment:
