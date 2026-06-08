@@ -1,0 +1,315 @@
+{
+  "name": "soca_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "=data",
+        "options": {
+          "encoding": "utf8"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        48
+      ],
+      "id": "6926b27f-bae0-4a16-a1de-72b238cb6d99",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{ $json.target }} \\\n-e TYPE={{ $json.type }} \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest \\\npython -m soca_runner.main \\\n{{ $json.mode === \"manual\" \n    ? \"--repos /app/outputs/\" + $json.repos + \" --name \" + $json.target \n    : \"\" \n}}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        48
+      ],
+      "id": "c0ec8864-f567-4469-bce4-c89ceea6b5f1",
+      "name": "Execute soca-runner"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.target}}/repos.txt",
+        "options": {
+          "fileExtension": ""
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        48
+      ],
+      "id": "97e36988-076e-408c-a565-a41a6da0d00f",
+      "name": "Read target repos"
+    },
+    {
+      "parameters": {
+        "jsCode": "const repos = $json.data\n  .split('\\n')\n  .map(r => r.trim())\n  .filter(r => r !== '');\n\nreturn [\n  {\n    json: {\n      repos_url: repos,\n      repo_count: repos.length\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        48
+      ],
+      "id": "1b9be4d4-91c9-418c-bdef-c6978fb0da37",
+      "name": "Code repo_url list & repo count"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1312,
+        240
+      ],
+      "id": "e623eb39-a919-4966-8920-c619dee8f3ff",
+      "name": "Wait",
+      "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        48
+      ],
+      "id": "80fb7636-cd7d-481d-b115-01e1f7597269",
+      "name": "Process metadata count"
+    },
+    {
+      "parameters": {
+        "command": "=find /root/.n8n-files/soca/{{$node[\"Trigger\"].json.target}}/metadata -maxdepth 1 -type f -name \"*.json\" | wc -l"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        720,
+        48
+      ],
+      "id": "5369a196-c34f-4cf1-9b7f-95108ce7b81c",
+      "name": "find metadatas json"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
+              "leftValue": "={{ $node[\"Process metadata count\"].json.count}}",
+              "rightValue": "={{ $node[\"Code repo_url list & repo count\"].json.repo_count }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        48
+      ],
+      "id": "8fe49503-bdfc-4599-9413-d552e072f67c",
+      "name": "If completed soca jobs",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n    \"target\": \"the target user/org\",\n    \"type\": \"user/org\",\n    \"mode\": \"auto/manual\",\n    \"repos\": \"path to repos.txt in manual mode\"\n  }"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        48
+      ],
+      "id": "e9f9a863-23e7-46b1-b052-da9cbcc621ab",
+      "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1392,
+        -80
+      ],
+      "id": "8ddfb09f-14e7-421f-90fa-5df5575f8e20",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "=\n{\n\"repos_url\": {{ $json.repos_url }},\n\"repo_count\": {{ $json.repo_count }},\n\"target\": {{ $node[\"Trigger\"].json.target }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1568,
+        -80
+      ],
+      "id": "9c1a807b-e9b4-4293-b5b3-2a4e8abcbf5a",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code repo_url list & repo count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute soca-runner": {
+      "main": [
+        [
+          {
+            "node": "Read target repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read target repos": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code repo_url list & repo count": {
+      "main": [
+        [
+          {
+            "node": "find metadatas json",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "find metadatas json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process metadata count": {
+      "main": [
+        [
+          {
+            "node": "If completed soca jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find metadatas json": {
+      "main": [
+        [
+          {
+            "node": "Process metadata count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If completed soca jobs": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute soca-runner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "846b4730-d623-4ebe-a368-a1c1836edbcb",
+  "meta": {
+    "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
+  },
+  "id": "SdY8cMvhvYuBoeDj",
+  "tags": []
+}

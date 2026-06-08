@@ -1,18 +1,23 @@
 ### 4. Flujo actual(container n8n)
 El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
 
-A diferencia de versiones anteriores, donde el flujo estaba dividido en múltiples workflows (`soca`, `rsfc`, `dashboard`), actualmente se ha **unificado en un único workflow end-to-end**, simplificando la gestión, monitorización y control del proceso.
+Actualmente se mantienen dos formas de ejecutar el pipeline:
+
+- `SQOO_not_modular_workflow.json`: versión end-to-end equivalente al flujo anterior, manteniendo todos los pasos en un único workflow. En esta versión la publicación de issues con `sw-metadata-bot` es configurable mediante `launch_issue`.
+- `SQOO_modular_workflow.json`: workflow principal modular de SQOO. Orquesta los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
+
+La versión modular facilita aislar y mantener cada fase sin cambiar el contrato global del pipeline. El workflow principal pasa entre fases los campos `target`, `type`, `mode`, `repos`, `repos_url`, `repo_count` y `launch_issue` según corresponda.
 
 
 
 #### Descripción general del flujo
 
-El workflow implementa un pipeline completo que abarca:
+Los workflows implementan un pipeline completo que abarca:
 
 1. **Extracción de repositorios**
 2. **Procesamiento de metadatos (SOCA)**
 3. **Evaluación de calidad (RSFC)**
-4. **Evaluación de metadatos(sw-metadata-bot)**
+4. **Evaluación de metadatos (sw-metadata-bot)**
 5. **Generación y publicacion de portal software enriquecido**
 6. **Envío de indicadores a DashVERSE**
 
@@ -42,13 +47,16 @@ El workflow implementa un pipeline completo que abarca:
 
 ##### 4. Análisis de metadatos con sw-metadata-bot
 
-n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias. Todo siguiento este proceso:
+n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y, si se habilita, generar issues automáticos cuando se detectan carencias. Todo siguiendo este proceso:
 
 - Generado un `config.json` con los repositorios obtenidos en el workflow
 
 - Ejecutado el análisis mediante `sw-metadata-bot run-analysis`
 - Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
-- Publicado los issues generados mediante `sw-metadata-bot publish`
+- Comprobado que existe `run_report.json` para la ejecución generada
+- Publicados los issues generados mediante `sw-metadata-bot publish` solo cuando `launch_issue` está activado
+
+En `SQOO_not_modular_workflow.json` esta decisión se controla desde el nodo `Target`. En `SQOO_modular_workflow.json` se define en el nodo `Conf` y se propaga al subworkflow `sw-metadata-bot_workfow`.
 
 ##### 5. Generación y publicacion del portal
 

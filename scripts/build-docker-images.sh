@@ -55,6 +55,7 @@ build_image() {
 
 build_image "soca-heavy:latest" "containers/soca_container"
 build_image "rsfc-heavy:latest" "containers/rsfc_container"
+build_image "resqui-heavy:latest" "containers/resqui_container"
 build_image "sw-metadata-bot:latest" "integrations/sw-metadata-bot-0.5.0"
 build_image "sw-metadata-bot-conf:latest" "containers/sw-metadata-bot_container"
 

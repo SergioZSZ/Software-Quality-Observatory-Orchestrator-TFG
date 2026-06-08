@@ -1,0 +1,210 @@
+{
+  "name": "rsfc_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Trigger\"].json.target \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        96,
+        208
+      ],
+      "id": "3a11f26e-b228-4732-b570-6ec3f083cb32",
+      "name": "Execute rsfc-runner"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        208
+      ],
+      "id": "30050c6e-88d9-4444-9196-1a67a82c4a14",
+      "name": "Process repocount"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        352
+      ],
+      "id": "af81894f-7620-443b-8dfc-f9996baea2dc",
+      "name": "Wait1",
+      "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
+              "leftValue": "={{ $node[\"Process repocount\"].json.count}}",
+              "rightValue": "={{ $node[\"Trigger\"].json.repo_count }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        704,
+        208
+      ],
+      "id": "6f16c60f-919b-4eea-8385-6245a0195fbe",
+      "name": "If completed rsfc jobs",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "command": "=find /root/.n8n-files/rsfc/{{$node[\"Trigger\"].json.target}}/ -type f -name \"*.json\" | wc -l"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        352,
+        208
+      ],
+      "id": "a65e87e5-7937-4cad-85a2-ae769f4d5b2a",
+      "name": "find rsfc assessments"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "\n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"target\": \"a string\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        208
+      ],
+      "id": "75444538-3aad-46b2-9d3c-c2588d3407cf",
+      "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        -48
+      ],
+      "id": "3c2646c1-b860-4caf-981f-367f28b5384c",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute rsfc-runner": {
+      "main": [
+        [
+          {
+            "node": "find rsfc assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process repocount": {
+      "main": [
+        [
+          {
+            "node": "If completed rsfc jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "find rsfc assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If completed rsfc jobs": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find rsfc assessments": {
+      "main": [
+        [
+          {
+            "node": "Process repocount",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute rsfc-runner",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9cfd6e66-2e7e-40a2-b425-6c515049bb1c",
+  "meta": {
+    "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
+  },
+  "id": "OrQ1T1DeNjtQWlpj",
+  "tags": []
+}

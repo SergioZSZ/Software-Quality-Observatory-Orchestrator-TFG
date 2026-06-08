@@ -117,6 +117,38 @@ services:
       - net
 
 
+# ** RESQUI **
+
+  worker_resqui:
+    image: resqui-heavy
+    command: python -u -m resqui_runner.worker
+    networks:
+      - net
+    volumes:
+      - ./outputs:/app/outputs
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    environment:
+      - GITHUB_TOKEN=${GITHUB_API_TOKEN}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+
+
+  rate_limiter_resqui:
+    image: resqui-heavy
+    command: python -m resqui_runner.rabbitmq.rate_limiter
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RATE_LIMIT_RESQUI_ENABLED=${RATE_LIMIT_RESQUI_ENABLED}
+
+    networks:
+      - net
+
 
 
 networks:

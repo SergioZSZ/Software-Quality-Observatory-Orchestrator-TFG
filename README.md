@@ -14,7 +14,7 @@ El objetivo del TFG es diseñar e implementar un sistema reproducible que:
 1. Extraiga automáticamente repositorios de GitHub
 2. Genere metadatos estructurados del software
 3. Evalúe la calidad del software mediante indicadores automáticos
-4. Evalúe la calidad de los metadatos del software y suba Issues automáticas a GitHub
+4. Evalúe la calidad de los metadatos del software y, si se habilita, suba Issues automáticas a GitHub
 5. Prepare la información para su integración en dashboards (DashVERSE) y catálogos (SOCA)
 6. Permita orquestar todo el proceso mediante workflows automatizados
 
@@ -28,7 +28,7 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 
 | Componente       | Rol                                    |
 | ---------------- | -------------------------------------- |
-| n8n              | Orquestación                           |
+| n8n              | Orquestación mediante workflows end-to-end y modulares |
 | soca_container   | extracción metadatos-repos y jobs soca |
 | rsfc_container   | creación de jobs rsfc                  |
 | rabbitmq         | message broker                         |
@@ -164,7 +164,7 @@ Se ha:
 - Generado dinámicamente un archivo `config.json` con la lista de repositorios obtenidos durante el workflow
 - Configurado el uso de `GITHUB_API_TOKEN` para permitir la consulta de repositorios y la publicación de issues
 - Incorporado el análisis incremental mediante `previous_report`, permitiendo reutilizar ejecuciones anteriores cuando se indique
-- Añadida la fase de publicación de issues tras la generación de los informes de metadatos
+- Añadida la fase opcional de publicación de issues tras la generación de los informes de metadatos, controlada desde `launch_issue` en los workflows de n8n
 
 El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obtener la lista de repositorios que forman parte del análisis. Para cada ejecución se crea un directorio específico dentro de:
 
@@ -176,18 +176,23 @@ El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obt
 ### 4. Flujo actual(container n8n)
 El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
 
-A diferencia de versiones anteriores, donde el flujo estaba dividido en múltiples workflows (`soca`, `rsfc`, `dashboard`), actualmente se ha **unificado en un único workflow end-to-end**, simplificando la gestión, monitorización y control del proceso.
+Actualmente se mantienen dos formas de ejecutar el pipeline:
+
+- `SQOO_not_modular_workflow.json`: versión end-to-end equivalente al flujo anterior, manteniendo todos los pasos en un único workflow. En esta versión la publicación de issues con `sw-metadata-bot` es configurable mediante `launch_issue`.
+- `SQOO_modular_workflow.json`: workflow principal modular de SQOO. Orquesta los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
+
+La versión modular facilita aislar y mantener cada fase sin cambiar el contrato global del pipeline. El workflow principal pasa entre fases los campos `target`, `type`, `mode`, `repos`, `repos_url`, `repo_count` y `launch_issue` según corresponda.
 
 
 
 #### Descripción general del flujo
 
-El workflow implementa un pipeline completo que abarca:
+Los workflows implementan un pipeline completo que abarca:
 
 1. **Extracción de repositorios**
 2. **Procesamiento de metadatos (SOCA)**
 3. **Evaluación de calidad (RSFC)**
-4. **Evaluación de metadatos(sw-metadata-bot)**
+4. **Evaluación de metadatos (sw-metadata-bot)**
 5. **Generación de portal software enriquecido**
 6. **Envío de indicadores a DashVERSE**
 
@@ -217,13 +222,16 @@ El workflow implementa un pipeline completo que abarca:
 
 ##### 4. Análisis de metadatos con sw-metadata-bot
 
-n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y generar issues automáticos cuando se detectan carencias. Todo siguiento este proceso:
+n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y, si se habilita, generar issues automáticos cuando se detectan carencias. Todo siguiendo este proceso:
 
 - Generado un `config.json` con los repositorios obtenidos en el workflow
 
 - Ejecutado el análisis mediante `sw-metadata-bot run-analysis`
 - Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
-- Publicado los issues generados mediante `sw-metadata-bot publish`
+- Comprobado que existe `run_report.json` para la ejecución generada
+- Publicados los issues generados mediante `sw-metadata-bot publish` solo cuando `launch_issue` está activado
+
+En `SQOO_not_modular_workflow.json` esta decisión se controla desde el nodo `Target`. En `SQOO_modular_workflow.json` se define en el nodo `Conf` y se propaga al subworkflow `sw-metadata-bot_workfow`.
 
 ##### 5. Generación del portal
 
@@ -367,9 +375,17 @@ Siguiendo los pasos en orden secuencial:
 3. Acceder a n8n mediante el navegador en http://localhost:5678
 4. En el primer acceso:
     1. Crear cuenta de usuario en n8n
-    2. Importar el workflow de `/containers/n8n_container/workflow/` en un nuevo
-5. Editar el nodo `Input` al principio del workflow con la organización/usuario deseado
-6. Ejecutar manualmente
+    2. Importar los workflows desde `/containers/n8n_container/workflows/`
+5. Elegir el modo de ejecución:
+   - Workflow no modular: importar y ejecutar `SQOO_not_modular_workflow.json`. Es la versión end-to-end equivalente al flujo anterior, con todos los pasos en un único workflow.
+   - Workflow modular: importar `SQOO_modular_workflow.json` y los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`. Después revisar los nodos `Call '<subworkflow>'` del workflow principal para que apunten a los subworkflows importados en la instancia de n8n.
+6. Editar el nodo inicial de configuración con la organización/usuario deseado:
+   - `target`: nombre de la organización o usuario.
+   - `type`: `org` o `user`.
+   - `mode`: `manual` cuando se use un archivo de repositorios, o el modo configurado para descubrimiento automático.
+   - `repos`: nombre del archivo de repositorios cuando `mode` sea `manual`.
+   - `launch_issue`: `true` para publicar issues con `sw-metadata-bot publish`, `false` para ejecutar solo el análisis de metadatos.
+7. Ejecutar manualmente
 
 Tras ello se ejecutará el workflow obteniendo en `outputs` las extracciones, reportes RSFC, informes de sw-metadata-bot y el portal final enriquecido antes del envío a DashVERSE. Los portales generados por SOCA se sirven con Nginx en `http://localhost:8030/portals/<target>/`, donde `<target>` coincide con la organizacion o usuario configurado en el workflow. Las paginas `dashboard-org.html` y `dashboard-repo.html` cargan los dashboards de DashVERSE mediante iframe directo usando `SUPERSET_PUBLIC_DOMAIN`.
 

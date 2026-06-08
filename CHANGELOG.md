@@ -1,4 +1,5 @@
 # General
+- Documentados los nuevos workflows de n8n: versión no modular con publicación de issues elegible y versión modular de SQOO con subworkflows.
 - Añadidos scripts de generación de imágenes docker necesarias para el software: `/scripts/build-docker-images.ps1` (powershell) y `/scripts/build-docker-images.sh` WSL/Linux
 
 # sw-metadata-bot

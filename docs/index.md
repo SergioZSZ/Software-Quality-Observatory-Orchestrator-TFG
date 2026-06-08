@@ -9,7 +9,7 @@ El objetivo del TFG es diseñar e implementar un sistema reproducible que:
 1. Extraiga automáticamente repositorios de GitHub
 2. Genere metadatos estructurados del software
 3. Evalúe la calidad del software mediante indicadores automáticos
-4. Evalúe la calidad de los metadatos del software y suba Issues automáticas a GitHub
+4. Evalúe la calidad de los metadatos del software y, si se habilita, suba Issues automáticas a GitHub
 5. Prepare la información para su integración en dashboards (DashVERSE) y catálogos (SOCA)
 6. Permita orquestar todo el proceso mediante workflows automatizados
 
@@ -22,7 +22,7 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 ---
 | Componente       | Rol                                    |
 | ---------------- | -------------------------------------- |
-| n8n              | Orquestación                           |
+| n8n              | Orquestación mediante workflows end-to-end y modulares |
 | soca_container   | extracción metadatos-repos y jobs soca |
 | rsfc_container   | creación de jobs rsfc                  |
 | rabbitmq         | message broker                         |

@@ -1,0 +1,209 @@
+{
+  "name": "dashverse_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "assessment",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        -16
+      ],
+      "id": "c13bd484-2751-4793-8535-f7a0b92c7b68",
+      "name": "Extract assessments"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "repos_url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        -16
+      ],
+      "id": "2fec1d9f-debe-4c08-96dc-881fd278b971",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/assessment_raw",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJTZXJnaW9aU1oiLCJpc19zdXBlcnVzZXIiOmZhbHNlLCJyb2xlIjoid2ViX3VzZXIiLCJhdWQiOiJwb3N0Z3Jlc3QiLCJleHAiOjE3ODI5MzY3NjIsImlhdCI6MTc4MDM0NDc2MiwianRpIjoiZjI3NTUxN2ItZmVjYy00ODJkLWI4MGEtOTg4MGI3YTVlM2NjIn0.tskzBJ5B3FmIxbCeMxMKNjzOBKVVhr9pIvA4jqzsMbw"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { payload: $json.assessment } }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 200,
+              "batchInterval": 1000
+            }
+          },
+          "redirect": {}
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        304,
+        -16
+      ],
+      "id": "89531b09-5c59-40a8-8431-c4232df33b7f",
+      "name": "Post assessments_raw"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const assessment = item.json.assessment;\n  const repoUrl = assessment.assessedSoftware?.url || null;\n\n  let owner = null;\n\n  if (repoUrl) {\n    const match = repoUrl.match(/^https?:\\/\\/github\\.com\\/([^\\/]+)\\/([^\\/]+?)(?:\\/)?$/);\n    if (match) {\n      owner = match[1];\n    }\n  }\n\n  item.json.assessment = {\n    ...assessment,\n    \"@id\": assessment[\"@id\"] || (\n      repoUrl\n        ? `${repoUrl}/assessment/${assessment.dateCreated}`\n        : null\n    ),\n    author: owner\n\n    \n  };\n\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        -16
+      ],
+      "id": "6cdca9cb-b8e4-4508-b496-f4869ef6eb2e",
+      "name": "Code input @id + author in json-ld"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/rsfc/{{$json.target}}/{{$json.repo_name}}/rsfc_output/rsfc_assessment.json",
+        "options": {
+          "fileExtension": ".json"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        -16
+      ],
+      "id": "9ccb28a9-ad02-4791-b3fd-e93bb92e0535",
+      "name": "read assessments RSFC"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "  \n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"target\": \"a string\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1056,
+        -16
+      ],
+      "id": "d27d1175-ff9a-48c9-8ccd-1999952149ad",
+      "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const target = $(\"Trigger\").first().json.target;\n\nreturn $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      target,\n      repo_name: url.split(\"/\").pop(),\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        -16
+      ],
+      "id": "c1b0d818-aaec-474f-b4e7-2c4beff7583d",
+      "name": "Code url->target-name"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract assessments": {
+      "main": [
+        [
+          {
+            "node": "Code input @id + author in json-ld",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Code url->target-name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code input @id + author in json-ld": {
+      "main": [
+        [
+          {
+            "node": "Post assessments_raw",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read assessments RSFC": {
+      "main": [
+        [
+          {
+            "node": "Extract assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code url->target-name": {
+      "main": [
+        [
+          {
+            "node": "read assessments RSFC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5922d997-8818-4850-92f4-3cf7af8f4b6b",
+  "meta": {
+    "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
+  },
+  "id": "T4KSZ1qVpOZyaD3T",
+  "tags": []
+}

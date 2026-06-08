@@ -1,0 +1,89 @@
+import os, subprocess
+from ..models import RunResponse
+from resqui_runner.config import RETRYABLE_ERRORS, RESQUI_CONF
+
+# funcion para ejecutar subprocessos
+def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> dict:
+    try:
+        result=subprocess.run(
+            cmd,
+            capture_output=True,
+            input=input,
+            text=True,
+            check=True,
+            cwd= personal_dir,
+            timeout= 3600
+        )
+        
+        #print("STDOUT:", result.stdout, flush=True)
+        #print("STDERR:", result.stderr, flush=True)
+        #print("RETURN CODE:", result.returncode, flush=True)
+    
+        return {
+            "status": "success",
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "returncode": result.returncode
+        }
+
+    except subprocess.CalledProcessError as e:
+
+        error_text = f"{e.stdout}\n{e.stderr}"
+        retryable = any(err in error_text for err in RETRYABLE_ERRORS)
+
+        # solo imprimimos si NO es retryable
+        if not retryable:
+            print("STDOUT:", e.stdout, flush=True)
+            print("STDERR:", e.stderr, flush=True)
+            print("RETURN CODE:", e.returncode, flush=True)
+        
+        return {
+            "status": "error",
+            "returncode": -1,
+            "stdout": e.stdout,
+            "stderr": e.stderr
+        }
+
+
+def gen_dir(base_dir,target, repo_url: str) -> str:
+    #guardamos ultima parte de la url
+    repo_name = repo_url.rstrip("/").split("/")[-1]
+    repo_owner = repo_url.rstrip("/").split("/")[-2]
+    
+    #creacion direcorios personal del procesamiento
+    outputs_dir = os.path.join(base_dir,"outputs","resqui")
+    os.makedirs(outputs_dir, exist_ok=True)
+
+    personal_out = os.path.join(
+        outputs_dir,
+        target,
+        repo_name
+    )
+    os.makedirs(personal_out, exist_ok=True)
+    
+    return personal_out
+    
+
+
+    
+    
+    
+def resqui_runner(base_dir: str, target: str, repo_url: str, token: str | None = None) -> RunResponse:
+
+    if token:
+        cmd = ["resqui","-c",f"{RESQUI_CONF}","-u",f"{repo_url}","-t",f"{token}"]
+    else: 
+        cmd = ["resqui","-c",f"{RESQUI_CONF}","-u",f"{repo_url}"]
+        
+    personal_dir = gen_dir(base_dir,target, repo_url)
+    
+    print(" (RESQUI)Repo to process:", repo_url)
+    result = run_command(personal_dir, cmd)
+    
+    
+    # comprobacion de errores(evaluating para rate limit y timeout) en worker
+    if result["status"] == "error":
+
+        return RunResponse(status=result)
+
+    return RunResponse(personal_dir=personal_dir, status=result)

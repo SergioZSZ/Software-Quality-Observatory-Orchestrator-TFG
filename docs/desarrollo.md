@@ -104,7 +104,7 @@ Se ha:
 - Generado dinámicamente un archivo `config.json` con la lista de repositorios obtenidos durante el workflow
 - Configurado el uso de `GITHUB_API_TOKEN` para permitir la consulta de repositorios y la publicación de issues
 - Incorporado el análisis incremental mediante `previous_report`, permitiendo reutilizar ejecuciones anteriores cuando se indique
-- Añadida la fase de publicación de issues tras la generación de los informes de metadatos
+- Añadida la fase opcional de publicación de issues tras la generación de los informes de metadatos, controlada desde `launch_issue` en los workflows de n8n
 
 El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obtener la lista de repositorios que forman parte del análisis. Para cada ejecución se crea un directorio específico dentro de:
 

@@ -1,5 +1,5 @@
 {
-  "name": "SQOO_workflow",
+  "name": "SQOO_not_modular_workflow",
   "nodes": [
     {
       "parameters": {
@@ -67,7 +67,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        240,
+        224,
         688
       ],
       "id": "624ae60e-c73c-40e7-aa73-ddef24bfe686",
@@ -161,22 +161,6 @@
       ],
       "id": "dea57c06-67bb-4747-b7ec-650bd1956634",
       "name": "Merge"
-    },
-    {
-      "parameters": {
-        "fileSelector": "=/root/.n8n-files/rsfc/{{$json.target}}/{{$json.repo_name}}/rsfc_output/rsfc_assessment.json",
-        "options": {
-          "fileExtension": ".json"
-        }
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1.1,
-      "position": [
-        768,
-        448
-      ],
-      "id": "0effccd9-979f-47d2-9642-d2851f250653",
-      "name": "Read/Write Files from Disk"
     },
     {
       "parameters": {
@@ -489,8 +473,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -16,
-        976
+        0,
+        688
       ],
       "id": "dbce6bd2-a9eb-4165-8b86-c81939c4d4a9",
       "name": "bot publish issues"
@@ -653,7 +637,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "{\n  \"target\": \"FAIR2ADAPT\",\n  \"type\": \"org\",\n  \"mode\": \"auto\",\n  \"repos\": \"\" \n}",
+        "jsonOutput": "{\n  \"target\": \"FAIR2ADAPT\",\n  \"type\": \"org\",\n  \"mode\": \"auto\",\n  \"repos\": \"\",\n  \"launch_issue\":false\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -664,6 +648,58 @@
       ],
       "id": "14745f36-1ab5-4b4b-9490-09537034baa4",
       "name": "Target"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/rsfc/{{$json.target}}/{{$json.repo_name}}/rsfc_output/rsfc_assessment.json",
+        "options": {
+          "fileExtension": ".json"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        448
+      ],
+      "id": "0effccd9-979f-47d2-9642-d2851f250653",
+      "name": "read assessments RSFC"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
+              "leftValue": "={{ $node[\"Target\"].json.launch_issue }}",
+              "rightValue": "=1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -160,
+        928
+      ],
+      "id": "1cda6ce2-b2da-477b-a6dc-cf8b17c1f2e9",
+      "name": "if found run_report.json1",
+      "alwaysOutputData": false
     }
   ],
   "pinData": {},
@@ -793,17 +829,6 @@
         [
           {
             "node": "Execute rsfc-runner",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Read/Write Files from Disk": {
-      "main": [
-        [
-          {
-            "node": "Extract assessments",
             "type": "main",
             "index": 0
           }
@@ -1050,13 +1075,7 @@
     },
     "Merge4": {
       "main": [
-        [
-          {
-            "node": "Read/Write Files from Disk",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "extract bot config": {
@@ -1090,7 +1109,7 @@
       "main": [
         [
           {
-            "node": "bot publish issues",
+            "node": "if found run_report.json1",
             "type": "main",
             "index": 0
           }
@@ -1136,6 +1155,35 @@
           }
         ]
       ]
+    },
+    "read assessments RSFC": {
+      "main": [
+        [
+          {
+            "node": "Extract assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if found run_report.json1": {
+      "main": [
+        [
+          {
+            "node": "bot publish issues",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute soca portal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -1143,7 +1191,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "cb68101d-d52b-4eea-a0a6-1ecaedc4379e",
+  "versionId": "1125fdd6-d454-46e2-8603-5c62edb921db",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

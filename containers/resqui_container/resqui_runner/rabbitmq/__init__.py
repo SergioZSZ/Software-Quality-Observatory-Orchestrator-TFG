@@ -1,0 +1,1 @@
+from .client import rabbit_connect

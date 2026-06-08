@@ -51,9 +51,17 @@ Siguiendo los pasos en orden secuencial:
 3. Acceder a n8n mediante el navegador en http://localhost:5678
 4. En el primer acceso:
     1. Crear cuenta de usuario en n8n
-    2. Importar el workflow de `/containers/n8n_container/workflow/` en un nuevo
-5. Editar el nodo `Input` al principio del workflow con la organización/usuario deseado
-6. Ejecutar manualmente
+    2. Importar los workflows desde `/containers/n8n_container/workflows/`
+5. Elegir el modo de ejecución:
+   - Workflow no modular: importar y ejecutar `SQOO_not_modular_workflow.json`. Es la versión end-to-end equivalente al flujo anterior, con todos los pasos en un único workflow.
+   - Workflow modular: importar `SQOO_modular_workflow.json` y los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`. Después revisar los nodos `Call '<subworkflow>'` del workflow principal para que apunten a los subworkflows importados en la instancia de n8n.
+6. Editar el nodo inicial de configuración con la organización/usuario deseado:
+   - `target`: nombre de la organización o usuario.
+   - `type`: `org` o `user`.
+   - `mode`: `manual` cuando se use un archivo de repositorios, o el modo configurado para descubrimiento automático.
+   - `repos`: nombre del archivo de repositorios cuando `mode` sea `manual`.
+   - `launch_issue`: `true` para publicar issues con `sw-metadata-bot publish`, `false` para ejecutar solo el análisis de metadatos.
+7. Ejecutar manualmente
 
 Tras ello se ejecutará el workflow obteniendo en `outputs` las extracciones, reportes RSFC, informes de sw-metadata-bot y el portal final enriquecido antes del envío a DashVERSE. Los portales generados por SOCA se sirven con Nginx en `http://localhost:8030/portals/<target>/`, donde `<target>` coincide con la organizacion o usuario configurado en el workflow. Las paginas `dashboard-org.html` y `dashboard-repo.html` cargan los dashboards de DashVERSE mediante iframe directo usando `SUPERSET_PUBLIC_DOMAIN`.
 
