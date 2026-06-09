@@ -64,7 +64,28 @@ El sistema permite escalar horizontalmente el número de workers mediante docker
 ### 3.5 rate_limiter_rsfc container
 El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitMQ de tamaño 1. Los workers RSFC se esperarán a obtener un token de la cola para procesar los jobs para no saturar de peticiones GitHubAPI y no sobrepasar el RateLimit.
 
-### 3.6 DashVerse Service
+### 3.6 Integracion de RESQUI
+
+Se ha integrado RESQUI mediante el contenedor `resqui_container`, usando `QualityPipelines-2.0` como submodulo del repositorio. La imagen `resqui-heavy` instala RESQUI y el runner propio `resqui_runner`, que publica jobs en RabbitMQ y permite que varios workers procesen repositorios en paralelo.
+
+Componentes principales:
+
+- `worker_resqui`: consume mensajes de la cola `resqui_jobs` y ejecuta RESQUI para cada repositorio.
+- `rate_limiter_resqui`: publica tokens en `github_rate_limit_resqui` para controlar las peticiones a GitHubAPI.
+- `resqui_work`: volumen Docker nombrado como `sqoo_resqui_work`, compartido entre el worker y los contenedores Docker que RESQUI lanza para plugins como Gitleaks, Super-Linter o RSFC.
+
+Salida generada:
+
+- Reportes RESQUI por repositorio en `outputs/resqui/<target>/<repo>/`.
+- Ficheros `failed_assessment.json` cuando un repositorio no puede procesarse correctamente.
+
+Modificaciones realizadas sobre RESQUI/QualityPipelines:
+
+- Soporte opcional de workspace compartido mediante `RESQUI_SHARED_WORKDIR` y `RESQUI_DOCKER_WORK_VOLUME`.
+- Uso de `--rm` en contenedores de plugins para evitar acumulacion de contenedores Docker parados.
+- Inicializacion de `success = False` en funciones de OpenSSF Scorecard para evitar variables sin definir.
+
+### 3.7 DashVerse Service
 El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/integrations/dashboards` existen 2 plantillas con diversos dashboards, los cuales son:
 
 #### SQOO-org:
@@ -93,7 +114,7 @@ Con las plantillas dadas en `/integrations/dashboards` hay opciones cross-filter
 
 
 
-### 3.7 Integración de sw-metadata-bot
+### 3.8 Integración de sw-metadata-bot
 
 Se ha:
 

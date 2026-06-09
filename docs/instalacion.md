@@ -8,6 +8,7 @@
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
 
    - `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI
+   - `RATE_LIMIT_RESQUI_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers RESQUI para peticiones a GitHubAPI
 
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
    - `PORTAL_PORT` puerto del host desde el que Nginx publica los portales SOCA (por defecto `8030`)
@@ -31,6 +32,15 @@ Siguiendo los pasos en orden secuencial:
 
 **NOTA** el paso 1 actualmente está compactado en los `/scripts/build-docker-images.sh` para terminales WSL/Linux y `/scripts/build-docker-images.ps1` para powershell de windows. Ejecutando dichos scripts se instalan automáticamente las imágenes docker.
 
+0. Importar los submodulos del repositorio:
+   - SQOO usa `containers/resqui_container/QualityPipelines-2.0` como submodulo para incluir el codigo fuente de RESQUI/QualityPipelines.
+   - Si se clona el repositorio desde cero, usar:
+      - Mandato: `git clone --recurse-submodules https://github.com/SergioZSZ/QualityPipelines`
+   - Si el repositorio ya estaba clonado o se acaba de hacer `git pull`, ejecutar desde la raiz de SQOO:
+      - Mandato: `git submodule update --init --recursive`
+   - Para comprobar que el submodulo esta descargado:
+      - Mandato: `git submodule status`
+
 1. Generar imágenes  docker:
    - `soca-heavy`:
       - Directorio desde el que crearla: `/containers/soca_container` 
@@ -44,17 +54,24 @@ Siguiendo los pasos en orden secuencial:
    - `sw-metadata-bot-conf`:
       - Directorio desde el que crearla: `/containers/sw-metadata-bot_container` 
       - Mandato: `docker build -t sw-metadata-bot-conf .`
+   - `resqui-heavy`:
+      - Directorio desde el que crearla: `/containers/resqui_container`
+      - Mandato: `docker build -t resqui-heavy .`
 
       
-2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
+2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N --scale worker_resqui=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
+
+   El servicio RESQUI usa el volumen Docker nombrado `sqoo_resqui_work` montado como `/resqui-work`. Este volumen permite que el worker `resqui-heavy` y los contenedores Docker lanzados por los plugins de RESQUI compartan el mismo workspace de trabajo. No debe sustituirse por un bind mount local si se quiere ejecutar RESQUI dentro de Docker con plugins.
 
 3. Acceder a n8n mediante el navegador en http://localhost:5678
 4. En el primer acceso:
     1. Crear cuenta de usuario en n8n
     2. Importar los workflows desde `/containers/n8n_container/workflows/`
-5. Elegir el modo de ejecución:
-   - Workflow no modular: importar y ejecutar `SQOO_not_modular_workflow.json`. Es la versión end-to-end equivalente al flujo anterior, con todos los pasos en un único workflow.
-   - Workflow modular: importar `SQOO_modular_workflow.json` y los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`. Después revisar los nodos `Call '<subworkflow>'` del workflow principal para que apunten a los subworkflows importados en la instancia de n8n.
+5. Importar y usar el workflow modular:
+   - Importar `SQOO_modular_workflow.json` y los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
+   - Importar tambien `resqui_workflow.json` si se quiere probar RESQUI de forma independiente.
+   - Despues revisar los nodos `Call '<subworkflow>'` del workflow principal para que apunten a los subworkflows importados en la instancia de n8n.
+   - **Nota:** `resqui_workflow.json` aun no esta integrado en `SQOO_modular_workflow.json`; se mantiene como subworkflow preparado para su integracion proximamente.
 6. Editar el nodo inicial de configuración con la organización/usuario deseado:
    - `target`: nombre de la organización o usuario.
    - `type`: `org` o `user`.

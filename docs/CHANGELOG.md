@@ -1,5 +1,5 @@
 # General:
-- Documentados los nuevos workflows de n8n: versión no modular con publicación de issues elegible y versión modular de SQOO con subworkflows.
+- Documentado el workflow modular de SQOO con subworkflows de n8n y publicacion de issues configurable.
 
 - Creados scripts de instalación de herramientas necesarias para la instalación de DashVERSE según sistema operativo en el directorio `/scripts`.
    - Windows: ``install-dev-tools.ps1``

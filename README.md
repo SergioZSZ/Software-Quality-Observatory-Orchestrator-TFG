@@ -123,7 +123,28 @@ El sistema permite escalar horizontalmente el número de workers mediante docker
 ### 3.5 rate_limiter_rsfc container
 El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitMQ de tamaño 1. Los workers RSFC se esperarán a obtener un token de la cola para procesar los jobs para no saturar de peticiones GitHubAPI y no sobrepasar el RateLimit.
 
-### 3.6 DashVerse Service
+### 3.6 Integracion de RESQUI
+
+Se ha integrado RESQUI mediante el contenedor `resqui_container`, usando `QualityPipelines-2.0` como submodulo del repositorio. La imagen `resqui-heavy` instala RESQUI y el runner propio `resqui_runner`, que publica jobs en RabbitMQ y permite que varios workers procesen repositorios en paralelo.
+
+Componentes principales:
+
+- `worker_resqui`: consume mensajes de la cola `resqui_jobs` y ejecuta RESQUI para cada repositorio.
+- `rate_limiter_resqui`: publica tokens en `github_rate_limit_resqui` para controlar las peticiones a GitHubAPI.
+- `resqui_work`: volumen Docker nombrado como `sqoo_resqui_work`, compartido entre el worker y los contenedores Docker que RESQUI lanza para plugins como Gitleaks, Super-Linter o RSFC.
+
+Salida generada:
+
+- Reportes RESQUI por repositorio en `outputs/resqui/<target>/<repo>/`.
+- Ficheros `failed_assessment.json` cuando un repositorio no puede procesarse correctamente.
+
+Modificaciones realizadas sobre RESQUI/QualityPipelines:
+
+- Soporte opcional de workspace compartido mediante `RESQUI_SHARED_WORKDIR` y `RESQUI_DOCKER_WORK_VOLUME`.
+- Uso de `--rm` en contenedores de plugins para evitar acumulacion de contenedores Docker parados.
+- Inicializacion de `success = False` en funciones de OpenSSF Scorecard para evitar variables sin definir.
+
+### 3.7 DashVerse Service
 El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/integrations/dashboards` existen 2 plantillas con diversos dashboards, los cuales son:
 
 #### SQOO-org:
@@ -153,7 +174,7 @@ Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filteri
 
 
 
-### 3.7 Integración de sw-metadata-bot
+### 3.8 Integración de sw-metadata-bot
 
 Se ha:
 
@@ -176,12 +197,14 @@ El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obt
 ### 4. Flujo actual(container n8n)
 El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
 
-Actualmente se mantienen dos formas de ejecutar el pipeline:
+Actualmente el despliegue se apoya en el workflow modular:
 
-- `SQOO_not_modular_workflow.json`: versión end-to-end equivalente al flujo anterior, manteniendo todos los pasos en un único workflow. En esta versión la publicación de issues con `sw-metadata-bot` es configurable mediante `launch_issue`.
 - `SQOO_modular_workflow.json`: workflow principal modular de SQOO. Orquesta los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
+- `resqui_workflow.json`: subworkflow de RESQUI preparado para ejecutar la evaluacion con workers `worker_resqui`.
 
 La versión modular facilita aislar y mantener cada fase sin cambiar el contrato global del pipeline. El workflow principal pasa entre fases los campos `target`, `type`, `mode`, `repos`, `repos_url`, `repo_count` y `launch_issue` según corresponda.
+
+**Nota:** `resqui_workflow.json` aun no esta integrado en `SQOO_modular_workflow.json`; se mantiene como subworkflow independiente y su integracion en el flujo principal se realizara proximamente.
 
 
 
@@ -220,6 +243,13 @@ Los workflows implementan un pipeline completo que abarca:
 - Envío de repositorios a los workers RSFC, evaluando la calidad de software
 - Control de finalización: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
 
+##### Subworkflow RESQUI (pendiente de integracion)
+
+- `resqui_workflow.json` publica los repositorios en la cola `resqui_jobs`.
+- Los workers `worker_resqui` ejecutan RESQUI con la configuracion incluida en `containers/resqui_container/resqui_runner/configurations/`.
+- Los resultados se escriben en `outputs/resqui/<target>/`.
+- Este subworkflow aun no forma parte del workflow principal modular; se integrara proximamente.
+
 ##### 4. Análisis de metadatos con sw-metadata-bot
 
 n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y, si se habilita, generar issues automáticos cuando se detectan carencias. Todo siguiendo este proceso:
@@ -231,7 +261,7 @@ n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los r
 - Comprobado que existe `run_report.json` para la ejecución generada
 - Publicados los issues generados mediante `sw-metadata-bot publish` solo cuando `launch_issue` está activado
 
-En `SQOO_not_modular_workflow.json` esta decisión se controla desde el nodo `Target`. En `SQOO_modular_workflow.json` se define en el nodo `Conf` y se propaga al subworkflow `sw-metadata-bot_workfow`.
+En `SQOO_modular_workflow.json` esta decisión se define en el nodo `Conf` y se propaga al subworkflow `sw-metadata-bot_workfow`.
 
 ##### 5. Generación del portal
 
@@ -333,6 +363,7 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
 
    - `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI
+   - `RATE_LIMIT_RESQUI_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers RESQUI para peticiones a GitHubAPI
 
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
    - `PORTAL_PORT` puerto del host desde el que Nginx publica los portales SOCA (por defecto `8030`)
@@ -356,6 +387,15 @@ Siguiendo los pasos en orden secuencial:
 
 **NOTA** el paso 1 actualmente está compactado en los `/scripts/build-docker-images.sh` para terminales WSL/Linux y `/scripts/build-docker-images.ps1` para powershell de windows. Ejecutando dichos scripts se instalan automáticamente las imágenes docker.
 
+0. Importar los submodulos del repositorio:
+   - SQOO usa `containers/resqui_container/QualityPipelines-2.0` como submodulo para incluir el codigo fuente de RESQUI/QualityPipelines.
+   - Si se clona el repositorio desde cero, usar:
+      - Mandato: `git clone --recurse-submodules https://github.com/SergioZSZ/QualityPipelines`
+   - Si el repositorio ya estaba clonado o se acaba de hacer `git pull`, ejecutar desde la raiz de SQOO:
+      - Mandato: `git submodule update --init --recursive`
+   - Para comprobar que el submodulo esta descargado:
+      - Mandato: `git submodule status`
+
 1. Generar imágenes  docker:
    - `soca-heavy`:
       - Directorio desde el que crearla: `/containers/soca_container` 
@@ -369,16 +409,23 @@ Siguiendo los pasos en orden secuencial:
    - `sw-metadata-bot-conf`:
       - Directorio desde el que crearla: `/containers/sw-metadata-bot_container` 
       - Mandato: `docker build -t sw-metadata-bot-conf .`
+   - `resqui-heavy`:
+      - Directorio desde el que crearla: `/containers/resqui_container`
+      - Mandato: `docker build -t resqui-heavy .`
 
-2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
+2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N --scale worker_resqui=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
+
+   El servicio RESQUI usa el volumen Docker nombrado `sqoo_resqui_work` montado como `/resqui-work`. Este volumen permite que el worker `resqui-heavy` y los contenedores Docker lanzados por los plugins de RESQUI compartan el mismo workspace de trabajo. No debe sustituirse por un bind mount local si se quiere ejecutar RESQUI dentro de Docker con plugins.
 
 3. Acceder a n8n mediante el navegador en http://localhost:5678
 4. En el primer acceso:
     1. Crear cuenta de usuario en n8n
     2. Importar los workflows desde `/containers/n8n_container/workflows/`
-5. Elegir el modo de ejecución:
-   - Workflow no modular: importar y ejecutar `SQOO_not_modular_workflow.json`. Es la versión end-to-end equivalente al flujo anterior, con todos los pasos en un único workflow.
-   - Workflow modular: importar `SQOO_modular_workflow.json` y los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`. Después revisar los nodos `Call '<subworkflow>'` del workflow principal para que apunten a los subworkflows importados en la instancia de n8n.
+5. Importar y usar el workflow modular:
+   - Importar `SQOO_modular_workflow.json` y los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
+   - Importar tambien `resqui_workflow.json` si se quiere probar RESQUI de forma independiente.
+   - Despues revisar los nodos `Call '<subworkflow>'` del workflow principal para que apunten a los subworkflows importados en la instancia de n8n.
+   - **Nota:** `resqui_workflow.json` aun no esta integrado en `SQOO_modular_workflow.json`; se mantiene como subworkflow preparado para su integracion proximamente.
 6. Editar el nodo inicial de configuración con la organización/usuario deseado:
    - `target`: nombre de la organización o usuario.
    - `type`: `org` o `user`.
