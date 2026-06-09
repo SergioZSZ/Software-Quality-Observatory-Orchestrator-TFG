@@ -4,6 +4,7 @@
 
 # sw-metadata-bot
 - arreglado problema de configuración de github token en sw-metadata-bot
+- añadida configuración para elegir si lanzar issues o no
 
 # nginx
 - añadido contenedor nginx de despliegue de los portales soca generados

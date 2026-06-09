@@ -126,6 +126,7 @@ services:
       - net
     volumes:
       - ./outputs:/app/outputs
+      - resqui_work:/resqui-work
       - /var/run/docker.sock:/var/run/docker.sock
 
     environment:
@@ -133,6 +134,8 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RESQUI_SHARED_WORKDIR=/resqui-work
+      - RESQUI_DOCKER_WORK_VOLUME=sqoo_resqui_work
 
 
   rate_limiter_resqui:
@@ -154,3 +157,7 @@ services:
 networks:
   net:
     driver: bridge
+
+volumes:
+  resqui_work:
+    name: sqoo_resqui_work

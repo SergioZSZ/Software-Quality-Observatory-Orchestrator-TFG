@@ -22,6 +22,8 @@ outputs/
 output/
 **/outputs/
 **/output/
+**/tmp/**
+**/resqui_work/
 
 # n8n data
 **/n8n_data/
