@@ -16,7 +16,7 @@ RUN poetry install --no-root
 
 # resqui
 COPY QualityPipelines-2.0 ./QualityPipelines-2.0
-RUN pip install -e ./QualityPipelines-2.0
+RUN SETUPTOOLS_SCM_PRETEND_VERSION_FOR_RESQUI=2.0.0 pip install -e ./QualityPipelines-2.0
 
 
 # instalacion de nltk para somef
