@@ -1,5 +1,5 @@
 {
-  "name": "SQOO_workflow",
+  "name": "SQOO_modular_workflow",
   "nodes": [
     {
       "parameters": {},
@@ -245,7 +245,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        704,
+        832,
         -128
       ],
       "id": "1181a16c-f8b2-42af-8fc0-8abdf4125c84",
@@ -308,11 +308,85 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        912,
+        1056,
         -128
       ],
       "id": "c917e333-b4e8-440a-892c-05003e9fdda5",
       "name": "Call 'dashverse_workflow'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "OOgwrx23wgLKGuZR",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/OOgwrx23wgLKGuZR",
+          "cachedResultName": "resqui_workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "launch_issue": "={{ $node[\"Conf\"].json.launch_issue }}",
+            "repo_count": "={{ $json.repo_count }}",
+            "repos_url": "={{ $json.repos_url }}",
+            "target": "={{ $node[\"Conf\"].json.target }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "repos_url",
+              "displayName": "repos_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "repo_count",
+              "displayName": "repo_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "target",
+              "displayName": "target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "launch_issue",
+              "displayName": "launch_issue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "boolean",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        -128
+      ],
+      "id": "3509d2c2-2342-4f73-8db9-8226e902e835",
+      "name": "Call 'resqui_workflow'"
     }
   ],
   "pinData": {},
@@ -365,7 +439,7 @@
       "main": [
         [
           {
-            "node": "Execute soca portal",
+            "node": "Call 'resqui_workflow'",
             "type": "main",
             "index": 0
           }
@@ -382,6 +456,17 @@
           }
         ]
       ]
+    },
+    "Call 'resqui_workflow'": {
+      "main": [
+        [
+          {
+            "node": "Execute soca portal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -389,10 +474,11 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "0a276315-7e46-41fd-971f-18f3238898d1",
+  "versionId": "6bba0721-f7f9-4f24-8dc5-a6c60de6938e",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
+  "nodeGroups": [],
   "id": "aayUwgyU5B5xmWWj",
   "tags": []
 }

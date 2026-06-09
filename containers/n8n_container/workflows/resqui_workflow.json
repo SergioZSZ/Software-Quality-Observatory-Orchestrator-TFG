@@ -12,15 +12,15 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        -5840,
-        -96
+        -5888,
+        80
       ],
-      "id": "6449cc7f-8a2d-4942-bf16-dec746227e80",
+      "id": "42e3ed00-685b-4362-a083-c306d01bcfde",
       "name": "Extract from File"
     },
     {
       "parameters": {
-        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Target\"].json.target}}/repos.txt",
+        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.target}}/repos.txt",
         "options": {
           "fileExtension": ""
         }
@@ -28,10 +28,10 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        -6048,
-        -96
+        -6096,
+        80
       ],
-      "id": "84378792-2ad3-4191-bfe1-f43afabddefc",
+      "id": "a253d541-d736-456b-9dfa-6791fc6e019e",
       "name": "Read target repos"
     },
     {
@@ -41,36 +41,49 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -5648,
-        -96
+        -5696,
+        80
       ],
-      "id": "a75bc156-7d70-4ecc-9af6-dee43a2846b8",
+      "id": "ca8d84c8-f340-4be4-aaeb-4bb8d2b8e1d1",
       "name": "Code repo_url list & repo count"
-    },
-    {
-      "parameters": {
-        "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -4944,
-        32
-      ],
-      "id": "d0987ec2-e498-49e4-b7d8-7a3b6e70ff5b",
-      "name": "Process repocount"
     },
     {
       "parameters": {},
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -4576,
-        160
+        -4624,
+        336
       ],
-      "id": "62f42ab7-5280-4ecd-baf2-7dc07c1f8f81",
+      "id": "58a67250-fd62-4b87-9c8e-907fe85ef392",
       "name": "Wait1",
       "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
+    },
+    {
+      "parameters": {
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Trigger\"].json.target \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nresqui-heavy:latest"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -5344,
+        80
+      ],
+      "id": "e488fd3a-7c23-4d3b-8f89-ac484a389a61",
+      "name": "Execute resqui-runner"
+    },
+    {
+      "parameters": {
+        "command": "=find /root/.n8n-files/resqui/{{$node[\"Trigger\"].json.target}}/ -type f -name \"*.json\" | wc -l"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -5152,
+        208
+      ],
+      "id": "8e02619d-c313-46d7-8099-0c3b036f7192",
+      "name": "find resqui summary"
     },
     {
       "parameters": {
@@ -84,7 +97,7 @@
           "conditions": [
             {
               "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
-              "leftValue": "={{ $node[\"Process repocount\"].json.count}}",
+              "leftValue": "={{ $node[\"Process stdout\"].json.count}}",
               "rightValue": "={{ $node[\"Code repo_url list & repo count\"].json.repo_count }}",
               "operator": {
                 "type": "number",
@@ -100,64 +113,39 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -4768,
-        32
+        -4816,
+        208
       ],
-      "id": "63856480-6f0b-4a9d-9431-464eaabf176e",
-      "name": "If completed rsfc jobs",
+      "id": "86629dd4-4535-43f1-9e47-c09155b44489",
+      "name": "If found",
       "alwaysOutputData": false
     },
     {
       "parameters": {
-        "command": "=find /root/.n8n-files/resqui/{{$node[\"Target\"].json.target}}/ -type f -name \"*.json\" | wc -l"
+        "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
       },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        -5104,
-        32
+        -4992,
+        208
       ],
-      "id": "4a902d9c-ed51-41de-bab5-1e06a5db14a2",
-      "name": "find rsfc assessments"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -6544,
-        -112
-      ],
-      "id": "15b8c51c-2dc2-479d-bc5a-8a818911a45f",
-      "name": "When clicking ‘Execute workflow’"
+      "id": "86f22f8a-4138-42ff-a032-b811ad32e023",
+      "name": "Process stdout"
     },
     {
       "parameters": {
-        "mode": "raw",
-        "jsonOutput": "{\n  \"target\": \"oeg-fair-sergio\",\n  \"type\": \"org\",\n  \"mode\": \"manual\",\n  \"repos\": \"repos.txt\" \n}",
-        "options": {}
+        "inputSource": "jsonExample",
+        "jsonExample": "\n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"target\": \"a string\"\n}"
       },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
       "position": [
-        -6352,
-        -96
+        -6448,
+        80
       ],
-      "id": "9b27ebbd-68f6-445c-bd49-2841155cf99e",
-      "name": "Target"
-    },
-    {
-      "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Target\"].json.target \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nresqui-heavy:latest"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        -5296,
-        -96
-      ],
-      "id": "c7de5b70-1c10-4116-a3dd-d1fc6cd38ee1",
-      "name": "Execute resqui-runner"
+      "id": "3b4d6d43-e10d-4061-92d1-42c52351820d",
+      "name": "Trigger"
     }
   ],
   "pinData": {},
@@ -195,29 +183,40 @@
         ]
       ]
     },
-    "Process repocount": {
-      "main": [
-        [
-          {
-            "node": "If completed rsfc jobs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Wait1": {
       "main": [
         [
           {
-            "node": "find rsfc assessments",
+            "node": "find resqui summary",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If completed rsfc jobs": {
+    "Execute resqui-runner": {
+      "main": [
+        [
+          {
+            "node": "find resqui summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find resqui summary": {
+      "main": [
+        [
+          {
+            "node": "Process stdout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If found": {
       "main": [
         [],
         [
@@ -229,44 +228,22 @@
         ]
       ]
     },
-    "find rsfc assessments": {
+    "Process stdout": {
       "main": [
         [
           {
-            "node": "Process repocount",
+            "node": "If found",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Target",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Target": {
+    "Trigger": {
       "main": [
         [
           {
             "node": "Read target repos",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Execute resqui-runner": {
-      "main": [
-        [
-          {
-            "node": "find rsfc assessments",
             "type": "main",
             "index": 0
           }
@@ -279,10 +256,11 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "d6d707de-d4e2-430b-9d63-654de56d8fcb",
+  "versionId": "4c75409f-2665-4306-83f2-c0876b4c318c",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
+  "nodeGroups": [],
   "id": "OOgwrx23wgLKGuZR",
   "tags": []
 }
