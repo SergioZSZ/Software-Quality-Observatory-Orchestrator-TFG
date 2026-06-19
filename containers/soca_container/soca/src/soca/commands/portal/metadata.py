@@ -221,15 +221,16 @@ class Metadata(object):
 
         return f"""
         <div style="margin-top:8px;">
-            <b>Metadata report:</b> {label}
-            <span style="margin-left:10px;">
-                --&gt; <a href="https://github.com/SoftwareUnderstanding/RsMetaCheck"
+            <b>
+                Metadata report
+                <a href="https://github.com/SoftwareUnderstanding/RsMetaCheck"
                     target="_blank"
                     rel="noopener noreferrer"
-                    style="text-decoration: underline;">
-                    RSMetaCheck
-                </a>
-            </span>
+                    style="text-decoration: underline; color: inherit;">
+                    (by RSMetaCheck)
+                </a>:
+            </b>
+            {label}
 
             {issue_link_html}
         </div>
@@ -1219,12 +1220,17 @@ class Metadata(object):
                 report_html = mistune.html(rsfc_report_md)
 
                 body_parts.append(f"""
-                <b>FAIR report (by rsfc):</b> {score_text}
-                <span style="margin-left:10px;">
-                    --&gt; <a href="https://github.com/oeg-upm/rsfc" target="_blank" rel="noopener noreferrer">
-                        RSFC
-                    </a>
-                </span><br><br>
+                <b>
+                    FAIR report
+                    <a href="https://github.com/oeg-upm/rsfc"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style="text-decoration: underline; color: inherit;">
+                        (by RSFC)
+                    </a>:
+                </b>
+                {score_text}
+                <br><br>
 
                 <details>
                     <summary style="cursor:pointer;">Show RSFC report</summary>

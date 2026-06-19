@@ -12,7 +12,9 @@ services:
     volumes:
       - ./n8n_container/n8n_data:/home/node/.n8n
       - /var/run/docker.sock:/var/run/docker.sock
-      - .//outputs:/root/.n8n-files
+      - ./outputs:/root/.n8n-files
+      - ./scripts/backup_outputs.sh:/opt/scripts/backup_outputs.sh:ro
+      - ./backups:/data/backups
     depends_on:
       - rabbitmq
     networks:

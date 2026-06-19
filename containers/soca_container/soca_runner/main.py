@@ -13,9 +13,11 @@ def main(repos_file=None, target_name=None):
     target = target_name if target_name else TARGET
     target_dir = os.path.join(BASE_DIR, "outputs", "soca", target)
 
-    # truncado carpeta del target por metadatos anticuados guardados y portal
+    # truncado de metadatos anticuados
     if os.path.exists(target_dir):
-        shutil.rmtree(target_dir)
+        if os.path.exists(os.path.join(target_dir, "metadata")):
+            print("**\nRemoving old metadata...\n")
+            shutil.rmtree(os.path.join(target_dir, "metadata"))
 
     os.makedirs(target_dir, exist_ok=True)
     
@@ -39,7 +41,7 @@ def main(repos_file=None, target_name=None):
             
             if response_fetch.status["status"]=="error":
                 print(f"Soca Fetch Error: {response_fetch.status}")
-                raise
+                raise RuntimeError(f"Soca Fetch Error: {response_fetch.status}")
             
             repos = response_fetch.repos
 
@@ -55,7 +57,7 @@ def main(repos_file=None, target_name=None):
         
     except Exception as e:
         print(f"Error: {e}")
-        raise
+        raise RuntimeError(str(e))
 
 
 
