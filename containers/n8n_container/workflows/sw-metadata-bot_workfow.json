@@ -60,7 +60,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot-conf:latest \\\nuv run sw-metadata-bot publish \\\n--analysis-root /app/outputs/sw-metadata-bot/{{$node[\"Target\"].json.target}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}\n"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot-conf:latest \\\nuv run sw-metadata-bot publish \\\n--analysis-root /app/outputs/sw-metadata-bot/{{$node[\"Trigger\"].json.target}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}\n"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -434,10 +434,11 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "ee4fa459-e6df-4149-b03a-b7d19ceebf0a",
+  "versionId": "df6b8787-d602-49cb-a89f-b07c652f2a2d",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
+  "nodeGroups": [],
   "id": "Wkl1O7rKybQLcw79",
   "tags": []
 }
