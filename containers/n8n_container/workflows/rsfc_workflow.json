@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Trigger\"].json.target \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Trigger\"].json.project \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -76,7 +76,7 @@
     },
     {
       "parameters": {
-        "command": "=find /root/.n8n-files/rsfc/{{$node[\"Trigger\"].json.target}}/ -type f -name \"*.json\" | wc -l"
+        "command": "=find /root/.n8n-files/rsfc/{{$node[\"Trigger\"].json.project}}/ -type f -name \"*.json\" | wc -l"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -90,13 +90,13 @@
     {
       "parameters": {
         "inputSource": "jsonExample",
-        "jsonExample": "\n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"target\": \"a string\"\n}"
+        "jsonExample": "\n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"project\": \"a string\"\n}"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -160,
-        208
+        -224,
+        192
       ],
       "id": "75444538-3aad-46b2-9d3c-c2588d3407cf",
       "name": "Trigger"
@@ -201,10 +201,11 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "9cfd6e66-2e7e-40a2-b425-6c515049bb1c",
+  "versionId": "91240bda-d38c-498f-9e72-5a330ca23cd9",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
+  "nodeGroups": [],
   "id": "OrQ1T1DeNjtQWlpj",
   "tags": []
 }

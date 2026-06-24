@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.target}}/repos.txt",
+        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/repos.txt",
         "options": {
           "fileExtension": ""
         }
@@ -61,7 +61,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Trigger\"].json.target \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nresqui-heavy:latest"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Trigger\"].json.project \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nresqui-heavy:latest"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -74,7 +74,7 @@
     },
     {
       "parameters": {
-        "command": "=find /root/.n8n-files/resqui/{{$node[\"Trigger\"].json.target}}/ -type f -name \"*.json\" | wc -l"
+        "command": "=find /root/.n8n-files/resqui/{{$node[\"Trigger\"].json.project}}/ -type f -name \"*.json\" | wc -l"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -136,7 +136,7 @@
     {
       "parameters": {
         "inputSource": "jsonExample",
-        "jsonExample": "\n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"target\": \"a string\"\n}"
+        "jsonExample": "\n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"project\": \"a string\"\n}"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -256,7 +256,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "4c75409f-2665-4306-83f2-c0876b4c318c",
+  "versionId": "654fd93d-9e68-41ad-94c1-87f0c8bc3ae7",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

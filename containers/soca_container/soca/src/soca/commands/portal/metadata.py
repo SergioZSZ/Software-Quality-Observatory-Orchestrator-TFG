@@ -13,6 +13,8 @@ import mistune
 import os
 import json
 from urllib.parse import unquote, urlparse
+import ast
+
 
 
 # from cffconvert import Citation
@@ -198,15 +200,24 @@ class Metadata(object):
         codemeta_status = record.get("codemeta_status")
         issue_url = record.get("issue_url") or record.get("previous_issue_url")
 
+        # Singular o plural según la cantidad
+        pitfall_label = "pitfall" if pitfalls_count == 1 else "pitfalls"
+        warning_label = "warning" if warnings_count == 1 else "warnings"
+
         if codemeta_status == "missing":
-            label = "No CodeMeta file"
+            quality_result = "No CodeMeta file"
         else:
-            label = f"{pitfalls_count} pitfalls / {warnings_count} warnings"
+            quality_result = (
+                f"{pitfalls_count} {pitfall_label}, "
+                f"{warnings_count} {warning_label}"
+            )
 
         if issue_url:
             issue_link_html = f"""
             <div style="margin-top:4px; font-size:0.9em;">
-                <a href="{issue_url}" target="_blank" rel="noopener noreferrer"
+                <a href="{issue_url}"
+                target="_blank"
+                rel="noopener noreferrer"
                 style="text-decoration: underline;">
                     Open to see GitHub issue
                 </a>
@@ -221,16 +232,14 @@ class Metadata(object):
 
         return f"""
         <div style="margin-top:8px;">
-            <b>
-                Metadata report
-                <a href="https://github.com/SoftwareUnderstanding/RsMetaCheck"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style="text-decoration: underline; color: inherit;">
-                    (by RSMetaCheck)
-                </a>:
-            </b>
-            {label}
+            <b>Metadata quality:</b>
+            {quality_result}
+            <a href="https://github.com/SoftwareUnderstanding/RsMetaCheck"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="font-weight:bold; text-decoration:underline; color:inherit;">
+                (by RSMetaCheck)
+            </a>
 
             {issue_link_html}
         </div>
@@ -363,34 +372,45 @@ class Metadata(object):
     def copy_button(self, text, label):
         import html
         import json
+
         if not text:
             return ""
-        safe_html  = html.escape(text)
+
+        safe_html = html.escape(text)
         safe_js = json.dumps(text)
+
         return f"""
             <div style="margin-bottom:10px;">
                 <b style="font-size:0.9em;">{label}</b>
             </div>
 
             <div style="position:relative;">
-                <button onclick='navigator.clipboard.writeText({safe_js})'
-                    style="position:absolute; top:5px; right:5px;">
+                <button
+                    onclick='navigator.clipboard.writeText({safe_js})'
+                    style="
+                        position:absolute;
+                        top:5px;
+                        right:5px;
+                        z-index:1;
+                    ">
                     Copy
                 </button>
 
                 <pre style="
                     background:#f7f7f7;
-                    padding:10px;
+                    padding:12px;
+                    padding-right:65px;
                     border-radius:6px;
                     font-size:0.85em;
+                    line-height:1.45;
                     overflow:auto;
                     max-height:250px;
-                    white-space:pre;
-                ">
-        {safe_html}
-                </pre>
+                    white-space:pre-wrap;
+                    overflow-wrap:anywhere;
+                    word-break:break-word;
+                ">{safe_html}</pre>
             </div>
-            """
+        """
 
     
     #parseador de bibtex para estructurar en html
@@ -401,10 +421,46 @@ class Metadata(object):
             bib_database = bibtexparser.loads(bibtex)
             entry = bib_database.entries[0] if bib_database.entries else {}
 
-            return entry  # 🔥 TODO
+            return entry 
 
         except Exception:
             return {}
+    def format_bibtex(self, bibtex):
+        import bibtexparser
+        from bibtexparser.bwriter import BibTexWriter
+
+        if not bibtex:
+            return ""
+
+        try:
+            bib_database = bibtexparser.loads(bibtex)
+
+            writer = BibTexWriter()
+
+            # Sangría de los campos
+            writer.indent = "    "
+
+            # Alinear los signos =
+            writer.align_values = True
+
+            # No reordenar las diferentes entradas
+            writer.order_entries_by = None
+
+            # Separación entre entradas si hubiera varias
+            writer.entry_separator = "\n\n"
+
+            formatted_bibtex = bibtexparser.dumps(
+                bib_database,
+                writer=writer
+            )
+
+            return formatted_bibtex.strip()
+
+        except Exception as exc:
+            print(f"Could not format BibTeX: {exc}")
+
+            # Si falla el parseo, mostrar el original
+            return str(bibtex).strip()
 
 
         
@@ -768,13 +824,28 @@ class Metadata(object):
 
             #  1º ver si hay bibtex y añadirlo al body
             if 'bibtex' in citations and citations['bibtex']:
-                
-                
-                
-                bib = safe_dic(citations, "bibtex")          
+
+                bib = safe_dic(citations, "bibtex")
+                bib_source = safe_dic(citations, "bibtex_source")
+
+                # Obtener el nombre del archivo del que procede el BibTeX
+                source_name = self.metadata_item_source_name({
+                    "source": bib_source
+                })
+
+                # Crear la etiqueta que se mostrará
+                if source_name and source_name.lower() == "readme.md":
+                    source_label = "Source README.md"
+                elif source_name:
+                    source_label = f"Source {source_name}"
+                else:
+                    source_label = "Source BibTeX"
+
+                formatted_bib = self.format_bibtex(bib)
                 parsed_bib = self.parse_bibtex(bib)
+
                 bib_clean = ""
-                bib_button = self.copy_button(bib, "BibTeX")
+                bib_button = self.copy_button(formatted_bib, "BibTeX")
                 
                 for key, value in parsed_bib.items():
                     
@@ -807,7 +878,8 @@ class Metadata(object):
                 </div>
                 
                 <div style="margin-bottom:15px; max-height:350px; overflow:auto;">
-                    {self.source_anchor("Source by BibTeX", safe_dic(citations, "bibtex_source"), bold=True)}<br><br>
+                {self.source_anchor(source_label, bib_source, bold=True)}<br><br>
+                
                     <div style="font-size:0.9em;">
                         {bib_clean}
                     </div>
@@ -932,6 +1004,7 @@ class Metadata(object):
         
         if identifier:
             identifier = str(identifier)
+            
             doi_url = identifier
 
             # si no viene como URL → construirla
@@ -1063,17 +1136,17 @@ class Metadata(object):
                             padding:10px;
                             border-radius:6px;
                             font-size:0.9em;
-                            margin-bottom:12px;
+                            margin-bottom:6px;
                         ">
                             {html_md}
+                        </div>
 
-                            <div style="
-                                text-align:right;
-                                font-style:italic;
-                                margin-top:0.75rem;
-                            ">
-                                {source_link}
-                            </div>
+                        <div style="
+                            text-align:right;
+                            font-style:italic;
+                            margin-bottom:12px;
+                        ">
+                            {source_link}
                         </div>
                         """
 
@@ -1221,28 +1294,21 @@ class Metadata(object):
 
                 body_parts.append(f"""
                 <b>
-                    FAIR report
-                    <a href="https://github.com/oeg-upm/rsfc"
+                    FAIR & health: 
+                </b>
+                    {score_text}
+                    <b><a href="https://github.com/oeg-upm/rsfc"
                         target="_blank"
                         rel="noopener noreferrer"
                         style="text-decoration: underline; color: inherit;">
                         (by RSFC)
-                    </a>:
+                    </a>
                 </b>
-                {score_text}
-                <br><br>
+                <br>
+                <details class="quality-details">
+                    <summary>Show RSFC report</summary>
 
-                <details>
-                    <summary style="cursor:pointer;">Show RSFC report</summary>
-
-                    <div style="
-                        margin-top:8px;
-                        max-height:500px;
-                        overflow:auto;
-                        padding:8px;
-                        background:#f7f7f7;
-                        border-radius:6px;
-                    ">
+                    <div class="rsfc-report">
                         {report_html}
                     </div>
                 </details>
@@ -1267,7 +1333,7 @@ class Metadata(object):
             body = "<hr>".join(body_parts)
 
             tooltip_summary = ", ".join(tooltip_summary_parts)
-            tooltip = f"Quality report ({tooltip_summary})" if tooltip_summary else "Quality report"
+            tooltip = f"Software Quality and Project Health ({tooltip_summary})" if tooltip_summary else "Software Quality and Project Health"
             
             html += self.icon_wrapper(
                 icon_html=f"""<img src="{self.base}repo_icons/quality.png" 
@@ -1275,7 +1341,7 @@ class Metadata(object):
                         {self.add_tooltip('bottom', tooltip)}>""",
 
                 modal_html=self.modal(
-                    title="Quality report",
+                    title="Software Quality and Project Health",
                     body=body,
                     markdown_translation=False
                 )
@@ -1325,7 +1391,7 @@ class Metadata(object):
                                 <h2 style="margin-bottom: 1rem;">{title}</h2>
                                 {extra_html}
                             </span>
-                            <div style="margin-bottom: 1rem; overflow: auto;">{body}</div>
+                            <div class="modal-body">{body}</div>
                             {footer_html}
                         </div>
                     </div>"""
@@ -1506,7 +1572,39 @@ class Metadata(object):
                    </div>"""
 
     def identifier(self):
-        return safe_dic(safe_dic(safe_list(safe_dic(self.md, 'identifier'), 0), 'result'), 'value')
+        value = safe_dic(
+            safe_dic(
+                safe_list(safe_dic(self.md, "identifier"), 0),
+                "result"
+            ),
+            "value"
+        )
+
+        if not value:
+            return None
+
+        # Lista real
+        if isinstance(value, list):
+            value = value[0] if value else None
+
+        # Cadena que representa una lista:
+        # "['https://doi.org/10.5281/zenodo.xxxxxxx']"
+        elif isinstance(value, str):
+            cleaned = value.strip()
+
+            if cleaned.startswith("[") and cleaned.endswith("]"):
+                try:
+                    parsed = ast.literal_eval(cleaned)
+
+                    if isinstance(parsed, list) and parsed:
+                        value = parsed[0]
+                except (ValueError, SyntaxError):
+                    pass
+
+        if not value:
+            return None
+
+        return str(value).strip()
 
     def status(self):
         return safe_dic(self.md, 'repository_status')

@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "command": "=mkdir -p /root/.n8n-files/sw-metadata-bot/{{$node[\"Trigger\"].json.target}}/"
+        "command": "=mkdir -p /root/.n8n-files/sw-metadata-bot/{{$node[\"Trigger\"].json.project}}/"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -32,7 +32,7 @@
     {
       "parameters": {
         "operation": "write",
-        "fileName": "=/root/.n8n-files/sw-metadata-bot/{{$node[\"Trigger\"].json.target}}/config.json",
+        "fileName": "=/root/.n8n-files/sw-metadata-bot/{{$node[\"Trigger\"].json.project}}/config.json",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
@@ -46,7 +46,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run -d --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot-conf:latest \\\nuv run sw-metadata-bot run-analysis \\\n--config-file /app/outputs/sw-metadata-bot/{{$node[\"Trigger\"].json.target}}/config.json \\\n--snapshot-tag {{ $node[\"set config file\"].json.outputs.snapshot_tag }}"
+        "command": "=docker run -d --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot-conf:latest \\\nuv run sw-metadata-bot run-analysis \\\n--config-file /app/outputs/sw-metadata-bot/{{$node[\"Trigger\"].json.project}}/config.json \\\n--snapshot-tag {{ $node[\"set config file\"].json.outputs.snapshot_tag }}"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -60,7 +60,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot-conf:latest \\\nuv run sw-metadata-bot publish \\\n--analysis-root /app/outputs/sw-metadata-bot/{{$node[\"Trigger\"].json.target}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}\n"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e GITHUB_API_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\nsw-metadata-bot-conf:latest \\\nuv run sw-metadata-bot publish \\\n--analysis-root /app/outputs/sw-metadata-bot/{{$node[\"Trigger\"].json.project}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}\n"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -87,7 +87,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "={\n  \"outputs\": {\n    \"snapshot_tag\": \"{{ $now.format('yyyyMMdd_HHmmss') }}\"\n  },\n  \"bot_config\": {\n    \"analysis\": {\n      \"repositories\": {{$json.repositories}},\n      \"generate_codemeta_if_missing\": true\n    },\n    \"issues\": {\n      \"custom_issue_message\": \"This issue was created automatically after running metadata quality checks. Several warnings or pitfalls were detected and may be worth reviewing.\",\n      \"opt_outs\": []\n    },\n    \"outputs\": {\n      \"output_root_dir\": \"/app/outputs/sw-metadata-bot/{{$json.target}}\",\n      \"run_name\": \"runs\"\n    }\n  }\n}",
+        "jsonOutput": "={\n  \"outputs\": {\n    \"snapshot_tag\": \"{{ $now.format('yyyyMMdd_HHmmss') }}\"\n  },\n  \"bot_config\": {\n    \"analysis\": {\n      \"repositories\": {{$json.repositories}},\n      \"generate_codemeta_if_missing\": true\n    },\n    \"issues\": {\n      \"custom_issue_message\": \"This issue was created automatically after running metadata quality checks. Several warnings or pitfalls were detected and may be worth reviewing.\",\n      \"opt_outs\": []\n    },\n    \"outputs\": {\n      \"output_root_dir\": \"/app/outputs/sw-metadata-bot/{{$json.project}}\",\n      \"run_name\": \"runs\"\n    }\n  }\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -102,7 +102,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "={\n  \"repositories\": {{$json.repos_url}},\n  \"target\": {{ $node[\"Trigger\"].json.target }}\n}\n",
+        "jsonOutput": "={\n  \"repositories\": {{$json.repos_url}},\n  \"project\": {{ $node[\"Trigger\"].json.project }}\n}\n",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -129,7 +129,7 @@
     },
     {
       "parameters": {
-        "command": "=test -f \"/root/.n8n-files/sw-metadata-bot/{{$node[\"Trigger\"].json.target}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}/run_report.json\" && echo 1 || echo 0"
+        "command": "=test -f \"/root/.n8n-files/sw-metadata-bot/{{$node[\"Trigger\"].json.project}}/runs/{{$node[\"set config file\"].json.outputs.snapshot_tag}}/run_report.json\" && echo 1 || echo 0"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -190,7 +190,7 @@
     {
       "parameters": {
         "inputSource": "jsonExample",
-        "jsonExample": "  \n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"target\": \"a string\",\n\"launch_issue\": false \n}"
+        "jsonExample": "  \n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"project\": \"a string\",\n\"launch_issue\": false \n}"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -240,7 +240,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "=  \n{\n\"repos_url\": {{$node[\"Trigger\"].json.repos_url}},\n\"repo_count\": {{$node[\"Trigger\"].json.repo_count}},\n\"target\":  {{$node[\"Trigger\"].json.target}}\n}",
+        "jsonOutput": "=  \n{\n\"repos_url\": {{$node[\"Trigger\"].json.repos_url}},\n\"repo_count\": {{$node[\"Trigger\"].json.repo_count}},\n\"project\":  {{$node[\"Trigger\"].json.project}}\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -434,7 +434,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "df6b8787-d602-49cb-a89f-b07c652f2a2d",
+  "versionId": "bb64e793-642a-4dd0-9fb9-56aad21bbc30",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

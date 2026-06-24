@@ -2,154 +2,6 @@
   "name": "SQOO_modular_workflow",
   "nodes": [
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -368,
-        -128
-      ],
-      "id": "1088f4e9-8601-4481-b2b3-cfb8b4bf803e",
-      "name": "When clicking ‘Execute workflow’"
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "SdY8cMvhvYuBoeDj",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/SdY8cMvhvYuBoeDj",
-          "cachedResultName": "soca_workflow"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "target": "={{$json.target}}",
-            "type": "={{$json.type}}",
-            "mode": "={{$json.mode}}",
-            "repos": "={{$json.repos}}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "target",
-              "displayName": "target",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "type",
-              "displayName": "type",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "mode",
-              "displayName": "mode",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "repos",
-              "displayName": "repos",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        48,
-        -128
-      ],
-      "id": "a6e803e8-cd3f-4731-bee7-8d07c037f646",
-      "name": "Call 'soca_workflow'"
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "OrQ1T1DeNjtQWlpj",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/OrQ1T1DeNjtQWlpj",
-          "cachedResultName": "rsfc_workflow"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "repo_count": "={{ $json.repo_count }}",
-            "repos_url": "={{ $json.repos_url }}",
-            "target": "={{ $json.target }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "repos_url",
-              "displayName": "repos_url",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "array",
-              "removed": false
-            },
-            {
-              "id": "repo_count",
-              "displayName": "repo_count",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "number",
-              "removed": false
-            },
-            {
-              "id": "target",
-              "displayName": "target",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        256,
-        -128
-      ],
-      "id": "d2b02925-8400-4fe5-b08d-884677bbdce7",
-      "name": "Call 'rsfc_workflow'"
-    },
-    {
       "parameters": {
         "workflowId": {
           "__rl": true,
@@ -164,7 +16,7 @@
             "launch_issue": "={{ $node[\"Conf\"].json.launch_issue }}",
             "repo_count": "={{ $json.repo_count }}",
             "repos_url": "={{ $json.repos_url }}",
-            "target": "={{ $node[\"Conf\"].json.target }}"
+            "project": "={{ $json.project }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -189,8 +41,8 @@
               "removed": false
             },
             {
-              "id": "target",
-              "displayName": "target",
+              "id": "project",
+              "displayName": "project",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -217,7 +69,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        464,
+        448,
         -128
       ],
       "id": "fa856f48-6637-4152-b31f-7f9759e01ecb",
@@ -225,27 +77,12 @@
     },
     {
       "parameters": {
-        "mode": "raw",
-        "jsonOutput": "{\n  \"target\": \"test\",\n  \"type\": \"org\",\n  \"mode\": \"manual\",\n  \"repos\": \"test.txt\",\n  \"launch_issue\":false\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -160,
-        -128
-      ],
-      "id": "317bf72b-cfa1-4576-8d51-3cf6740f0629",
-      "name": "Conf"
-    },
-    {
-      "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Conf\"].json.target}} \\\n-e TYPE={{$node[\"Conf\"].json.type}} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\n-e DASHBOARD_ORG_EMBED_ID=\"{{ $env.DASHBOARD_ORG_EMBED_ID }}\" \\\n-e DASHBOARD_REPO_EMBED_ID=\"{{ $env.DASHBOARD_REPO_EMBED_ID }}\" \\\n-e SUPERSET_PUBLIC_DOMAIN=\"{{ $env.SUPERSET_PUBLIC_DOMAIN }}\" \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Conf\"].json.project}} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\n-e DASHBOARD_ORG_EMBED_ID=\"{{ $env.DASHBOARD_ORG_EMBED_ID }}\" \\\n-e DASHBOARD_REPO_EMBED_ID=\"{{ $env.DASHBOARD_REPO_EMBED_ID }}\" \\\n-e SUPERSET_PUBLIC_DOMAIN=\"{{ $env.SUPERSET_PUBLIC_DOMAIN }}\" \\\nsoca-heavy:latest \\\npython -m soca_runner.genportal"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        832,
+        656,
         -128
       ],
       "id": "1181a16c-f8b2-42af-8fc0-8abdf4125c84",
@@ -265,7 +102,7 @@
           "value": {
             "repo_count": "={{ $node[\"Call 'rsfc_workflow'\"].json.repo_count }}",
             "repos_url": "={{ $node[\"Call 'rsfc_workflow'\"].json.repos_url }}",
-            "target": "={{ $node[\"Conf\"].json.target }}"
+            "target": "={{ $node[\"Conf\"].json.project}}"
           },
           "matchingColumns": [],
           "schema": [
@@ -326,10 +163,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "launch_issue": "={{ $node[\"Conf\"].json.launch_issue }}",
             "repo_count": "={{ $json.repo_count }}",
             "repos_url": "={{ $json.repos_url }}",
-            "target": "={{ $node[\"Conf\"].json.target }}"
+            "project": "={{ $json.project }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -354,23 +190,13 @@
               "removed": false
             },
             {
-              "id": "target",
-              "displayName": "target",
+              "id": "project",
+              "displayName": "project",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
               "type": "string",
-              "removed": false
-            },
-            {
-              "id": "launch_issue",
-              "displayName": "launch_issue",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "boolean",
               "removed": false
             }
           ],
@@ -382,20 +208,225 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        640,
-        -128
+        656,
+        -320
       ],
       "id": "3509d2c2-2342-4f73-8db9-8226e902e835",
       "name": "Call 'resqui_workflow'"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -128
+      ],
+      "id": "4239ee41-b0ba-4d58-8e56-bc7b8d435c7b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "SdY8cMvhvYuBoeDj",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/SdY8cMvhvYuBoeDj",
+          "cachedResultName": "soca_workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "project": "={{ $json.project }}",
+            "organizations": "={{ $json.organizations }}",
+            "extra_repositories": "={{ $json.extra_repositories }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "project",
+              "displayName": "project",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "organizations",
+              "displayName": "organizations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "extra_repositories",
+              "displayName": "extra_repositories",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        -128
+      ],
+      "id": "506ac066-5c27-409c-845c-3195266b61be",
+      "name": "Call 'soca_workflow'"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"project\": \"fair-sergio\",\n  \"organizations\":[\n    {\"org\":\"FAIR2ADAPT\", \"type\":\"org\"},\n    {\"org\":\"SergioZSZ\", \"type\":\"user\"}\n  ],\n   \"extra_repositories\":[ \"https://github.com/KnowledgeCaptureAndDiscovery/somef\",\n\"https://github.com/oeg-upm/soca\"\n  ],\n  \"launch_issue\":false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        -128
+      ],
+      "id": "cce404da-0125-45ad-90cb-afc7dfb98f8b",
+      "name": "Conf"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "OrQ1T1DeNjtQWlpj",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/OrQ1T1DeNjtQWlpj",
+          "cachedResultName": "rsfc_workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "repo_count": "={{ $json.repo_count }}",
+            "repos_url": "={{ $json.repos_url }}",
+            "project": "={{ $json.project }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "repos_url",
+              "displayName": "repos_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "repo_count",
+              "displayName": "repo_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "project",
+              "displayName": "project",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        -128
+      ],
+      "id": "6e96c8de-b129-41ee-b9ae-5cbd47bef0d0",
+      "name": "Call 'rsfc_workflow'"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "\n  {\n    \"repos_url\": [\n      \"https://github.com/esgg/airflow-workflows\",\n      \"https://github.com/esgg/ckan-deliver\",\n      \"https://github.com/esgg/ckanext-scheming-test\",\n      \"https://github.com/esgg/Climathon-Madrid-2018\",\n      \"https://github.com/esgg/dmptool-api\",\n      \"https://github.com/esgg/docs\",\n      \"https://github.com/esgg/eae-mosquitto-examples\",\n      \"https://github.com/esgg/GLORIAAlbumPortlet\",\n      \"https://github.com/esgg/GLORIACamerasThumbnail\",\n      \"https://github.com/esgg/GLORIADeviceControlsPortlet\",\n      \"https://github.com/esgg/GLORIADevicePortlets\",\n      \"https://github.com/esgg/GLORIAExternalPoll\",\n      \"https://github.com/esgg/GLORIAGenericCCDCameraPortlet\",\n      \"https://github.com/esgg/GLORIAGenericDomePortlet\",\n      \"https://github.com/esgg/GloriaGenericEmperimentTimerPortlet\",\n      \"https://github.com/esgg/GLORIAGenericFocuserPortlet\",\n      \"https://github.com/esgg/GLORIAGenericMountPortlet\",\n      \"https://github.com/esgg/GLORIAGenericSurveillanceCameraPortlet\",\n      \"https://github.com/esgg/GLORIAGenericWeatherStationPortlet\",\n      \"https://github.com/esgg/GLORIAImageViewerPortlet\",\n      \"https://github.com/esgg/GLORIAKarmaCalculationService\",\n      \"https://github.com/esgg/GLORIAKarmaWebService\",\n      \"https://github.com/esgg/GLORIAMainControlsPortlet\",\n      \"https://github.com/esgg/GLORIANightExperiment\",\n      \"https://github.com/esgg/GLORIANightExperimentLayout\",\n      \"https://github.com/esgg/GLORIAObjectsCatalogPortlet\",\n      \"https://github.com/esgg/GLORIAOnlineNightExperiment\",\n      \"https://github.com/esgg/GLORIAOnlinePortlets\",\n      \"https://github.com/esgg/GloriaOnlineSolarExperiment\",\n      \"https://github.com/esgg/GLORIATelescopeReservations\",\n      \"https://github.com/esgg/lightpollutionmap\",\n      \"https://github.com/esgg/n8n-grado\",\n      \"https://github.com/esgg/open_science_guidelines\",\n      \"https://github.com/esgg/RSQKit\",\n      \"https://github.com/esgg/sky_data\",\n      \"https://github.com/esgg/ss-telegram-bot\",\n      \"https://github.com/esgg/tess-scripts\",\n      \"https://github.com/esgg/TutorialGit\",\n      \"https://github.com/esgg/twitter-farolapp\",\n      \"https://github.com/esgg/unie-test\",\n      \"https://github.com/esgg/w3id.org\",\n      \"https://github.com/SergioZSZ/OOPS\",\n      \"https://github.com/SergioZSZ/OS-IA-Pipegrobid\",\n      \"https://github.com/SergioZSZ/Proyectos\",\n      \"https://github.com/SergioZSZ/QualityPipelines\",\n      \"https://github.com/SergioZSZ/SMA-para-Analisis-de-Sentimiento\",\n      \"https://github.com/SergioZSZ/soca\",\n      \"https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG\",\n      \"https://github.com/KnowledgeCaptureAndDiscovery/somef\",\n      \"https://github.com/oeg-upm/rsfc\",\n      \"https://github.com/oeg-upm/soca\"\n    ],\n    \"repo_count\": 51,\n    \"project\": \"esteban-sergio\"\n  }\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        -352
+      ],
+      "id": "879996b8-011c-4118-aa5c-139626796d2c",
+      "name": "Edit Fields"
     }
   ],
   "pinData": {},
   "connections": {
+    "Call 'sw-metadata-bot_workfow'": {
+      "main": [
+        [
+          {
+            "node": "Execute soca portal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute soca portal": {
+      "main": [
+        [
+          {
+            "node": "Call 'dashverse_workflow'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'resqui_workflow'": {
+      "main": [
+        []
+      ]
+    },
     "When clicking ‘Execute workflow’": {
       "main": [
         [
           {
             "node": "Conf",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conf": {
+      "main": [
+        [
+          {
+            "node": "Call 'soca_workflow'",
             "type": "main",
             "index": 0
           }
@@ -424,48 +455,9 @@
         ]
       ]
     },
-    "Conf": {
+    "Edit Fields": {
       "main": [
-        [
-          {
-            "node": "Call 'soca_workflow'",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Call 'sw-metadata-bot_workfow'": {
-      "main": [
-        [
-          {
-            "node": "Call 'resqui_workflow'",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Execute soca portal": {
-      "main": [
-        [
-          {
-            "node": "Call 'dashverse_workflow'",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Call 'resqui_workflow'": {
-      "main": [
-        [
-          {
-            "node": "Execute soca portal",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     }
   },
@@ -474,7 +466,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "6bba0721-f7f9-4f24-8dc5-a6c60de6938e",
+  "versionId": "ed04b146-6412-4fb8-acac-d476f9906c8d",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

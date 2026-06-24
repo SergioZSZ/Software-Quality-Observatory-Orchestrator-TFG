@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{ $json.target }} \\\n-e TYPE={{ $json.type }} \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nsoca-heavy:latest \\\npython -m soca_runner.main \\\n{{ $json.mode === \"manual\" \n    ? \"--repos /app/outputs/\" + $json.repos + \" --name \" + $json.target \n    : \"\" \n}}"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e PROJECT=\"{{ $json.project }}\" \\\n-e ORGANIZATIONS_JSON='{{ JSON.stringify($json.organizations || []) }}' \\\n-e EXTRA_REPOSITORIES_JSON='{{ JSON.stringify($json.extra_repositories || []) }}' \\\n-e GITHUB_TOKEN=\"{{ $env.GITHUB_API_TOKEN }}\" \\\n-e RABBITMQ_HOST=\"{{ $env.RABBITMQ_HOST }}\" \\\n-e RABBITMQ_USER=\"{{ $env.RABBITMQ_USER }}\" \\\n-e RABBITMQ_PASSWORD=\"{{ $env.RABBITMQ_PASSWORD }}\" \\\nsoca-heavy:latest \\\npython -m soca_runner.main"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -33,7 +33,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.target}}/repos.txt",
+        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/repos.txt",
         "options": {
           "fileExtension": ""
         }
@@ -87,7 +87,7 @@
     },
     {
       "parameters": {
-        "command": "=find /root/.n8n-files/soca/{{$node[\"Trigger\"].json.target}}/metadata -maxdepth 1 -type f -name \"*.json\" | wc -l"
+        "command": "=find /root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/metadata -maxdepth 1 -type f -name \"*.json\" | wc -l"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -135,20 +135,6 @@
     },
     {
       "parameters": {
-        "inputSource": "jsonExample",
-        "jsonExample": "{\n    \"target\": \"the target user/org\",\n    \"type\": \"user/org\",\n    \"mode\": \"auto/manual\",\n    \"repos\": \"path to repos.txt in manual mode\"\n  }"
-      },
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -272,
-        48
-      ],
-      "id": "e9f9a863-23e7-46b1-b052-da9cbcc621ab",
-      "name": "Trigger"
-    },
-    {
-      "parameters": {
         "mode": "chooseBranch"
       },
       "type": "n8n-nodes-base.merge",
@@ -163,7 +149,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "=\n{\n\"repos_url\": {{ $json.repos_url }},\n\"repo_count\": {{ $json.repo_count }},\n\"target\": {{ $node[\"Trigger\"].json.target }}\n}",
+        "jsonOutput": "=\n{\n\"repos_url\": {{ $json.repos_url }},\n\"repo_count\": {{ $json.repo_count }},\n\"project\": {{ $node[\"Trigger\"].json.project }}\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -174,6 +160,20 @@
       ],
       "id": "9c1a807b-e9b4-4293-b5b3-2a4e8abcbf5a",
       "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n    \"project\": \"name of the project\",\n    \"organizations\": [],\n    \"extra_repositories\": []\n  }"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -368,
+        16
+      ],
+      "id": "a4fc405c-5785-49a4-83ac-b9a98fb4f345",
+      "name": "Trigger"
     }
   ],
   "pinData": {},
@@ -278,22 +278,22 @@
         ]
       ]
     },
-    "Trigger": {
+    "Merge": {
       "main": [
         [
           {
-            "node": "Execute soca-runner",
+            "node": "Edit Fields",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Merge": {
+    "Trigger": {
       "main": [
         [
           {
-            "node": "Edit Fields",
+            "node": "Execute soca-runner",
             "type": "main",
             "index": 0
           }
@@ -306,10 +306,11 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "846b4730-d623-4ebe-a368-a1c1836edbcb",
+  "versionId": "81c59eff-6f6c-4612-a87c-ccf9342a8ab9",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
+  "nodeGroups": [],
   "id": "SdY8cMvhvYuBoeDj",
   "tags": []
 }

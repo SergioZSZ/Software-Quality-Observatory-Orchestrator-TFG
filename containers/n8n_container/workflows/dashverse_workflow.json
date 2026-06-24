@@ -84,7 +84,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "=/root/.n8n-files/rsfc/{{$json.target}}/{{$json.repo_name}}/rsfc_output/rsfc_assessment.json",
+        "fileSelector": "=/root/.n8n-files/rsfc/{{$json.project}}/{{$json.repo_name}}/rsfc_output/rsfc_assessment.json",
         "options": {
           "fileExtension": ".json"
         }
@@ -101,7 +101,7 @@
     {
       "parameters": {
         "inputSource": "jsonExample",
-        "jsonExample": "  \n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"target\": \"a string\"\n}"
+        "jsonExample": "  \n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"project\": \"a string\"\n}"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -114,7 +114,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const target = $(\"Trigger\").first().json.target;\n\nreturn $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      target,\n      repo_name: url.split(\"/\").pop(),\n    }\n  };\n});"
+        "jsCode": "const project = $(\"Trigger\").first().json.project;\n\nreturn $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      project,\n      repo_name: url.split(\"/\").pop(),\n    }\n  };\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -200,10 +200,11 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "5922d997-8818-4850-92f4-3cf7af8f4b6b",
+  "versionId": "437d0fc6-470e-43c6-a311-04ded7a5e541",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
+  "nodeGroups": [],
   "id": "T4KSZ1qVpOZyaD3T",
   "tags": []
 }
