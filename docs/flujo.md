@@ -1,89 +1,79 @@
-### 4. Flujo actual(container n8n)
-El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
+# Workflow modular
 
-Actualmente el despliegue se apoya en el workflow modular:
+El sistema utiliza `SQOO_modular_workflow.json` como único workflow principal de n8n. Orquesta los siguientes subworkflows:
 
-- `SQOO_modular_workflow.json`: workflow principal modular de SQOO. Orquesta los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
-- `resqui_workflow.json`: subworkflow de RESQUI preparado para ejecutar la evaluacion con workers `worker_resqui`.
+- `soca_workflow.json`
+- `rsfc_workflow.json`
+- `resqui_workflow.json`
+- `sw-metadata-bot_workfow.json`
+- `dashverse_workflow.json`
 
-La versión modular facilita aislar y mantener cada fase sin cambiar el contrato global del pipeline. El workflow principal pasa entre fases los campos `target`, `type`, `mode`, `repos`, `repos_url`, `repo_count` y `launch_issue` según corresponda.
+## Configuración de entrada
 
-**Nota:** `resqui_workflow.json` aun no esta integrado en `SQOO_modular_workflow.json`; se mantiene como subworkflow independiente y su integracion en el flujo principal se realizara proximamente.
+El nodo `Conf` define:
 
+- `project`: nombre estable usado en directorios y estado incremental.
+- `organizations`: lista de objetos `{"org": "nombre", "type": "org|user"}`.
+- `extra_repositories`: URLs adicionales a las descubiertas en GitHub.
+- `launch_issue`: activa la publicación de issues de sw-metadata-bot.
 
+## 1. Descubrimiento incremental y SOCA
 
-#### Descripción general del flujo
+`soca_workflow.json` ejecuta `soca_runner.main`, consulta GitHub y compara cada `updated_at` con `outputs/soca/<project>/repository-state.json`.
 
-Los workflows implementan un pipeline completo que abarca:
+Genera:
 
-1. **Extracción de repositorios**
-2. **Procesamiento de metadatos (SOCA)**
-3. **Evaluación de calidad (RSFC)**
-4. **Evaluación de metadatos (sw-metadata-bot)**
-5. **Generación y publicacion de portal software enriquecido**
-6. **Envío de indicadores a DashVERSE**
+- `repos.txt`: inventario completo.
+- `repos-updated.txt`: repositorios nuevos o modificados.
+- `repos-removed.txt`: repositorios retirados.
+- `repository-state.pending.json`: estado pendiente de consolidar.
 
+Los workers procesan solo `repos-updated.txt`. Cada extracción se genera en staging y sustituye de forma atómica el resultado anterior; si falla, se conserva el último resultado válido y se registra el error. `status.json` diferencia repositorios correctos y fallidos.
 
+El workflow principal evalúa `has_changes`. Si es `true`, continúa con RSFC; si es `false`, no repite las evaluaciones y consolida directamente el estado pendiente.
 
-####  Etapas del workflow
+## 2. RSFC y RESQUI
 
-##### 1. Inicialización 
+Los subworkflows reciben `repos_url` y `repos_removed`:
 
-- Trigger manual (`Execute Workflow`)
-- Definición del objetivo (`target`) y tipo (`user` / `org`)
-- Ejecución del contenedor: ```soca-heavy:latest ```
-- Ejecución del pipeline SOCA por los workers
-- Generación de metadatos por repositorio
+- RSFC 0.1.7 evalúa los repositorios actualizados, reutiliza metadatos SOCA cuando existen y escribe en `outputs/rsfc/<project>/<owner>_<repo>/`.
+- RESQUI evalúa el mismo lote con QualityPipelines y escribe en `outputs/resqui/<project>/<owner>_<repo>/`.
+- Ambos eliminan las salidas persistidas de los repositorios retirados y conservan un resultado anterior si una nueva evaluación falla.
+- Los subworkflows esperan un estado terminal `completed` o `failed`; un lote fallido detiene el pipeline.
 
-##### 2. Lectura y procesamiento de repositorios
+## 3. sw-metadata-bot
 
-- Lectura del archivo generado: `repos.txt`
-- Transformación a lista de URLs
-- Cálculo del número total de repositorios (repo_count)
-- Control de finalización procesamiento de repositorios: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
+sw-metadata-bot 0.5.3 recibe el inventario completo, no solo el lote actualizado. Esto permite que cada snapshot mantenga todos los repositorios.
 
+El bot:
 
-##### 3. Evaluación RSFC
-- Envío de repositorios a los workers RSFC, evaluando la calidad de software
-- Control de finalización: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
+1. Genera `config.json`.
+2. Ejecuta `sw-metadata-bot run-analysis` con una snapshot fechada.
+3. Localiza automáticamente el `run_report.json` anterior.
+4. Reutiliza los artefactos cuyo commit no ha cambiado.
+5. Ejecuta `sw-metadata-bot publish` solo cuando `launch_issue` es `true`.
 
-##### Subworkflow RESQUI (pendiente de integracion)
+Las snapshots se guardan en `outputs/sw-metadata-bot/<project>/runs/<snapshot>/`.
 
-- `resqui_workflow.json` publica los repositorios en la cola `resqui_jobs`.
-- Los workers `worker_resqui` ejecutan RESQUI con la configuracion incluida en `containers/resqui_container/resqui_runner/configurations/`.
-- Los resultados se escriben en `outputs/resqui/<target>/`.
-- Este subworkflow aun no forma parte del workflow principal modular; se integrara proximamente.
+## 4. Portal
 
-##### 4. Análisis de metadatos con sw-metadata-bot
+Cuando terminan las evaluaciones, `soca_runner.genportal` combina metadatos SOCA, assessments RSFC e informes de sw-metadata-bot. El portal se guarda en `outputs/soca/<project>/portal/` y Nginx lo sirve en:
 
-n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y, si se habilita, generar issues automáticos cuando se detectan carencias. Todo siguiendo este proceso:
+```text
+http://localhost:8030/portals/<project>/
+```
 
-- Generado un `config.json` con los repositorios obtenidos en el workflow
+## 5. DashVERSE
 
-- Ejecutado el análisis mediante `sw-metadata-bot run-analysis`
-- Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
-- Comprobado que existe `run_report.json` para la ejecución generada
-- Publicados los issues generados mediante `sw-metadata-bot publish` solo cuando `launch_issue` está activado
+`dashverse_workflow.json` enriquece los assessments con `@id` y `author` antes de publicarlos:
 
-En `SQOO_modular_workflow.json` esta decisión se define en el nodo `Conf` y se propaga al subworkflow `sw-metadata-bot_workfow`.
+- RSFC: `POST /assessment_raw` con `{ "payload": assessment }`.
+- RESQUI: `POST /assessment` con el assessment validado.
 
-##### 5. Generación y publicacion del portal
+Las peticiones utilizan `Authorization: Bearer <DASHVERSE_JWT>`.
 
-- Se ejecuta `genportal.py` cuando ya existen los reportes de RSFC y sw-metadata-bot.
-- El portal incorpora metadatos SOCA, indicadores RSFC e informes/issues de sw-metadata-bot.
-- El portal queda persistido en `outputs/soca/<target>/portal/`.
-- El servicio `nginx` publica ese directorio en `http://localhost:8030/portals/<target>/`.
-- Las paginas embebidas cargan los dashboards de DashVERSE/Superset mediante iframe directo usando `SUPERSET_PUBLIC_DOMAIN`.
+Tras generar el portal, `If repo updated` comprueba `repo_count`. DashVERSE solo se ejecuta cuando existen repositorios actualizados; los lotes que contienen únicamente eliminaciones pasan directamente a la consolidación.
 
-Salida generada:
+## 6. Consolidación del estado
 
-- Portal HTML/JSON enriquecido con reportes y metadatos
-- Dashboards embebidos publicados junto al catálogo
-
-##### 6. Envío de assessments a DashVERSE
-
-- Lectura de los archivos generados: `rsfc_assessment.json` por cada repositorio
-- Extracción y transformación de los datos del assessment añadiendo un @id y el `author` como keys del json-ld
-
-- Iteración sobre cada repositorio y sus checks mediante nodos `Split Out`
-- Envío de datos mediante peticiones HTTP POST a la API de DashVERSE `/assessment_raw`
+Al terminar DashVERSE, o directamente cuando no hay assessments nuevos, n8n sustituye `repository-state.json` por `repository-state.pending.json`. Así, una ejecución fallida no marca como procesados cambios incompletos y una ejecución con solo eliminaciones actualiza correctamente el inventario.

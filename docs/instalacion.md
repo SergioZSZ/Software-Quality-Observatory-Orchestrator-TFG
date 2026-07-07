@@ -1,159 +1,145 @@
-## 5. Instalación/Despliegue
+# Instalación y despliegue
 
-#### 5.1 Previa
- Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
-   - `GITHUB_API_TOKEN`: siguiendo el formato `GITHUB_TOKEN=xxxxxx`, siendo el `xxxxxx` el token personal obtenido desde github ( token classic) marcándo el scope 'public_repo' 
+## Orquestador
 
-   - `RABBITMQ_USER` usuario de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
-   - `RABBITMQ_PASSWORD` contraseña de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
-
-   - `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI
-   - `RATE_LIMIT_RESQUI_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers RESQUI para peticiones a GitHubAPI
-
-   - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
-   - `PORTAL_PORT` puerto del host desde el que Nginx publica los portales SOCA (por defecto `8030`)
-
-   - `DASHBOARD_ORG_EMBED_ID` id o slug del dashboard SQO-org importado en DashVERSE/Superset
-   - `DASHBOARD_REPO_EMBED_ID` id o slug del dashboard SQO-repo importado en DashVERSE/Superset
-
-   - ``SUPERSET_PUBLIC_DOMAIN`` dominio publico usado por el portal para cargar los dashboards embebidos. En Docker Desktop/Windows se debe usar `http://host.docker.internal:8088` para que el portal generado desde los contenedores apunte correctamente a Superset.
-
-      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`, `OUTPUTS`, `DASHBOARD_ORG_EMBED_ID` y `DASHBOARD_REPO_EMBED_ID`.
-
-
-**A tener en cuenta**:  
--  El token (classic) se debe obtener desde GitHub y seleccionando el scope 'public_repo'. si no saltará error el uso de ese token. Se puede dejar vacía pero sólo se podrán realizar 50 peticiones por hora a GitHubAPI (no recomendable, muchos repos = error) y no se podrán subir las Issues automáticamente.
-
--  El nº o slug de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`. Los dashboards deben estar publicados y permitir embebido desde el portal.
-
-
-#### 5.2 Instalación/Despliegue del orquestador
-Siguiendo los pasos en orden secuencial:
-
-**NOTA** el paso 1 actualmente está compactado en los `/scripts/build-docker-images.sh` para terminales WSL/Linux y `/scripts/build-docker-images.ps1` para powershell de windows. Ejecutando dichos scripts se instalan automáticamente las imágenes docker.
-
-0. Importar los submodulos del repositorio:
-   - SQOO usa `containers/resqui_container/QualityPipelines-2.0` como submodulo para incluir el codigo fuente de RESQUI/QualityPipelines.
-   - Si se clona el repositorio desde cero, usar:
-      - Mandato: `git clone --recurse-submodules https://github.com/SergioZSZ/QualityPipelines`
-   - Si el repositorio ya estaba clonado o se acaba de hacer `git pull`, ejecutar desde la raiz de SQOO:
-      - Mandato: `git submodule update --init --recursive`
-   - Para comprobar que el submodulo esta descargado:
-      - Mandato: `git submodule status`
-
-1. Generar imágenes  docker:
-   - `soca-heavy`:
-      - Directorio desde el que crearla: `/containers/soca_container` 
-      - Mandato: `docker build -t soca-heavy .`
-   - `rsfc-heavy`:
-      - Directorio desde el que crearla: `/containers/rsfc_container` 
-      - Mandato: `docker build -t rsfc-heavy .`
-   - `sw-metadata-bot`:
-      - Directorio desde el que crearla: `/integrations/sw-metadata-bot-0.5.0`
-      - Mandato: `docker build -t sw-metadata-bot .`
-   - `sw-metadata-bot-conf`:
-      - Directorio desde el que crearla: `/containers/sw-metadata-bot_container` 
-      - Mandato: `docker build -t sw-metadata-bot-conf .`
-   - `resqui-heavy`:
-      - Directorio desde el que crearla: `/containers/resqui_container`
-      - Mandato: `docker build -t resqui-heavy .`
-
-      
-2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N --scale worker_resqui=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
-
-   El servicio RESQUI usa el volumen Docker nombrado `sqoo_resqui_work` montado como `/resqui-work`. Este volumen permite que el worker `resqui-heavy` y los contenedores Docker lanzados por los plugins de RESQUI compartan el mismo workspace de trabajo. No debe sustituirse por un bind mount local si se quiere ejecutar RESQUI dentro de Docker con plugins.
-
-3. Acceder a n8n mediante el navegador en http://localhost:5678
-4. En el primer acceso:
-    1. Crear cuenta de usuario en n8n
-    2. Importar los workflows desde `/containers/n8n_container/workflows/`
-5. Importar y usar el workflow modular:
-   - Importar `SQOO_modular_workflow.json` y los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
-   - Importar tambien `resqui_workflow.json` si se quiere probar RESQUI de forma independiente.
-   - Despues revisar los nodos `Call '<subworkflow>'` del workflow principal para que apunten a los subworkflows importados en la instancia de n8n.
-   - **Nota:** `resqui_workflow.json` aun no esta integrado en `SQOO_modular_workflow.json`; se mantiene como subworkflow preparado para su integracion proximamente.
-6. Editar el nodo inicial de configuración con la organización/usuario deseado:
-   - `target`: nombre de la organización o usuario.
-   - `type`: `org` o `user`.
-   - `mode`: `manual` cuando se use un archivo de repositorios, o el modo configurado para descubrimiento automático.
-   - `repos`: nombre del archivo de repositorios cuando `mode` sea `manual`.
-   - `launch_issue`: `true` para publicar issues con `sw-metadata-bot publish`, `false` para ejecutar solo el análisis de metadatos.
-7. Ejecutar manualmente
-
-Tras ello se ejecutará el workflow obteniendo en `outputs` las extracciones, reportes RSFC, informes de sw-metadata-bot y el portal final enriquecido antes del envío a DashVERSE. Los portales generados por SOCA se sirven con Nginx en `http://localhost:8030/portals/<target>/`, donde `<target>` coincide con la organizacion o usuario configurado en el workflow. Las paginas `dashboard-org.html` y `dashboard-repo.html` cargan los dashboards de DashVERSE mediante iframe directo usando `SUPERSET_PUBLIC_DOMAIN`.
-
-
-
-#### 5.3 Instalación/Despliegue de DashVERSE
-**PREVIA**
-Todos los scripts de `/integrations/DashVERSE-0.2.0/scripts` deben tener permisos de ejecución para la instalación de DashVERSE en Linux `chmod +x *.sh`
-
-Todo este proceso, si se usa Windows, se debe hacer desde Ubuntu en WSL, no desde PowerShell ni Git Bash. Ansible no corre de forma nativa en Windows y es importante que `kubectl`, `make port-forward` y `make setup-dashboards` se ejecuten en el mismo entorno.
-
-Tambien es recomendable copiar DashVERSE al sistema de archivos de WSL para evitar problemas de permisos con Ansible al trabajar desde `/mnt/c`:
+### 1. Clonar el repositorio
 
 ```bash
-mkdir -p ~/projects/SQOO_TFG/integrations
-rsync -a /mnt/c/Users/jzaba/Documents/GitHub/SQOO_TFG/integrations/DashVERSE-0.2.0/ ~/projects/SQOO_TFG/integrations/DashVERSE-0.2.0/
-chmod -R go-w ~/projects/SQOO_TFG
-cd ~/projects/SQOO_TFG/integrations/DashVERSE-0.2.0
+git clone --recurse-submodules https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG.git
+cd Software-Quality-Observatory-Orchestrator-TFG
 ```
 
-1. comprobar que Docker Desktop esta accesible desde WSL:
-      mandato: `docker ps`
+En una copia existente:
 
-2. si `kubectl` apunta a un binario antiguo, dejar primero `/usr/bin` en el PATH:
-      mandato: `echo 'export PATH="/usr/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc`
+```bash
+git submodule update --init --recursive
+```
 
-3. cambiar driver de minikube a docker
-      mandato:``minikube config set driver docker``
+### 2. Configurar el entorno
 
-4. arrancar cluster de minikube
-      mandato: ``minikube start --cpus=4 --memory=4096 --driver=docker``
+Copiar `containers/.env.example` como `containers/.env` y completar:
 
-   para comprobar que  kubernetes responde usar este mandato:
-   ``kubectl get nodes`` y si funciona y se crea el nodo todo ok
+- `GITHUB_API_TOKEN`: token de GitHub para consultas y publicación de issues.
+- `RABBITMQ_USER` y `RABBITMQ_PASSWORD`.
+- `RATE_LIMIT_RSFC_ENABLED` y `RATE_LIMIT_RESQUI_ENABLED`.
+- `OUTPUTS`: ruta absoluta de `containers/outputs`.
+- `PORTAL_PORT`: puerto de Nginx, `8030` por defecto.
+- `DASHBOARD_ORG_EMBED_ID` y `DASHBOARD_REPO_EMBED_ID`.
+- `SUPERSET_PUBLIC_DOMAIN`: `http://localhost:8088` en local.
+- `DASHVERSE_JWT`: token generado por la API de DashVERSE.
 
+No se deben guardar tokens reales en Git.
 
-5. desplegar y montar el servicio con el archivo make del directorio de DashVERSE. Primero hay que instalar superset con helm.
-      mandatos: `helm repo add Superset https://apache.github.io/superset --force-update`
-      `helm repo update`
-y posteriormente hacer el deploy
-      mandato: `make deploy`
-tras ello, realizar `make sync-apply` para importar los indicadores y dimensiones EVERSE en la base de datos (tener en cuenta las modificaciones dashverse si no se usa el DASHVERSE del repositorio)
+### 3. Construir las imágenes
 
-6. Comprobar que se haya desplegado bien todo
-      mandato: `kubectl get all -n dashverse`
+Se pueden usar `scripts/build-docker-images.sh` en WSL/Linux o `scripts/build-docker-images.ps1` en PowerShell. Los mandatos equivalentes desde la raíz son:
 
-7. Port-forward de los puertos del servicio (en un terminal WSL mantenerlo abierto):
-      mandato: `make port-forward` 
-      **NOTA:** si se esta desplegando en servidores y no en local, si se quiere tener accesible el subdominio para acceder se debe sustituir la línea 21 por `--address 0.0.0.0 -n "$NS" "svc/$svc" "$local_port:$remote_port" 2>/dev/null || true` en el script `/integrations/DashVERSE-0.2.0/scripts/port-forward.sh.sh`
+```bash
+docker build -t soca-heavy:latest containers/soca_container
+docker build -t rsfc-heavy:latest containers/rsfc_container
+docker build -t resqui-heavy:latest containers/resqui_container
+docker build -t sw-metadata-bot:latest integrations/sw-metadata-bot-0.5.3
+docker build -t sw-metadata-bot-conf:latest containers/sw-metadata-bot_container
+```
 
-   Desde Windows se puede acceder en el navegador a `http://localhost:8088`, `http://localhost:8080`, `http://localhost:3000` y `http://localhost:8000` mientras ese terminal siga abierto.
+La imagen `sw-metadata-bot-conf` debe construirse después de `sw-metadata-bot`, ya que hereda de ella.
 
-8. Obtener credenciales de acceso a Superset
-      desde terminal linux, ejecutar desde este mismo directorio
-      `bash ./scripts/show-access.sh` pudiendo obtener así todas las credenciales necesarias
+### 4. Levantar los servicios
 
+```bash
+cd containers
+docker compose up -d --build \
+  --scale worker_soca=4 \
+  --scale worker_rsfc=4 \
+  --scale worker_resqui=4
+```
 
-9. Conectarse a superset en http://localhost:8088
-      login con user: admin   pwd: la obtenida desde el script anterior
+Los workers pueden escalarse según los recursos disponibles. Los logs se consultan con:
 
-10. generar conexión a la BBDD y dashboards base de DashVERSE:
-      mandato: ``make setup-dashboards``
+```bash
+docker compose logs -f worker_soca worker_rsfc worker_resqui
+```
 
-11. Se necesita un token jwt para las peticiones desde n8n. Para ello con el servicio desplegado ir a http://localhost:8000 y hacerse una cuenta EVERSE. Después hacer login y generar un token auth. Expiran tras un mes. Este token debe ponerse en los nodos que hacen peticiones http a dashVERSE del flujo n8n en el campo Authorization dentro de Headers como `Bearer TU_TOKEN`.
+### 5. Importar el workflow
 
-12. Importar los dashboards encontrados en `/integrations/dashboards` si se quieren mantener tambien los dashboards SQOO antiguos.
+Acceder a `http://localhost:5678` e importar:
 
-   
-#### 5.4 Encendido y apagado del servicio DashVERSE:
+- `SQOO_modular_workflow.json`
+- `soca_workflow.json`
+- `rsfc_workflow.json`
+- `resqui_workflow.json`
+- `sw-metadata-bot_workfow.json`
+- `dashverse_workflow.json`
 
-##### apagar todo:
-1. ``Cntrl+C`` para cerrar el port-forwarding desde el terminal abierto
-2. ``minikube stop `` apaga el cluster
+Revisar los nodos `Call '<subworkflow>'` para que apunten a los workflows importados.
 
-##### encenderlo:
-1. encendemos cluster: ``minikube start`` 
-2. lo reiniciamos ``kubectl delete pods --all -n dashverse``
-3. forwarding de puertos desde ``~/projects/SQOO_TFG/integrations/DashVERSE-0.2.0`` en un terminal WSL: `make port-forward`
+En el nodo `Conf` configurar:
+
+```json
+{
+  "project": "mi-proyecto",
+  "organizations": [
+    {"org": "mi-organizacion", "type": "org"}
+  ],
+  "extra_repositories": [],
+  "launch_issue": false
+}
+```
+
+El portal quedará disponible en `http://localhost:8030/portals/<project>/`.
+
+## DashVERSE 0.2.0
+
+En Windows, el despliegue se realiza desde Ubuntu en WSL con Docker Desktop y su integración WSL activada. Se recomienda trabajar en el sistema de archivos Linux, no bajo `/mnt/c`.
+
+### Requisitos
+
+- Docker
+- Make
+- OpenTofu
+- Minikube
+- Helm
+- kubectl
+- Ansible
+
+### Despliegue
+
+```bash
+cd integrations/DashVERSE-0.2.0
+minikube config set driver docker
+minikube start --cpus=4 --memory=4096 --driver=docker
+helm repo add Superset https://apache.github.io/superset --force-update
+helm repo update
+make deploy
+make sync-apply
+make status
+make port-forward
+```
+
+Mientras `make port-forward` esté activo se exponen:
+
+- Superset: `http://localhost:8088`
+- Demo portal: `http://localhost:8080`
+- API de assessments: `http://localhost:3000`
+- API de autenticación: `http://localhost:8000`
+
+Las credenciales se consultan con:
+
+```bash
+bash ./scripts/show-access.sh
+```
+
+Los dashboards base se configuran con `make setup-dashboards`. Las plantillas SQOO se importan desde `integrations/dashboards/` y deben publicarse con permisos para el rol utilizado, por ejemplo `Public`.
+
+Para obtener `DASHVERSE_JWT`, crear una cuenta e iniciar sesión en `http://localhost:8000`. El token se guarda en `containers/.env`; no se copia manualmente en los nodos de n8n.
+
+### Parada y arranque posterior
+
+```bash
+# Parar
+minikube stop
+
+# Volver a iniciar
+minikube start
+make port-forward
+```

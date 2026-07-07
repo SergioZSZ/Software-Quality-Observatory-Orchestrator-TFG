@@ -12,6 +12,8 @@ Este documento resume los resultados obtenidos en los tres casos de estudio anal
 
 En todos los casos, los tiempos reflejan solo el tiempo de ejecución de los workers de `SOCA` y `RSFC`, sin contar tiempos intermedios del workflow. `RsMetaCheck` se ha ejecutado de forma secuencial y su coste temporal es reducido frente al resto del pipeline
 
+Los resultados representan ejecuciones completas. El workflow actual evita repetir SOCA, RSFC y RESQUI para repositorios sin cambios, por lo que sus tiempos no son directamente comparables con una ejecución incremental.
+
 ### Resultados finales
 
 #### SergioZSZ

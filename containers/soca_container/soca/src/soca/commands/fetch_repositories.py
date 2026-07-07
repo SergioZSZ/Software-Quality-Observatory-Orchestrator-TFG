@@ -4,6 +4,9 @@ import requests
 from pathlib import Path
 
 
+GITHUB_TIMEOUT = 30
+
+
 def fetch(input, output, type, not_archived, not_forked, not_disabled):
 
     open(output, 'w')
@@ -53,12 +56,32 @@ def _fetch(name, out_path, type, not_archived, not_forked, not_disabled):
         while cont:
             try:
                 if not hasToken:
-                    r = requests.get(url=URL, params=PARAMS)
+                    r = requests.get(
+                        url=URL,
+                        params=PARAMS,
+                        timeout=GITHUB_TIMEOUT,
+                    )
                 else:
                     r = requests.get(
-                        url=URL, params=PARAMS, headers=HEADERS)
+                        url=URL,
+                        params=PARAMS,
+                        headers=HEADERS,
+                        timeout=GITHUB_TIMEOUT,
+                    )
+
+                # Interrumpir el fetch si GitHub responde con un error HTTP.
+                # De este modo no se acepta como válido un repos.txt parcial.
+                r.raise_for_status()
 
                 data_repos = r.json()
+
+                # La API debe devolver una lista de repositorios. Las respuestas
+                # de error de GitHub suelen ser objetos con un campo "message".
+                if not isinstance(data_repos, list):
+                    raise RuntimeError(
+                        f"Invalid GitHub response for {type} '{name}'"
+                    )
+
                 print("Request " + str(page) + ". " + str(len(data_repos)
                                                             ) + " repositories are downloaded per request")
                 page += 1
@@ -76,9 +99,11 @@ def _fetch(name, out_path, type, not_archived, not_forked, not_disabled):
                         print(
                             f"    - The repository '{repo['url']}' has been filtered out...")
 
-                if len(data_repos) < 50:
+                if len(data_repos) < page_size:
                     cont = False
-            except Exception as e:
-                print(str(e))
-                print(f"ERROR: '{type} {name}'")
-                return
+            except Exception as exc:
+                # Propagar el error hace que el comando termine con código
+                # distinto de cero y evita procesar un inventario incompleto.
+                raise RuntimeError(
+                    f"Could not fetch {type} '{name}', page {page}: {exc}"
+                ) from exc

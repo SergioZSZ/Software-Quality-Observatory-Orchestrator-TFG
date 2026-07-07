@@ -1,63 +1,63 @@
-# This CITATION.cff file was generated with cffinit.
-# Visit https://bit.ly/cffinit to generate yours today!
-
 cff-version: 1.2.0
-title: Software-Quality-Observatory-Orchestrator
 message: >-
-  If you use this software, please cite it using the
-  metadata from this file.
+  If you use this software, please cite it using the metadata from this file.
+title: Software Quality Observatory Orchestrator
 type: software
 authors:
   - given-names: Sergio
     family-names: Zaballos Herrera
-    name-particle: Sergio
+    affiliation: Escuela Técnica Superior de Ingenieros Informáticos, Universidad Politécnica de Madrid (ETSIINF-UPM)
     email: s.zaballosh@gmail.com
-    orcid: 'https://orcid.org/0009-0000-3795-2767'
+    orcid: https://orcid.org/0009-0000-3795-2767
+contact:
+  - given-names: Sergio
+    family-names: Zaballos Herrera
+    affiliation: Escuela Técnica Superior de Ingenieros Informáticos, Universidad Politécnica de Madrid (ETSIINF-UPM)
+    email: s.zaballosh@gmail.com
+    orcid: https://orcid.org/0009-0000-3795-2767
+abstract: >-
+  A modular and containerized orchestrator for assessing research software
+  quality. It uses n8n and RabbitMQ to coordinate incremental metadata
+  extraction with SOCA and SOMEF, FAIR quality assessments with RSFC and
+  RESQUI, metadata checks with sw-metadata-bot and RsMetaCheck, publication
+  to DashVERSE, and generation of a software catalogue portal.
+keywords:
+  - research software
+  - software quality assessment
+  - FAIR software
+  - software metadata
+  - workflow orchestration
+  - incremental workflows
+  - n8n
+  - Docker
+  - DashVERSE
+license: Apache-2.0
+version: 0.13.0
 identifiers:
   - type: doi
     value: 10.5281/zenodo.18879858
-  - type: url
-    value: >-
-      https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG-
-    description: Github URL
-repository-code: >-
-  https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG-
-url: 'https://github.com/'
-repository: 'https://zenodo.org/records/18868922'
-abstract: >-
-  This project presents the design and implementation of a
-  Software Quality Observatory Orchestrator, a system that
-  automates the analysis and evaluation of research software
-  repositories. The platform integrates tools from the
-  research software ecosystem, including SOCA for repository
-  discovery and metadata extraction and RSFC (Research
-  Software Fitness Criteria) for assessing software quality
-  indicators.
-
-
-  The system is implemented through a containerized
-  architecture using Docker, while workflow orchestration is
-  managed with n8n, enabling reproducible and automated
-  execution of the analysis pipeline. The orchestrator
-  retrieves repositories, processes them through the
-  evaluation tools, and collects the resulting quality
-  metrics.
-
-
-  The resulting framework provides a scalable and modular
-  approach for evaluating large collections of research
-  software, contributing to improved software quality
-  assessment, reproducibility, and automation in research
-  software engineering and open science.
-keywords:
-  - workflow orchestration
-  - research software
-  - software quality assessment
-  - research software engineering
-  - n8n
-  - reproducible workflows
-  - software quality metrics
-license: Apache-2.0
-commit: 6a77aece0370dc677960497eef3e2efba78a0360
-version: 0.11.0
-date-released: '2026-04-28'
+    description: Concept DOI for all archived versions of the software.
+repository-code: https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG
+url: https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG
+references:
+  - type: software
+    title: SOCA
+    repository-code: https://github.com/oeg-upm/soca
+  - type: software
+    title: SOMEF
+    repository-code: https://github.com/KnowledgeCaptureAndDiscovery/somef
+  - type: software
+    title: RSFC
+    repository-code: https://github.com/oeg-upm/rsfc
+  - type: software
+    title: RESQUI (EVERSE Software Quality Pipelines)
+    repository-code: https://github.com/EVERSE-ResearchSoftware/QualityPipelines
+  - type: software
+    title: DashVERSE
+    repository-code: https://github.com/EVERSE-ResearchSoftware/DashVERSE
+  - type: software
+    title: sw-metadata-bot
+    repository-code: https://github.com/SoftwareUnderstanding/sw-metadata-bot
+  - type: software
+    title: RsMetaCheck
+    repository-code: https://github.com/SoftwareUnderstanding/RsMetaCheck

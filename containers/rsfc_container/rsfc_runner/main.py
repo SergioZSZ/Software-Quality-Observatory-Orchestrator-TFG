@@ -1,7 +1,8 @@
 from .rabbitmq.client import publish_job
-import json, os, shutil, fcntl, tempfile
+import json, os, fcntl, tempfile
 from contextlib import contextmanager
 from .config import BASE_DIR, INPUT
+from .repository_state import build_rsfc_repository_paths, parse_github_repository_url, remove_repository_old_results
 
 
 
@@ -65,6 +66,8 @@ def initialize_status(target, expected_repos):
         "status": "completed" if expected_repos == 0 else "processing",
         "expected_repos": expected_repos,
         "processed_repos": 0,
+        "successful_repos": 0,
+        "failed_repos": []
     }
 
     # bloqueo durante toda la escritura inicial del fichero
@@ -80,9 +83,10 @@ def initialize_status(target, expected_repos):
 
 def main(input: dict):
     
-    repos = input["repos_url"]
+    repos = input.get("repos_url", [])
     repos_count = len(repos)
     target = input.get("target")
+    repos_removed = input.get("repos_removed", [])
 
     if not target:
         raise RuntimeError("Target name is required")
@@ -91,24 +95,24 @@ def main(input: dict):
     # truncado de indicadores obsoletos inicial
     target_dir = os.path.join(BASE_DIR, "outputs", "rsfc", target)
 
-    if os.path.exists(target_dir):
-        shutil.rmtree(target_dir)
-
     os.makedirs(target_dir, exist_ok=True)
 
+    for repo_url in repos_removed:
+        repository_paths = build_rsfc_repository_paths(BASE_DIR,target,repo_url)
+        removed = remove_repository_old_results(repository_paths)
+        print(f"Removed RSFC results for {repo_url}: {removed}",flush=True)
+    
     # inicializacion del json de estado antes de enviar trabajos a los workers
     initialize_status(target, repos_count)
 
     #procesamiento de repos (jobs)
     for repo_url in repos:
-        
-        
-        name = repo_url.rstrip("/").split("/")[-1]
-        job_id = target + "_" + name
+        repository = parse_github_repository_url(repo_url)
+        job_id = f"{target}_{repository.file_key}"
 
-        publish_job(job_id, repo_url, target, repos_count)
+        publish_job(job_id, repository.url, target, repos_count)
 
- 
+
     
         
         

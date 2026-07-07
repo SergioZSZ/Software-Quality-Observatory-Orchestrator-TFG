@@ -1,6 +1,6 @@
 [project]
 name = "sqoo"
-version = "0.12.0"
+version = "0.13.0"
 description = ""
 authors = [
     {name = "SergioZSZ",email = "s.zaballosh@gmail.com"}
@@ -17,6 +17,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
 soca = {path = "containers/soca_container/soca", develop = true}
-rsfc = {path = "containers/rsfc_container/rsfc-0.1.5", develop = true}
+rsfc = {path = "containers/rsfc_container/rsfc-0.1.7", develop = true}
 resqui = {path = "containers/resqui_container/QualityPipelines-2.0", develop = true}
 

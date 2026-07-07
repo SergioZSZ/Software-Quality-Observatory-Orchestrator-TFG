@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Trigger\"].json.project \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({\n  repos_url: $json.repos_url,\n  repos_removed: $json.repos_removed || [],\n  target: $(\"Trigger\").first().json.project\n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nrsfc-heavy:latest"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -13,19 +13,6 @@
       ],
       "id": "3a11f26e-b228-4732-b570-6ec3f083cb32",
       "name": "Execute rsfc-runner"
-    },
-    {
-      "parameters": {
-        "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        528,
-        208
-      ],
-      "id": "30050c6e-88d9-4444-9196-1a67a82c4a14",
-      "name": "Process repocount"
     },
     {
       "parameters": {},
@@ -41,56 +28,8 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
-              "leftValue": "={{ $node[\"Process repocount\"].json.count}}",
-              "rightValue": "={{ $node[\"Trigger\"].json.repo_count }}",
-              "operator": {
-                "type": "number",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "looseTypeValidation": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        704,
-        208
-      ],
-      "id": "6f16c60f-919b-4eea-8385-6245a0195fbe",
-      "name": "If completed rsfc jobs",
-      "alwaysOutputData": false
-    },
-    {
-      "parameters": {
-        "command": "=find /root/.n8n-files/rsfc/{{$node[\"Trigger\"].json.project}}/ -type f -name \"*.json\" | wc -l"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        352,
-        208
-      ],
-      "id": "a65e87e5-7937-4cad-85a2-ae769f4d5b2a",
-      "name": "find rsfc assessments"
-    },
-    {
-      "parameters": {
         "inputSource": "jsonExample",
-        "jsonExample": "\n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"project\": \"a string\"\n}"
+        "jsonExample": "{\n  \"repos_url\": [],\n  \"repo_count\": 0,\n  \"repos_removed\": [],\n  \"removed_count\": 0,\n  \"has_changes\": false,\n  \"project\": \"project-name\"\n}"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -113,6 +52,130 @@
       ],
       "id": "3c2646c1-b860-4caf-981f-367f28b5384c",
       "name": "Merge"
+    },
+    {
+      "parameters": {
+        "command": "=cat \"/root/.n8n-files/rsfc/{{$node[\"Trigger\"].json.project}}/status.json\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        352,
+        208
+      ],
+      "id": "a65e87e5-7937-4cad-85a2-ae769f4d5b2a",
+      "name": "read rsfc status"
+    },
+    {
+      "parameters": {
+        "jsCode": "const status = JSON.parse($json.stdout.trim());\n\nreturn [{\n  json: status,\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        208
+      ],
+      "id": "30050c6e-88d9-4444-9196-1a67a82c4a14",
+      "name": "Parse rsfc status"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "processing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "17763253-5934-4e8a-9979-e392628ee8ea"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "25eed139-4d1a-4330-be92-bb735eaeb259",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7f0c25cb-81f0-47f6-8200-4a7b735e2174",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        192
+      ],
+      "id": "b3edb18d-c96b-48e4-8bc3-519ac9eb94de",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=RSFC failed: {{ JSON.stringify($json.failed_repos || []) }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        240
+      ],
+      "id": "529d18d0-e1c4-44b8-8242-b3c9faabdd9c",
+      "name": "Stop and Error"
     }
   ],
   "pinData": {},
@@ -121,18 +184,7 @@
       "main": [
         [
           {
-            "node": "find rsfc assessments",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Process repocount": {
-      "main": [
-        [
-          {
-            "node": "If completed rsfc jobs",
+            "node": "read rsfc status",
             "type": "main",
             "index": 0
           }
@@ -143,36 +195,7 @@
       "main": [
         [
           {
-            "node": "find rsfc assessments",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If completed rsfc jobs": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 1
-          }
-        ],
-        [
-          {
-            "node": "Wait1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "find rsfc assessments": {
-      "main": [
-        [
-          {
-            "node": "Process repocount",
+            "node": "read rsfc status",
             "type": "main",
             "index": 0
           }
@@ -194,6 +217,53 @@
           }
         ]
       ]
+    },
+    "read rsfc status": {
+      "main": [
+        [
+          {
+            "node": "Parse rsfc status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse rsfc status": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -201,7 +271,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "91240bda-d38c-498f-9e72-5a330ca23cd9",
+  "versionId": "9f8cbbc4-f611-4a7d-8392-511745b25156",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

@@ -1,4 +1,4 @@
-import time, os, json, shutil, fcntl, tempfile
+import time, os, json, fcntl, tempfile
 
 from .rabbitmq.client import rabbit_connect, publish_job
 from .cruds.functions import soca_extract, soca_portal
@@ -6,7 +6,8 @@ from .cruds.functions import soca_extract, soca_portal
 from .config import QUEUE_NAME, BASE_DIR, RATE_LIMIT_QUEUE, RATE_LIMIT_SOCA_ENABLED
 from datetime import datetime
 from contextlib import contextmanager
-
+from pathlib import Path
+from .repository_state import parse_github_repository_url
 
 STATUS_FILENAME = "status.json"
 STATUS_LOCK_FILENAME = "status.lock"
@@ -71,10 +72,13 @@ def write_status_atomic(status_file, status_data):
         raise
 
 
-# incrementar repos procesados manteniendo exclusion mutua entre workers
-def increment_processed_repos(target):
+# Registra el resultado de un repositorio bajo bloqueo exclusivo.
+def record_repository_result(
+    target,
+    repository_url,
+    succeeded,
+):
     with acquire_status_lock(target) as status_file:
-
         if not os.path.isfile(status_file):
             raise FileNotFoundError(
                 f"Status file not initialized: {status_file}"
@@ -83,19 +87,43 @@ def increment_processed_repos(target):
         with open(status_file, "r", encoding="utf-8") as file:
             status_data = json.load(file)
 
-        expected_repos = int(status_data["expected_repos"])
-        processed_repos = int(status_data["processed_repos"])
+        expected_repos = int(
+            status_data["expected_repos"]
+        )
+        processed_repos = int(
+            status_data["processed_repos"]
+        )
+        successful_repos = int(
+            status_data.get("successful_repos", 0)
+        )
+        failed_repos = list(
+            status_data.get("failed_repos", [])
+        )
 
-        # incrementar sin permitir superar el numero esperado
-        processed_repos = min(processed_repos + 1, expected_repos)
+        processed_repos = min(
+            processed_repos + 1,
+            expected_repos,
+        )
+
+        if succeeded:
+            successful_repos = min(
+                successful_repos + 1,
+                expected_repos,
+            )
+        elif repository_url not in failed_repos:
+            failed_repos.append(repository_url)
 
         status_data["processed_repos"] = processed_repos
+        status_data["successful_repos"] = successful_repos
+        status_data["failed_repos"] = failed_repos
 
-        # marcar completed cuando todos los repos han terminado
-        if processed_repos >= expected_repos:
-            status_data["status"] = "completed"
-        else:
+        # Esperar a todos los workers antes de fijar el estado terminal.
+        if processed_repos < expected_repos:
             status_data["status"] = "processing"
+        elif failed_repos:
+            status_data["status"] = "failed"
+        else:
+            status_data["status"] = "completed"
 
         write_status_atomic(status_file, status_data)
 
@@ -119,70 +147,144 @@ def wait_for_token(channel):
 
 
 ### logica interna del worker
-def cleanup_repo_dir(metadata_dir, repo_name):
-    repo_dir = os.path.join(metadata_dir, repo_name)
 
-    if not os.path.isdir(repo_dir):
-        timestamp(f"[CLEANUP] Repo dir not found: {repo_dir}")
-        return
+# Localiza el único JSON generado para un repositorio en staging.
+def find_staged_metadata(
+    staging_dir: str,
+    repository_key: str,
+) -> Path:
+    candidates = list(
+        Path(staging_dir).glob(
+            f"{repository_key}_*.json"
+        )
+    )
 
-    try:
-        shutil.rmtree(repo_dir)
-        timestamp(f"[CLEANUP] Deleted repo dir: {repo_dir}")
-    except Exception as e:
-        timestamp(f"[CLEANUP] Error deleting repo dir {repo_dir}: {str(e)}")
+    if len(candidates) != 1:
+        raise RuntimeError(
+            f"Expected one metadata JSON for "
+            f"{repository_key}, found {len(candidates)}"
+        )
 
-# extraccion de metadata
+    return candidates[0]
+
+
+# Promueve el resultado nuevo y elimina las versiones antiguas
+def promote_repository_metadata(
+    staged_metadata: Path,
+    metadata_dir: str,
+    repository_key: str,
+) -> Path:
+    destination = (
+        Path(metadata_dir) / staged_metadata.name
+    )
+
+    # Promover primero garantiza que nunca eliminamos el resultado activo
+    # antes de disponer de uno nuevo válido
+    os.replace(staged_metadata, destination)
+
+    for previous_metadata in Path(metadata_dir).glob(
+        f"{repository_key}_*.json"
+    ):
+        if previous_metadata != destination:
+            previous_metadata.unlink()
+
+    # Un resultado correcto elimina el error anterior del repositorio.
+    failed_file = (
+        Path(metadata_dir)
+        / f"failed_{repository_key}.json"
+    )
+    failed_file.unlink(missing_ok=True)
+
+    return destination
+
+
+# Extrae y reemplaza los metadatos de un repositorio de forma segura.
 def handle_extract_metadata(target, repo_url):
+    repository = parse_github_repository_url(repo_url)
+    repository_key = repository.file_key
 
-    repo_name = repo_url.rstrip("/").split("/")[-1]
-    target_dir = os.path.join(BASE_DIR, "outputs", "soca", target)
-    metadata_dir = os.path.join(target_dir, "metadata")
+    target_dir = Path(BASE_DIR) / "outputs" / "soca" / target
+    metadata_dir = target_dir / "metadata"
+    staging_root = target_dir / ".staging"
 
-    os.makedirs(metadata_dir, exist_ok=True)
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    staging_root.mkdir(parents=True, exist_ok=True)
 
     start = time.time()
+    extraction_succeeded = False
 
     try:
-        # ejecutar extracción
-        response = soca_extract(BASE_DIR, target, repo_url)
+        # Cada job utiliza un temporal independiente. Al salir del bloque,
+        # también desaparece el clon temporal creado por SOCA.
+        with tempfile.TemporaryDirectory(
+            prefix=f"{repository_key}_",
+            dir=staging_root,
+        ) as staging_dir:
+            response = soca_extract(
+                staging_dir,
+                repository.url,
+            )
 
-        # caso error, genera carpeta con fichero status error
-        if response.status["status"] == "error":
-            timestamp(f"    [{target} - {repo_name}]extract_metadata failed: {response.status}")
+            if response.status["status"] == "error":
+                raise RuntimeError(
+                    f"SOCA extraction failed: {response.status}"
+                )
 
-            failed_file = os.path.join(metadata_dir, f"failed_{repo_name}.json")
-            with open(failed_file, "w", encoding="utf-8") as f:
-                json.dump({"detail": response.status}, f, indent=2)
+            # SOCA puede terminar con código cero sin generar ningún JSON.
+            staged_metadata = find_staged_metadata(
+                staging_dir,
+                repository_key,
+            )
 
-        else:
+            active_metadata = promote_repository_metadata(
+                staged_metadata=staged_metadata,
+                metadata_dir=str(metadata_dir),
+                repository_key=repository_key,
+            )
 
-            total_time = time.time() - start
-            timestamp(f"[{target} - {repo_name}]  Metadata extracted in {total_time:.2f}s ")
+        extraction_succeeded = True
+        total_time = time.time() - start
 
-    # caso excepcion inesperada, genera tambien fichero status error
-    except Exception as e:
-        timestamp(f"    [{target} - {repo_name}]extract_metadata failed: {str(e)}")
+        timestamp(
+            f"[{target} - {repository_key}] Metadata extracted "
+            f"in {total_time:.2f}s: {active_metadata.name}"
+        )
 
-        failed_file = os.path.join(metadata_dir, f"failed_{repo_name}.json")
-        with open(failed_file, "w", encoding="utf-8") as f:
-            json.dump({"detail": str(e)}, f, indent=2)
+    except Exception as exc:
+        # El resultado activo anterior no se elimina si la extracción falla.
+        timestamp(
+            f"[{target} - {repository_key}] "
+            f"extract_metadata failed: {exc}"
+        )
 
-    # eliminacion de repositorio extraido
-    cleanup_repo_dir(metadata_dir, repo_name)
+        failed_file = (
+            metadata_dir
+            / f"failed_{repository_key}.json"
+        )
 
-    # actualizar conteo de repos procesados con bloqueo exclusivo
-    status_data = increment_processed_repos(target)
+        with failed_file.open("w", encoding="utf-8") as file:
+            json.dump(
+                {"detail": str(exc)},
+                file,
+                indent=2,
+            )
+            file.write("\n")
+
+    # Por ahora se mantiene el contador actual. En el siguiente paso
+    # diferenciaremos entre repositorios correctos y fallidos.
+    status_data =record_repository_result(
+    target=target,
+    repository_url=repository.url,
+    succeeded=extraction_succeeded,
+)
 
     timestamp(
         f"[SOCA] {target} Progress: "
-        f"{status_data['processed_repos']}/{status_data['expected_repos']} "
-        f"repos processed"
+        f"{status_data['processed_repos']}/"
+        f"{status_data['expected_repos']} repos processed"
     )
 
-    # si todo procesado cambia status a completed
-    if status_data["status"] == "completed":
-        timestamp(f"[{target}] All repos processed")
+    return extraction_succeeded
 
 
 

@@ -1,5 +1,5 @@
 from ..models import FetchResponse, PortalResponse
-import os, subprocess
+import os, subprocess, time
     
 # funcion para ejecutar subprocessos
 def run_command(cmd: list[str], input: str | None = None):
@@ -52,20 +52,30 @@ def soca_fetch(dir_base: str, target: str, type: str)-> FetchResponse:
     print("saving repos file in:", repos_file)
 
     # mandatos soca
-    fetch = ["soca", "fetch", "-i", target, "-o", repos_file, f"--{type}"]
+    fetch = ["soca", "fetch","-nd","-na","-nf", "-i", target, "-o", repos_file, f"--{type}"]
 
     
     result_fetch = run_command(fetch)
+
+    if result_fetch.get("stdout"):
+        print(f"SOCA stdout:\n{result_fetch['stdout']}", flush=True)
+
+    if result_fetch.get("stderr"):
+        print(f"SOCA stderr:\n{result_fetch['stderr']}", flush=True)
+
     if result_fetch["status"]=="error":
         return FetchResponse(status=result_fetch)    
     
-    if os.path.getsize(repos_file) == 0:
-        return FetchResponse(status={
-            "status": "error",
-            "returncode": 422,
-            "stdout": "",
-            "stderr": "No se generó el fichero con los repositorios o está vacío"
-        })
+    time.sleep(5)
+    if not os.path.isfile(repos_file):
+        return FetchResponse(
+            status={
+                "status": "error",
+                "returncode": 422,
+                "stdout": result_fetch.get("stdout", ""),
+                "stderr": "No se generó el fichero de repositorios",
+            }
+        )
     
     return FetchResponse(repos=list_repos(repos_file), status= {"status":"success","returncode":0})
 
@@ -73,20 +83,25 @@ def soca_fetch(dir_base: str, target: str, type: str)-> FetchResponse:
 
 
 
-def soca_extract(dir_base: str, target: str, url: str)-> PortalResponse:
+def soca_extract(output_dir: str, url: str)-> PortalResponse:
     # directorios a usar
-    target_dir = os.path.join(dir_base,"outputs","soca",target)
-    dir_metadata = os.path.abspath(os.path.join(target_dir,"metadata"))
-    
-    
-    # mandato soca
-    extract = ["soca", "extract-1-repo", "-i", url, "-o", dir_metadata]
-    
-    # mandatos a orquestar
-    
-    result_extract =run_command(extract)
-    if result_extract["status"]=="error":
-        return PortalResponse(status=result_extract) 
+    metadata_dir = os.path.abspath(output_dir)
+    os.makedirs(metadata_dir, exist_ok=True)
+
+    extract_command = [
+        "soca",
+        "extract-1-repo",
+        "-i",
+        url,
+        "-o",
+        metadata_dir,
+        "-v",
+    ]
+
+    result_extract = run_command(extract_command)
+
+    if result_extract["status"] == "error":
+        return PortalResponse(status=result_extract)
 
     return PortalResponse(status={"status":"success", "returncode":0})
 

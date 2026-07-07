@@ -1,21 +1,27 @@
-# General:
-- Documentado el workflow modular de SQOO con subworkflows de n8n y publicacion de issues configurable.
+# General
 
-- Creados scripts de instalación de herramientas necesarias para la instalación de DashVERSE según sistema operativo en el directorio `/scripts`.
-   - Windows: ``install-dev-tools.ps1``
-   - Linux: ``install-dev-tools.sh``
+- Actualizado el workflow modular para procesar solo repositorios nuevos o modificados, retirar los eliminados y conservar el inventario completo.
+- Integrado RESQUI en el pipeline modular y reforzada la persistencia de resultados de SOCA, RSFC y RESQUI ante fallos.
+- Añadidos scripts para construir las imágenes Docker desde Windows o WSL/Linux.
+- Añadida la variable `DASHVERSE_JWT` para autenticar la publicación desde n8n.
 
-- Añadido estudio sobre la eficiencia de paralelismo de workers en readthedocs (link de referencia en README.md)
+# SOCA
 
-- Actualizada información de instalación de herramientas para el lanzamiento de DashVERSE
+- Actualizado SOMEF a la versión 0.11.0 y mejorado el portal software enriquecido.
 
-- Actualizada documentación con las nuevas integraciones
+# RSFC
 
-- Actualizada imagen de flujo a una más completa y visualmente correcta
+- Actualizado RSFC a la versión 0.1.7.
+- Reutilizados los metadatos de SOCA y corregidas las comprobaciones de versiones y del gestor de issues.
 
-# sw-metadata-bot:
-- Codificada nueva integración sw-metadata-bot al workflow para generación de Issues sobre los metadatos de los repositorios
+# RESQUI
 
-# n8n:
-- Modificado workflow para la integración de sw-metadata-bot en él
+- Actualizado QualityPipelines e integrado RESQUI en el workflow modular.
 
+# sw-metadata-bot
+
+- Actualizado a la versión 0.5.3, con análisis incremental y publicación de issues configurable.
+
+# DashVERSE
+
+- Añadida la publicación de assessments de RSFC y RESQUI y la visualización embebida de dashboards.

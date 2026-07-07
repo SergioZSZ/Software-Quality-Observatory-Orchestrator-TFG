@@ -2,52 +2,6 @@
   "name": "resqui_workflow",
   "nodes": [
     {
-      "parameters": {
-        "operation": "text",
-        "binaryPropertyName": "=data",
-        "options": {
-          "encoding": "utf8"
-        }
-      },
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1.1,
-      "position": [
-        -5888,
-        80
-      ],
-      "id": "42e3ed00-685b-4362-a083-c306d01bcfde",
-      "name": "Extract from File"
-    },
-    {
-      "parameters": {
-        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/repos.txt",
-        "options": {
-          "fileExtension": ""
-        }
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1.1,
-      "position": [
-        -6096,
-        80
-      ],
-      "id": "a253d541-d736-456b-9dfa-6791fc6e019e",
-      "name": "Read target repos"
-    },
-    {
-      "parameters": {
-        "jsCode": "const repos = $json.data\n  .split('\\n')\n  .map(r => r.trim())\n  .filter(r => r !== '');\n\nreturn [\n  {\n    json: {\n      repos_url: repos,\n      repo_count: repos.length\n    }\n  }\n];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -5696,
-        80
-      ],
-      "id": "ca8d84c8-f340-4be4-aaeb-4bb8d2b8e1d1",
-      "name": "Code repo_url list & repo count"
-    },
-    {
       "parameters": {},
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -61,7 +15,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({ \n  repos_url: $json.repos_url, \n  target:$node[\"Trigger\"].json.project \n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nresqui-heavy:latest"
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e INPUT='{{ JSON.stringify({\n  repos_url: $json.repos_url || [],\n  repos_removed: $json.repos_removed || [],\n  target: $(\"Trigger\").first().json.project\n}) }}' \\\n-e GITHUB_TOKEN={{ $env.GITHUB_API_TOKEN }} \\\n-e RABBITMQ_HOST={{ $env.RABBITMQ_HOST }} \\\n-e RABBITMQ_USER={{ $env.RABBITMQ_USER }} \\\n-e RABBITMQ_PASSWORD={{ $env.RABBITMQ_PASSWORD }} \\\nresqui-heavy:latest"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -74,7 +28,21 @@
     },
     {
       "parameters": {
-        "command": "=find /root/.n8n-files/resqui/{{$node[\"Trigger\"].json.project}}/ -type f -name \"*.json\" | wc -l"
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"repos_url\": [],\n  \"repo_count\": 0,\n  \"repos_removed\": [],\n  \"removed_count\": 0,\n  \"has_changes\": false,\n  \"project\": \"project-name\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -5600,
+        80
+      ],
+      "id": "3b4d6d43-e10d-4061-92d1-42c52351820d",
+      "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "command": "=cat \"/root/.n8n-files/resqui/{{$node[\"Trigger\"].json.project}}/status.json\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -83,46 +51,11 @@
         208
       ],
       "id": "8e02619d-c313-46d7-8099-0c3b036f7192",
-      "name": "find resqui summary"
+      "name": "read resqui status"
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
-              "leftValue": "={{ $node[\"Process stdout\"].json.count}}",
-              "rightValue": "={{ $node[\"Code repo_url list & repo count\"].json.repo_count }}",
-              "operator": {
-                "type": "number",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "looseTypeValidation": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        -4816,
-        208
-      ],
-      "id": "86629dd4-4535-43f1-9e47-c09155b44489",
-      "name": "If found",
-      "alwaysOutputData": false
-    },
-    {
-      "parameters": {
-        "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
+        "jsCode": "const status = JSON.parse($json.stdout.trim());\n\nreturn [{\n  json: status,\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -131,63 +64,127 @@
         208
       ],
       "id": "86f22f8a-4138-42ff-a032-b811ad32e023",
-      "name": "Process stdout"
+      "name": "parse resqui status"
     },
     {
       "parameters": {
-        "inputSource": "jsonExample",
-        "jsonExample": "\n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"project\": \"a string\"\n}"
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "processing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "132295df-0c79-4ca7-b735-23a0bdafca4f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8fa95cc1-dae4-403c-afa0-c570344e7a6e",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e8a46ade-5ab6-4a93-b495-f35a92c66d49",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
       },
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
       "position": [
-        -6448,
-        80
+        -4800,
+        208
       ],
-      "id": "3b4d6d43-e10d-4061-92d1-42c52351820d",
-      "name": "Trigger"
+      "id": "e8e25f70-b38e-430d-a73f-b883fe9427a4",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=RESQUI failed: {{ JSON.stringify($json.failed_repos || []) }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -4416,
+        224
+      ],
+      "id": "80dd6f58-3c6a-4d0f-b8b9-cef23dba49c3",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -4528,
+        -144
+      ],
+      "id": "a920e98e-7bf6-4bed-a5a7-591be9ed5292",
+      "name": "Merge"
     }
   ],
   "pinData": {},
   "connections": {
-    "Extract from File": {
-      "main": [
-        [
-          {
-            "node": "Code repo_url list & repo count",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Read target repos": {
-      "main": [
-        [
-          {
-            "node": "Extract from File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code repo_url list & repo count": {
-      "main": [
-        [
-          {
-            "node": "Execute resqui-runner",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Wait1": {
       "main": [
         [
           {
-            "node": "find resqui summary",
+            "node": "read resqui status",
             "type": "main",
             "index": 0
           }
@@ -198,41 +195,7 @@
       "main": [
         [
           {
-            "node": "find resqui summary",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "find resqui summary": {
-      "main": [
-        [
-          {
-            "node": "Process stdout",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If found": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Wait1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Process stdout": {
-      "main": [
-        [
-          {
-            "node": "If found",
+            "node": "read resqui status",
             "type": "main",
             "index": 0
           }
@@ -243,7 +206,59 @@
       "main": [
         [
           {
-            "node": "Read target repos",
+            "node": "Execute resqui-runner",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read resqui status": {
+      "main": [
+        [
+          {
+            "node": "parse resqui status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse resqui status": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
             "type": "main",
             "index": 0
           }
@@ -256,7 +271,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "654fd93d-9e68-41ad-94c1-87f0c8bc3ae7",
+  "versionId": "bd1204d6-3355-4103-81bd-004851ab723f",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

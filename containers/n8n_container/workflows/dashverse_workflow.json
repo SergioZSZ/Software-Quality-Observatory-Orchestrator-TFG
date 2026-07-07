@@ -3,6 +3,65 @@
   "nodes": [
     {
       "parameters": {
+        "fileSelector": "=/root/.n8n-files/rsfc/{{$json.project}}/{{$json.repository_key}}/rsfc_output/rsfc_assessment.json",
+        "options": {
+          "fileExtension": ".json"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        -192
+      ],
+      "id": "9ccb28a9-ad02-4791-b3fd-e93bb92e0535",
+      "name": "read assessments RSFC"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "  \n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"project\": \"a string\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1056,
+        -16
+      ],
+      "id": "d27d1175-ff9a-48c9-8ccd-1999952149ad",
+      "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const project = $(\"Trigger\").first().json.project;\n\nreturn $input.all().map(item => {\n  const repoUrl = String(item.json.repos_url)\n    .trim()\n    .replace(/\\/+$/, \"\")\n    .replace(/\\.git$/i, \"\");\n\n  const match = repoUrl.match(\n    /^https?:\\/\\/github\\.com\\/([^/]+)\\/([^/]+)$/i\n  );\n\n  if (!match) {\n    throw new Error(`Invalid GitHub repository URL: ${repoUrl}`);\n  }\n\n  const [, owner, repo] = match;\n\n  return {\n    json: {\n      project,\n      repo_url: repoUrl,\n      owner,\n      repository_key: `${owner}_${repo}`.replace(/\\./g, \"-\"),\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        -16
+      ],
+      "id": "c1b0d818-aaec-474f-b4e7-2c4beff7583d",
+      "name": "Code url->target-name"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/resqui/{{$json.project}}/{{$json.repository_key}}/resqui_summary.json",
+        "options": {
+          "fileExtension": ".json"
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        48
+      ],
+      "id": "8c4b6dcc-7998-4033-af1e-dc3896950db7",
+      "name": "read assessments RESQUI"
+    },
+    {
+      "parameters": {
         "operation": "fromJson",
         "destinationKey": "assessment",
         "options": {}
@@ -11,24 +70,25 @@
       "typeVersion": 1.1,
       "position": [
         -96,
-        -16
+        48
       ],
-      "id": "c13bd484-2751-4793-8535-f7a0b92c7b68",
-      "name": "Extract assessments"
+      "id": "57da385a-2015-4f18-89a0-4f977fe50560",
+      "name": "Extract assessments RESQUI"
     },
     {
       "parameters": {
-        "fieldToSplitOut": "repos_url",
+        "operation": "fromJson",
+        "destinationKey": "assessment",
         "options": {}
       },
-      "type": "n8n-nodes-base.splitOut",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
       "position": [
-        -832,
-        -16
+        -96,
+        -192
       ],
-      "id": "2fec1d9f-debe-4c08-96dc-881fd278b971",
-      "name": "Split Out1"
+      "id": "c13bd484-2751-4793-8535-f7a0b92c7b68",
+      "name": "Extract assessments RSFC"
     },
     {
       "parameters": {
@@ -39,7 +99,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJTZXJnaW9aU1oiLCJpc19zdXBlcnVzZXIiOmZhbHNlLCJyb2xlIjoid2ViX3VzZXIiLCJhdWQiOiJwb3N0Z3Jlc3QiLCJleHAiOjE3ODI5MzY3NjIsImlhdCI6MTc4MDM0NDc2MiwianRpIjoiZjI3NTUxN2ItZmVjYy00ODJkLWI4MGEtOTg4MGI3YTVlM2NjIn0.tskzBJ5B3FmIxbCeMxMKNjzOBKVVhr9pIvA4jqzsMbw"
+              "value": "=Bearer {{ $env.DASHVERSE_JWT }}"
             },
             {
               "name": "Content-Type",
@@ -64,108 +124,98 @@
       "typeVersion": 4.4,
       "position": [
         304,
-        -16
+        -192
       ],
       "id": "89531b09-5c59-40a8-8431-c4232df33b7f",
-      "name": "Post assessments_raw"
+      "name": "Post assessments_raw RSFC"
     },
     {
       "parameters": {
-        "jsCode": "return items.map(item => {\n  const assessment = item.json.assessment;\n  const repoUrl = assessment.assessedSoftware?.url || null;\n\n  let owner = null;\n\n  if (repoUrl) {\n    const match = repoUrl.match(/^https?:\\/\\/github\\.com\\/([^\\/]+)\\/([^\\/]+?)(?:\\/)?$/);\n    if (match) {\n      owner = match[1];\n    }\n  }\n\n  item.json.assessment = {\n    ...assessment,\n    \"@id\": assessment[\"@id\"] || (\n      repoUrl\n        ? `${repoUrl}/assessment/${assessment.dateCreated}`\n        : null\n    ),\n    author: owner\n\n    \n  };\n\n  return item;\n});\n"
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/assessment",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.DASHVERSE_JWT }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.assessment }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 200,
+              "batchInterval": 1000
+            }
+          },
+          "redirect": {}
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        304,
+        48
+      ],
+      "id": "7d656500-4c34-4de1-bf79-cc968dcb420d",
+      "name": "Post assessments_raw RESQUI"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "repos_url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        -16
+      ],
+      "id": "2fec1d9f-debe-4c08-96dc-881fd278b971",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = \"rsfc\"; \n\nreturn $input.all().map(item => {\n  const assessment = item.json.assessment;\n  const repoUrl = assessment.assessedSoftware?.url || null;\n\n  const match = repoUrl?.match(\n    /^https?:\\/\\/github\\.com\\/([^/]+)\\/[^/]+\\/?$/i\n  );\n  const owner = match?.[1] || null;\n\n  const generatedId =\n    repoUrl && assessment.dateCreated\n      ? `${repoUrl}/assessment/${source}/${encodeURIComponent(assessment.dateCreated)}`\n      : null;\n\n  item.json.assessment = {\n    ...assessment,\n    \"@id\": assessment[\"@id\"] || generatedId,\n    author: assessment.author ?? owner,\n  };\n\n  return item;\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         96,
-        -16
+        -192
       ],
       "id": "6cdca9cb-b8e4-4508-b496-f4869ef6eb2e",
-      "name": "Code input @id + author in json-ld"
+      "name": "Code input @id + author in json-ld RSFC"
     },
     {
       "parameters": {
-        "fileSelector": "=/root/.n8n-files/rsfc/{{$json.project}}/{{$json.repo_name}}/rsfc_output/rsfc_assessment.json",
-        "options": {
-          "fileExtension": ".json"
-        }
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1.1,
-      "position": [
-        -320,
-        -16
-      ],
-      "id": "9ccb28a9-ad02-4791-b3fd-e93bb92e0535",
-      "name": "read assessments RSFC"
-    },
-    {
-      "parameters": {
-        "inputSource": "jsonExample",
-        "jsonExample": "  \n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"project\": \"a string\"\n}"
-      },
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -1056,
-        -16
-      ],
-      "id": "d27d1175-ff9a-48c9-8ccd-1999952149ad",
-      "name": "Trigger"
-    },
-    {
-      "parameters": {
-        "jsCode": "const project = $(\"Trigger\").first().json.project;\n\nreturn $input.all().map(item => {\n  const url = item.json.repos_url;\n\n  return {\n    json: {\n      project,\n      repo_name: url.split(\"/\").pop(),\n    }\n  };\n});"
+        "jsCode": "const source = \"resqui\";\n\nreturn $input.all().map(item => {\n  const assessment = item.json.assessment;\n  const repoUrl = assessment.assessedSoftware?.url || null;\n\n  const match = repoUrl?.match(\n    /^https?:\\/\\/github\\.com\\/([^/]+)\\/[^/]+\\/?$/i\n  );\n  const owner = match?.[1] || null;\n\n  const generatedId =\n    repoUrl && assessment.dateCreated\n      ? `${repoUrl}/assessment/${source}/${encodeURIComponent(assessment.dateCreated)}`\n      : null;\n\n  item.json.assessment = {\n    ...assessment,\n    \"@id\": assessment[\"@id\"] || generatedId,\n    author: assessment.author ?? owner,\n  };\n\n  return item;\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -576,
-        -16
+        96,
+        48
       ],
-      "id": "c1b0d818-aaec-474f-b4e7-2c4beff7583d",
-      "name": "Code url->target-name"
+      "id": "a77be7c5-1b78-4967-8ab8-4548292f43c1",
+      "name": "Code input @id + author in json-ld RESQUI"
     }
   ],
   "pinData": {},
   "connections": {
-    "Extract assessments": {
-      "main": [
-        [
-          {
-            "node": "Code input @id + author in json-ld",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Split Out1": {
-      "main": [
-        [
-          {
-            "node": "Code url->target-name",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code input @id + author in json-ld": {
-      "main": [
-        [
-          {
-            "node": "Post assessments_raw",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "read assessments RSFC": {
       "main": [
         [
           {
-            "node": "Extract assessments",
+            "node": "Extract assessments RSFC",
             "type": "main",
             "index": 0
           }
@@ -176,7 +226,7 @@
       "main": [
         [
           {
-            "node": "Split Out1",
+            "node": "Split Out",
             "type": "main",
             "index": 0
           }
@@ -190,6 +240,77 @@
             "node": "read assessments RSFC",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "read assessments RESQUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read assessments RESQUI": {
+      "main": [
+        [
+          {
+            "node": "Extract assessments RESQUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract assessments RESQUI": {
+      "main": [
+        [
+          {
+            "node": "Code input @id + author in json-ld RESQUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract assessments RSFC": {
+      "main": [
+        [
+          {
+            "node": "Code input @id + author in json-ld RSFC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Code url->target-name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code input @id + author in json-ld RSFC": {
+      "main": [
+        [
+          {
+            "node": "Post assessments_raw RSFC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code input @id + author in json-ld RESQUI": {
+      "main": [
+        [
+          {
+            "node": "Post assessments_raw RESQUI",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -200,7 +321,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "437d0fc6-470e-43c6-a311-04ded7a5e541",
+  "versionId": "1f2c2be1-932e-4aef-bf97-d9e68c031c45",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

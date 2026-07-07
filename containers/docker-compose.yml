@@ -28,6 +28,7 @@ services:
       - DASHBOARD_ORG_EMBED_ID=${DASHBOARD_ORG_EMBED_ID}
       - DASHBOARD_REPO_EMBED_ID=${DASHBOARD_REPO_EMBED_ID}
       - SUPERSET_PUBLIC_DOMAIN=${SUPERSET_PUBLIC_DOMAIN:-http://host.docker.internal:8088}
+      - DASHVERSE_JWT=${DASHVERSE_JWT}
       # *** General ***
       - GENERIC_TIMEZONE=Europe/Madrid
       - TZ=Europe/Madrid

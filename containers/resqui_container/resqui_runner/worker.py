@@ -1,25 +1,130 @@
-import time, os, json
+import time, os, json, fcntl, tempfile, time, shutil
+
+from contextlib import contextmanager
+from datetime import datetime
+from pathlib import Path
 
 from .cruds import resqui_runner
 from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE, RATE_LIMIT_RESQUI_ENABLED, RETRYABLE_ERRORS
 from .rabbitmq import rabbit_connect
-from datetime import datetime
-
+from .repository_state import build_resqui_repository_paths, promote_staged_resqui_results
 MAX_RETRIES = 7
 
-
+## Auxiliares
 def timestamp(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
     
 
+def write_repository_failed_assessment(active_dir: str | Path,response_status: dict) -> Path:
+    active_path = Path(active_dir)
+    active_path.mkdir(parents=True, exist_ok=True)
 
-def count_jsons(base_path):
-    count = 0
-    for root, dirs, files in os.walk(base_path):
-        for file in files:
-            if file.endswith(".json"):
-                count += 1
-    return count
+    failed_file = active_path / "failed_assessment.json"
+
+    write_json_atomic(
+        str(failed_file),
+        {"detail": response_status},
+    )
+
+    return failed_file
+
+# rutas del fichero de estado y del fichero lock compartido entre workers
+def get_status_paths(target):
+    target_dir = os.path.join(BASE_DIR, "outputs", "resqui", target)
+
+    os.makedirs(target_dir, exist_ok=True)
+
+    status_file = os.path.join(target_dir, "status.json")
+    lock_file = os.path.join(target_dir, "status.lock")
+
+    return status_file, lock_file
+
+
+# bloqueo exclusivo para que solo un worker acceda al status a la vez
+@contextmanager
+def acquire_status_lock(target):
+    status_file, lock_file = get_status_paths(target)
+
+    # el lock debe estar en el volumen outputs compartido por todos los workers
+    with open(lock_file, "a+", encoding="utf-8") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+
+        try:
+            yield status_file
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
+# escritura atomica para evitar que otro worker lea un json incompleto
+def write_json_atomic(file_path, data):
+    directory = os.path.dirname(file_path)
+
+    file_descriptor, temporary_path = tempfile.mkstemp(
+        prefix=".status_",
+        suffix=".tmp",
+        dir=directory,
+    )
+
+    try:
+        with os.fdopen(file_descriptor, "w", encoding="utf-8") as temporary_file:
+            json.dump(data, temporary_file, indent=2)
+            temporary_file.flush()
+            os.fsync(temporary_file.fileno())
+
+        os.replace(temporary_path, file_path)
+
+    except Exception:
+        if os.path.exists(temporary_path):
+            os.remove(temporary_path)
+
+        raise
+
+
+# incremento protegido del numero de repositorios procesados
+def record_resqui_repository_result(target,repository_url,succeeded):
+    with acquire_status_lock(target) as status_file:
+        if not os.path.isfile(status_file):
+            raise FileNotFoundError(
+                f"Status file not initialized: {status_file}"
+            )
+
+        with open(status_file, "r", encoding="utf-8") as file:
+            status_data = json.load(file)
+
+        expected_repos = int(status_data["expected_repos"])
+        processed_repos = min(
+            int(status_data["processed_repos"]) + 1,
+            expected_repos,
+        )
+        successful_repos = int(
+            status_data.get("successful_repos", 0)
+        )
+        failed_repos = list(
+            status_data.get("failed_repos", [])
+        )
+
+        if succeeded:
+            successful_repos = min(
+                successful_repos + 1,
+                expected_repos,
+            )
+        elif repository_url not in failed_repos:
+            failed_repos.append(repository_url)
+
+        status_data["processed_repos"] = processed_repos
+        status_data["successful_repos"] = successful_repos
+        status_data["failed_repos"] = failed_repos
+
+        if processed_repos < expected_repos:
+            status_data["status"] = "processing"
+        elif failed_repos:
+            status_data["status"] = "failed"
+        else:
+            status_data["status"] = "completed"
+
+        write_json_atomic(status_file, status_data)
+        return status_data.copy()
+
 
 
 
@@ -39,105 +144,98 @@ def wait_for_token(channel):
             
             
 #llamada a resqui_runner y cambios de estado de la bbdd
-def resqui_indicators_generation(job_id,target, repo_url,repos_count, base_dir, token, retries):
-    # creamos sesion db
-        
-        while retries < MAX_RETRIES:
-            # ejecutamos resqui_runner por cada worker
-            response = resqui_runner(base_dir, target, str(repo_url), token)
-            error_text = str(response.status)
-            retryable = any(err in error_text for err in RETRYABLE_ERRORS)
-            #si no error rompemos retries o si es error no 
-            if response.status["status"] == "success" or not retryable :
-                break
+def resqui_indicators_generation(job_id,target,repo_url,base_dir,token):
+    
+    repository_paths = build_resqui_repository_paths(base_dir,target,repo_url)
+    repository_paths.staging_root.mkdir(parents=True,exist_ok=True)
 
-            # si es de los errores marcados para retry (conexion o timeout) lo intentamos 3 veces como max
-            if retryable:
-                retries += 1
-                if retries < MAX_RETRIES:
-                    timestamp(f"[{job_id}] retry {retries}/{MAX_RETRIES} due to network error")
-                    time.sleep(min(2 ** retries * 5, 300))
-                    continue
+    succeeded = False
+    last_status = {}
+
+    for attempt in range(MAX_RETRIES):
+        staging_path = Path(
+            tempfile.mkdtemp(prefix=f"{repository_paths.active_dir.name}-",
+                            dir=repository_paths.staging_root)
+            )
+
+        try:
+            response = resqui_runner(str(staging_path),repo_url,token)
+            last_status = response.status
+
+            if last_status["status"] == "success":
+                try:
+                    promote_staged_resqui_results(staging_path,repository_paths.active_dir,
+                                                )
+                except RuntimeError as exc:
+                    last_status = {
+                        "status": "error",
+                        "returncode": -1,
+                        "stdout": "",
+                        "stderr": str(exc)
+                    }
                 else:
-                    timestamp(f"[{job_id}] max retries reached")
+                    succeeded = True
                     break
-            else:
+
+            error_text = str(last_status)
+            retryable = any(error in error_text for error in RETRYABLE_ERRORS)
+
+            if not retryable:
                 break
-            
-        # si es error distinto a los volver a intentar o demasiados retries, generamos failed file
-        if response.status["status"] == "error":
-            
 
-            timestamp(f"\n\n\n\n\n\n*******************************************************************************************\n{json.dumps(response.status, indent=2)}*******************************************************************************************\n\n\n\n\n\n")
-            repo_name = repo_url.rstrip("/").split("/")[-1]
-            failed_repo_dir = os.path.join(BASE_DIR,"outputs","resqui",target,repo_name)
-            os.makedirs(failed_repo_dir,exist_ok=True)
-            
-            failed_job = {"detail": response.status}
-            failed_job_file = os.path.join(failed_repo_dir,"failed_assessment.json")
-            
-            with open(failed_job_file,"w") as f:
-                json.dump(failed_job,f, indent=2)
+            retry_number = attempt + 1
 
-            if retryable:
-                return True
-            return False
+            if retry_number >= MAX_RETRIES:
+                timestamp(f"[{job_id}] max retries reached")
+                break
 
-        #b uscamos todos los .json del directorio target para logs
-        resqui_target_dir = os.path.join(BASE_DIR,"outputs", "resqui", target)
-        completed = count_jsons(resqui_target_dir)
+            timestamp(f"[{job_id}] retry {retry_number}/{MAX_RETRIES} due to network error")
+            time.sleep(min(2 ** retry_number * 5, 300))
 
-        timestamp(f"[RESQUI] {target} Progress: {completed}/{repos_count} repos processed")
-        
-        
+        finally:
+            if staging_path.exists():
+                shutil.rmtree(staging_path)
 
-        if completed == repos_count:
-            timestamp(f"[{target}] All repos processed")
-        
-        return False
+    if not succeeded:
+        write_repository_failed_assessment(repository_paths.active_dir, last_status)
+
+    status_data = record_resqui_repository_result(target, repo_url, succeeded)
+
+    timestamp(f"[RESQUI] {target} Progress: {status_data['processed_repos']}/{status_data['expected_repos']} repos processed")
+
+    return succeeded
             
             
 
 # carga del mensaje de la cola y envío a background
 def process_message(ch, method, properties, body):
+    job_id = "unknown"
     try:
-        
-        # cargamos mensaje y cambiamos job de string a uuid
         message = json.loads(body.decode())
         job_id = message["job_id"]
         repo_url = message["repo_url"]
         target = message["target"]
-        repos_count = message["repos_count"]
 
         start = time.time()
         timestamp(f"[{job_id}] Received job")
 
-        # procesamos mensaje pero nates  limit
-        if RATE_LIMIT_RESQUI_ENABLED==True:
+        if RATE_LIMIT_RESQUI_ENABLED:
             wait_for_token(ch)
-            
-        requeue = resqui_indicators_generation(job_id, target, repo_url,repos_count, BASE_DIR, TOKEN, 0)
+
+        succeeded = resqui_indicators_generation(job_id,target,repo_url,BASE_DIR,TOKEN)
 
         total_time = time.time() - start
-        
-        timestamp(f"[{job_id}] completed in: {total_time:.2f}s")
-        
-        # evitar saturar github api 
-        
-        #confirmacion de mensaje pocesado para eliminarlo de la cola
-        if requeue:
-            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
-        
-        else:
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-        
 
+        result = "completed" if succeeded else "failed"
 
+        timestamp(f"[{job_id}] {result} in {total_time:.2f}s")
+
+        ch.basic_ack(delivery_tag=method.delivery_tag)
         
     except Exception as e:
-        # si falla lo metemos en la cola (faltaría revisar si el error es para meter en cola)
-        timestamp(f"\n\n\n[ {job_id}] failed: {str(e)}\n\n\n")
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+        timestamp(f"[{job_id}] Error processing job: {e}")
+        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+
 
 
 

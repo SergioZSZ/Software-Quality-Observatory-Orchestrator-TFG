@@ -357,11 +357,57 @@ class Metadata(object):
     # parseo de cff a bibtex
     def cff_to_bibtex(self, cff_text):
         from cffconvert import Citation
+        import re
+        import yaml
+        import unicodedata
 
         try:
+            # Convertir CFF a BibTeX mediante cffconvert
             citation = Citation(cffstr=cff_text)
-            return citation.as_bibtex()
-        except Exception:
+            bibtex = citation.as_bibtex()
+
+            # Leer los datos del CFF para construir la clave
+            parsed = yaml.safe_load(cff_text)
+
+            authors = parsed.get("authors", [])
+            first_author = authors[0] if authors else {}
+
+            surname = first_author.get("family-names", "reference").strip()
+
+            date_released = str(parsed.get("date-released", ""))
+            year = date_released[:4] if date_released else ""
+
+            title = parsed.get("title", "software")
+            title_words = re.findall(r"[A-Za-z0-9]+", title)
+            title_word = title_words[0] if title_words else "software"
+
+            # Ejemplo: Toledo + 2024 + RML -> toledo2024rml
+            raw_key = f"{surname}{year}{title_word}"
+
+            # Eliminar acentos, espacios y caracteres no válidos
+            citation_key = unicodedata.normalize("NFKD", raw_key)
+            citation_key = citation_key.encode("ascii", "ignore").decode("ascii")
+            citation_key = re.sub(
+                r"[^A-Za-z0-9:_-]",
+                "",
+                citation_key
+            ).lower()
+
+            if not citation_key:
+                citation_key = "softwareReference"
+
+            # Sustituir únicamente la clave genérica de cffconvert
+            bibtex = re.sub(
+                r"(@\w+\s*\{)YourReferenceHere(?=,)",
+                lambda match: f"{match.group(1)}{citation_key}",
+                bibtex,
+                count=1
+            )
+
+            return bibtex
+
+        except Exception as exc:
+            print(f"Could not convert CFF to BibTeX: {exc}")
             return None
 
 

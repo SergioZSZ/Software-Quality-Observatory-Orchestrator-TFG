@@ -1,20 +1,71 @@
 from .rabbitmq import publish_job
 from .models import SocaResponse
 from .cruds import soca_fetch
-from soca_runner.config import BASE_DIR
-
-import argparse
-import fcntl
-import json
-import os
-import shutil
-import tempfile
+from soca_runner.config import BASE_DIR, TOKEN
+from .repository_state import RepositoryRef, RepositorySnapshot, fetch_current_github_repository_state, parse_github_repository_url, calculate_incremental_repository_changes, write_incremental_repository_change_files,load_consolidated_repository_state
+import fcntl, json, os, tempfile
 from contextlib import contextmanager
+from pathlib import Path
 
 
 VALID_OWNER_TYPES = {"org", "user"}
 STATUS_FILENAME = "status.json"
 STATUS_LOCK_FILENAME = "status.lock"
+
+
+
+
+# Construye el inventario consultable y conserva el origen de cada repositorio.
+def build_repository_snapshots(
+    organization_repositories: list[str],
+    extra_repositories: list[str],
+    token: str | None,
+) -> list[tuple[RepositorySnapshot, str]]:
+    repositories_by_key: dict[
+        str,
+        tuple[RepositoryRef, str],
+    ] = {}
+
+    candidates = [
+        *(
+            (repository, "organization")
+            for repository in organization_repositories
+        ),
+        *(
+            (repository, "extra")
+            for repository in extra_repositories
+        ),
+    ]
+
+    for repository_url, source in candidates:
+        repository = parse_github_repository_url(repository_url)
+        key = repository.comparison_key
+        existing = repositories_by_key.get(key)
+
+        # Un extra explícito prevalece sobre el mismo repositorio
+        # descubierto desde una organización.
+        if existing is None or source == "extra":
+            repositories_by_key[key] = (
+                repository,
+                source,
+            )
+
+    snapshots: list[
+        tuple[RepositorySnapshot, str]
+    ] = []
+
+    for repository, source in repositories_by_key.values():
+        snapshot = fetch_current_github_repository_state(
+            repository,
+            token,
+        )
+        snapshots.append((snapshot, source))
+
+    return snapshots
+
+
+
+
 
 
 def normalize_repository(repository: str) -> str:
@@ -125,50 +176,69 @@ def initialize_status(project, expected_repos):
         "status": "completed" if expected_repos == 0 else "processing",
         "expected_repos": expected_repos,
         "processed_repos": 0,
+        "successful_repos": 0,
+        "failed_repos": [],
     }
 
     with acquire_status_lock(project) as status_file:
         write_status_atomic(status_file, status_data)
+
+# Elimina únicamente los resultados SOCA de un repositorio retirado
+def remove_repository_metadata(
+    metadata_dir: str | Path,
+    repository_url: str,
+) -> list[Path]:
+    metadata_path = Path(metadata_dir)
+
+    if not metadata_path.exists():
+        return []
+
+    repository = parse_github_repository_url(repository_url)
+    repository_key = repository.file_key
+    removed_files: list[Path] = []
+
+    patterns = (
+        f"{repository_key}_*.json",
+        f"failed_{repository_key}.json",
+    )
+
+    for pattern in patterns:
+        for file_path in metadata_path.glob(pattern):
+            if not file_path.is_file():
+                continue
+
+            file_path.unlink()
+            removed_files.append(file_path)
+
+    return removed_files
+
 
 
 def main(
     project: str,
     organizations: list[dict] | None = None,
     extra_repositories: list[str] | None = None,
-    repos_file: str | None = None,
 ):
     print("** Soca runner started **")
 
     if not project:
         raise RuntimeError("Project name is required")
+    
 
     organizations = organizations or []
     extra_repositories = extra_repositories or []
 
+    # Evitar una ejecución sin ninguna fuente configurada.
+    if not organizations and not extra_repositories:
+        raise RuntimeError("At least one organization or extra repository is required")
+    
     project_dir = os.path.join(BASE_DIR, "outputs", "soca", project)
-    metadata_dir = os.path.join(project_dir, "metadata")
-    output_repos_file = os.path.join(project_dir, "repos.txt")
 
-    # Eliminar únicamente los metadatos antiguos.
-    if os.path.exists(metadata_dir):
-        print("**\nRemoving old metadata...\n")
-        shutil.rmtree(metadata_dir)
 
     os.makedirs(project_dir, exist_ok=True)
 
     try:
-        repositories = []
-
-        # Compatibilidad opcional con el antiguo --repos.
-        if repos_file:
-            print("**\nReading repositories from custom repos.txt...\n")
-
-            with open(repos_file, "r", encoding="utf-8") as file:
-                repositories.extend(
-                    line.strip()
-                    for line in file
-                    if line.strip()
-                )
+        organization_repositories = []
 
         # Obtener repositorios de organizaciones y usuarios.
         for source in organizations:
@@ -207,28 +277,59 @@ def main(
                         f"{response_fetch.status}"
                     )
 
-                repositories.extend(response_fetch.repos)
+                organization_repositories.extend(
+                    response_fetch.repos
+                )
 
-        # Añadir los repositorios definidos manualmente.
-        repositories.extend(extra_repositories)
+        # Combinar los repositorios descubiertos con los extras configurados.
+        # La función elimina duplicados y consulta su estado actual en GitHub.
+        snapshots = build_repository_snapshots(
+            organization_repositories=organization_repositories,
+            extra_repositories=extra_repositories,
+            token=TOKEN,
+        )
 
-        # Normalizar y eliminar duplicados.
-        repositories = deduplicate_repositories(repositories)
+        # Cargar el estado de la última ejecución completada. Si todavía no
+        # existe, se usa un estado vacío y todos los repositorios son nuevos.
+        previous_state = load_consolidated_repository_state(
+            os.path.join(project_dir, "repository-state.json")
+        )
 
-        if not repositories:
-            raise RuntimeError(
-                "No repositories were found for this project"
+        # Comparar la información actual de GitHub con el estado consolidado.
+        changes = calculate_incremental_repository_changes(
+            previous_state=previous_state,
+            current_snapshots=snapshots,
+        )
+
+        # Guardar el inventario completo, los repositorios modificados, los
+        # eliminados y el estado pendiente que se consolidará al finalizar.
+        write_incremental_repository_change_files(
+            output_directory=project_dir,
+            changes=changes,
+        )
+        # Retirar de la caché SOCA los repositorios archivados,
+        # deshabilitados, eliminados o retirados de la configuración.
+        metadata_dir = Path(project_dir) / "metadata"
+
+        for repository_url in changes.removed:
+            removed_files = remove_repository_metadata(
+                metadata_dir=metadata_dir,
+                repository_url=repository_url,
             )
 
-        # Guardar la lista definitiva del proyecto.
-        with open(output_repos_file, "w", encoding="utf-8") as file:
-            file.write("\n".join(repositories))
-            file.write("\n")
+            print(
+                f"Removed {len(removed_files)} metadata files "
+                f"for '{repository_url}'"
+            )
+
+
+        # Procesar únicamente los repositorios nuevos o modificados.
+        repositories = changes.updated
 
         print(
-            f"**\n{len(repositories)} unique repositories found "
-            f"for project '{project}'\n"
-        )
+        f"**\n{len(repositories)} repositories require processing "
+        f"for project '{project}'\n"
+    )
 
         # inicializar status antes de publicar los trabajos
         initialize_status(
@@ -264,23 +365,7 @@ def main(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--repos",
-        help="Optional legacy repos.txt path",
-        default=None,
-    )
-
-    parser.add_argument(
-        "--name",
-        help="Optional legacy project name",
-        default=None,
-    )
-
-    args = parser.parse_args()
-
-    project = os.getenv("PROJECT") or args.name
+    project = os.getenv("PROJECT")
 
     organizations = read_json_environment(
         "ORGANIZATIONS_JSON"
@@ -294,5 +379,4 @@ if __name__ == "__main__":
         project=project,
         organizations=organizations,
         extra_repositories=extra_repositories,
-        repos_file=args.repos,
     )

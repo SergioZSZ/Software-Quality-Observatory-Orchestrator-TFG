@@ -1,86 +1,105 @@
 {
-    "@context": "https://w3id.org/codemeta/3.0",
-    "applicationCategory": "Software quality research",
-    "codeRepository": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG",
-    "contributor": {
-        "email": "s.zaballosh@gmail.com",
-        "familyName": "Zaballos Herrera",
-        "givenName": "Sergio",
-        "@id": "https://orcid.org/0009-0000-3795-2767",
-        "@type": "Person"
-    },
-    "maintainer": {
-    "@type": "Person",
-    "givenName": "Sergio",
-    "familyName": "Zaballos Herrera",
-    "email": "s.zaballosh@gmail.com"
-    },
-    "author": {
-    "@type": "Person",
-    "givenName": "Sergio",
-    "familyName": "Zaballos Herrera",
-    "email": "s.zaballosh@gmail.com"
-    },
-    
-    "dateCreated": "2026-03-04",
-    "dateModified": "2026-04-28",
-    "datePublished": "2026-04-028",
-    "description": "This project presents the design and implementation of a\n  Software Quality Observatory Orchestrator, a system that\n  automates the analysis and evaluation of research software\n  repositories. The platform integrates tools from the\n  research software ecosystem, including SOCA for repository\n  discovery and metadata extraction and RSFC (Research\n  Software Fitness Criteria) for assessing software quality\n  indicators.\n\n\n  The system is implemented through a containerized\n  architecture using Docker, while workflow orchestration is\n  managed with n8n, enabling reproducible and automated\n  execution of the analysis pipeline. The orchestrator\n  retrieves repositories, processes them through the\n  evaluation tools, and collects the resulting quality\n  metrics.\n\n\n  The resulting framework provides a scalable and modular\n  approach for evaluating large collections of research\n  software, contributing to improved software quality\n  assessment, reproducibility, and automation in research\n  software engineering and open science.",
-    "downloadUrl": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG",
-    "identifier": "https://doi.org/10.5281/zenodo.18879858",
-    "keywords": [
-        "workflow orchestration",
-        "research software",
-        "software quality assessment",
-        "research software engineering",
-        "n8n",
-        "reproducible workflows",
-        "software quality metrics",
-        "Docker"
-    ],
-    "license": "https://spdx.org/licenses/Apache-2.0",
-    "name": "Software-Quality-Observatory-Orchestrator",
-    "operatingSystem": [
-        "Linux",
-        "Windows",
-        "macOS"
-    ],
-    "programmingLanguage":{
-        "name": "Python",
-        "version": "3.11"
-    },
+  "@context": "https://w3id.org/codemeta/3.0",
+  "@type": "SoftwareSourceCode",
+  "name": "Software Quality Observatory Orchestrator",
+  "description": "A modular and containerized orchestrator for assessing research software quality. It uses n8n and RabbitMQ to coordinate incremental metadata extraction with SOCA and SOMEF, FAIR quality assessments with RSFC and RESQUI, metadata checks with sw-metadata-bot and RsMetaCheck, publication to DashVERSE, and generation of a software catalogue portal.",
+  "applicationCategory": "Research software quality assessment",
+  "keywords": [
+    "research software",
+    "software quality assessment",
+    "FAIR software",
+    "software metadata",
+    "workflow orchestration",
+    "incremental workflows",
+    "n8n",
+    "Docker",
+    "DashVERSE"
+  ],
+  "url": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG",
+  "codeRepository": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG",
+  "downloadUrl": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/releases",
+  "issueTracker": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/issues",
+  "readme": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/blob/main/README.md",
+  "softwareHelp": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/tree/main/docs",
+  "buildInstructions": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/blob/main/docs/instalacion.md",
+  "releaseNotes": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/blob/main/CHANGELOG.md",
+  "identifier": "https://doi.org/10.5281/zenodo.18879858",
+  "license": "https://spdx.org/licenses/Apache-2.0",
 
-    "relatedLink": [
-        "https://github.com/oeg-upm/soca",
-        "https://github.com/oeg-upm/soca",
-        "https://github.com/KnowledgeCaptureAndDiscovery/somef/tree/master"
-    ],
-    "releaseNotes": "release of the Software Quality Observatory Orchestrator.\n\nThis version provides a containerized architecture for orchestrating\nsoftware quality assessment workflows using SOCA and RSFC.\n\nMain features:\n- Automated repository retrieval\n- Integration with RSFC for quality assessment\n- Workflow orchestration using n8n\n- Docker-based deployment",
-    "runtimePlatform": [
-        "Docker",
-        "Python"
-    ],
-    "softwareRequirements": [
-        {
-            "name": "Docker",
-            "version": "20+"
-        },
-        {
-            "name": "python",
-            "version": "3.11"
-        },
-        {
-            "name": "n8n",
-            "version": "latest"
-        }
-    ],
-    "version": "0.12.0",
-    "developmentStatus": "active",
-    "issueTracker": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/issues",
-    "support": "https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/issues",
-    "support_channels": [
-    "GitHub Issues: https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/issues"
-    ],
 
-    "@type": "SoftwareSourceCode"
+  "version": "0.13.0",
+  "developmentStatus": "active",
+  "dateCreated": "2026-03-04",
+  "dateModified": "2026-07-06",
+  "datePublished": "2026-03-05",
+
+
+"author": {
+  "@id": "https://orcid.org/0009-0000-3795-2767",
+  "@type": "Person",
+  "givenName": "Sergio",
+  "familyName": "Zaballos Herrera",
+  "email": "s.zaballosh@gmail.com",
+  "affiliation": {
+    "@type": "Organization",
+    "name": "Escuela Técnica Superior de Ingenieros Informáticos",
+    "alternateName": "ETSIINF",
+    "url": "https://www.etsiinf.upm.es/",
+    "parentOrganization": {
+      "@type": "Organization",
+      "name": "Universidad Politécnica de Madrid",
+      "alternateName": "UPM",
+      "url": "https://www.upm.es/"
+    }
+  }
+},
+"maintainer": {
+  "@id": "https://orcid.org/0009-0000-3795-2767",
+  "@type": "Person",
+  "givenName": "Sergio",
+  "familyName": "Zaballos Herrera",
+  "email": "s.zaballosh@gmail.com",
+  "affiliation": {
+    "@type": "Organization",
+    "name": "Escuela Técnica Superior de Ingenieros Informáticos",
+    "alternateName": "ETSIINF",
+    "url": "https://www.etsiinf.upm.es/",
+    "parentOrganization": {
+      "@type": "Organization",
+      "name": "Universidad Politécnica de Madrid",
+      "alternateName": "UPM",
+      "url": "https://www.upm.es/"
+    }
+  }
+},
+
+
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "Python",
+    "url": "https://www.python.org/"
+  },
+  "runtimePlatform": [
+    "Docker",
+    "Python >=3.11,<3.13",
+    "n8n"
+  ],
+  "operatingSystem": [
+    "Linux",
+    "Windows",
+    "macOS"
+  ],
+  "softwareRequirements": [
+    "Docker with Docker Compose",
+    "Python >=3.11,<3.13"
+  ],
+  "relatedLink": [
+    "https://github.com/oeg-upm/soca",
+    "https://github.com/KnowledgeCaptureAndDiscovery/somef",
+    "https://github.com/oeg-upm/rsfc",
+    "https://github.com/EVERSE-ResearchSoftware/QualityPipelines",
+    "https://github.com/EVERSE-ResearchSoftware/DashVERSE",
+    "https://github.com/SoftwareUnderstanding/sw-metadata-bot",
+    "https://github.com/SoftwareUnderstanding/RsMetaCheck"
+  ]
 }

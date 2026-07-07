@@ -13,16 +13,15 @@ RUN poetry config virtualenvs.create false
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-root
 
-
-# rsfc 
-COPY rsfc-0.1.5 ./rsfc-0.1.5
-RUN pip install -e ./rsfc-0.1.5
-
-
 # instalacion de nltk para somef de soca
 RUN pip install nltk
 RUN python -m nltk.downloader wordnet
 RUN python -m nltk.downloader omw-1.4
+
+# rsfc 
+COPY rsfc-0.1.7 ./rsfc-0.1.7
+RUN pip install -e ./rsfc-0.1.7
+
 
 # resto del runner
 COPY rsfc_runner ./rsfc_runner

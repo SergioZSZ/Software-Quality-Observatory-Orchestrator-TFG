@@ -49,36 +49,16 @@ INDS=$(curl -sf "$GITHUB_API/indicators" | jq -r '.[].name | select(endswith(".j
 
 Tras este cambio, `make sync-apply SYNC_DIR=./everse-sync` descarga correctamente las dimensiones e indicadores y los importa en DashVERSE.
 
-## Datasets que se rellenan parcialmente
+## Publicación de assessments desde n8n
 
+Los assessments originales pueden no incluir `@id` ni `author`. `dashverse_workflow.json` completa ambos campos antes de llamar a la API:
 
-#### `api.assessment`
+- `author` se obtiene del propietario presente en la URL de GitHub.
+- `@id` se genera con la URL del repositorio, el origen (`rsfc` o `resqui`) y `dateCreated`.
 
-Se rellena parcialmente.
+El workflow publica:
 
-Comportamiento observado:
-- `@context` y `@type` se muestran correctamente.
-- `dateCreated` se muestra correctamente.
-- `license` y `assessedSoftware` se muestran correctamente como objetos JSON.
-- `@id` aparece como `N/A`.
-- `author` aparece como `N/A`.
+- RSFC en `/assessment_raw`, envolviendo el JSON-LD en `payload`.
+- RESQUI en `/assessment`, usando el esquema validado por DashVERSE.
 
-Motivo:
-- la vista `api.assessment` extrae estos campos del `payload`:
-
-```sql
-payload->>'@id' AS "@id",
-payload->'author' AS author,
-```
-
-- los assessments generados por RSFC no incluyen esos campos:
-  - no incluyen `@id`,
-  - no incluyen `author`.
-
-Por tanto, no se trata de un fallo de la vista, sino de una diferencia entre el modelo esperado por DashVERSE y el JSON-LD generado por RSFC.
-
-**YA SOLUCIONADO**
-Solución:
-- si se desea que esos campos aparezcan, habría que enriquecer el JSON-LD antes de insertarlo
-  - se guardo en "author" el user/org de github encontrado en la url
-  - en id se guardó el @id del "dataCreated" ya que es único por assessment
+La autenticación se configura una sola vez mediante `DASHVERSE_JWT` en `containers/.env`. Los nodos HTTP forman la cabecera `Authorization: Bearer ...` a partir de esa variable.

@@ -9,7 +9,7 @@ Documentación detallada en : https://software-quality-observatory-orchestrator-
 
 ## 1. Objetivo del proyecto
 
-El objetivo del TFG es diseñar e implementar un sistema reproducible que:
+El objetivo del proyecto es diseñar e implementar un sistema reproducible que:
 
 1. Extraiga automáticamente repositorios de GitHub
 2. Genere metadatos estructurados del software
@@ -28,22 +28,18 @@ El sistema se basa en la integración y orquestación de herramientas existentes
 
 | Componente       | Rol                                    |
 | ---------------- | -------------------------------------- |
-| n8n              | Orquestación mediante workflows end-to-end y modulares |
-| soca_container   | extracción metadatos-repos y jobs soca |
-| rsfc_container   | creación de jobs rsfc                  |
-| rabbitmq         | message broker                         |
-| worker_rsfc      | procesamiento jobs indicadores         |
-| worker_soca      | procesamiento jobs metadatos           |
-| rate_limiter_rsfc| limitador tokens githubAPI worker_rsfc |
-| nginx            | publicacion del portal SOCA |
-| DashVerse        | observatorio de evaluación             |
-| sw-metadata-bot  | Generación de issues sobre metadatos   |
+| n8n              | Orquestación del workflow modular y sus subworkflows |
+| SOCA              | Descubrimiento incremental, metadatos y portal software |
+| RSFC              | Evaluación de indicadores FAIR de software |
+| RESQUI            | Evaluación configurable mediante QualityPipelines |
+| RabbitMQ          | Distribución de trabajos entre workers |
+| workers           | Procesamiento paralelo de SOCA, RSFC y RESQUI |
+| rate limiters     | Control de peticiones a GitHub para RSFC y RESQUI |
+| Nginx             | Publicación del portal SOCA |
+| sw-metadata-bot   | Evaluación incremental de metadatos e issues opcionales |
+| DashVERSE         | Persistencia y visualización de assessments |
 
 
-
-
-
-![Diagrama de flujo del sistema](docs/images/flujo_SQOO.png)
 
 
 
@@ -69,6 +65,7 @@ Se ha:
 - Encapsulado en un contenedor Docker
 - Configurado volúmenes para persistencia de resultados
 - Orquestado mediante lanzamiento de jobs para la extracción de metadatos por workers en paralelo
+- Añadido seguimiento de estado para procesar solo repositorios nuevos o modificados y retirar los eliminados
 - Configurado `genportal.py` para crear el portal final tras RSFC y sw-metadata-bot
 Salida generada:
 
@@ -85,8 +82,9 @@ Mientras que soca_container publica en una cola de trabajo en RabbitMQ con el us
 
 Cada worker ejecuta el módulo `python -u -m soca_runner.worker` que se dedica a:
 
-1. Recibe un job de RabbitMQ (con el target)
-2. Se extraen metadatos de los repos obtenidos en el fetch por workers paralelos o genera un fichero explicando el error en caso de que no se pudiese extraer
+1. Recibe un repositorio actualizado desde RabbitMQ
+2. Extrae los metadatos en un directorio temporal y promueve el resultado de forma atómica
+3. Conserva el resultado anterior y registra el error si la nueva extracción falla
 
 El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_soca=N`` siendo N el número de workers que se levantarán.
 
@@ -96,6 +94,8 @@ Se ha:
 
 - Preparado entorno aislado con poetry
 - Instalado RSFC en el entorno
+- Actualizado a RSFC 0.1.7 y SOMEF 0.11.0
+- Reutilizados los metadatos ya generados por SOCA cuando están disponibles
 - Adaptado su ejecución vía execute-command de n8n
 - Encapsulado en contenedor independiente
 - Orquestado mediante lanzamiento de jobs a RabbitMQ la extraccion de indicadores
@@ -113,7 +113,7 @@ Cada worker ejecuta el módulo `python -u -m rsfc_runner.worker` que se encarga 
 
 1. Recibe un job de RabbitMQ
 2. Ejecuta la evaluación del repositorio mediante rsfc
-3. Genera un `rsfc_assessment.json` con los indicadores de calidad  o `failed_assessment.json` explicando el error de procesamiento
+3. Genera un `rsfc_assessment.json` o un `failed_assessment.json` sin eliminar un resultado válido anterior
 4. Espera a tener token para procesar siguiente trabajo (github rate limit)
 5. Responde a RabbitMQ habiendo procesado el job para recibir otro
 
@@ -125,7 +125,7 @@ El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitM
 
 ### 3.6 Integracion de RESQUI
 
-Se ha integrado RESQUI mediante el contenedor `resqui_container`, usando `QualityPipelines-2.0` como submodulo del repositorio. La imagen `resqui-heavy` instala RESQUI y el runner propio `resqui_runner`, que publica jobs en RabbitMQ y permite que varios workers procesen repositorios en paralelo.
+Se ha integrado RESQUI en el workflow modular mediante el contenedor `resqui_container`. La imagen `resqui-heavy` instala el submódulo `QualityPipelines-2.0` y el runner que distribuye las evaluaciones entre workers.
 
 Componentes principales:
 
@@ -135,8 +135,8 @@ Componentes principales:
 
 Salida generada:
 
-- Reportes RESQUI por repositorio en `outputs/resqui/<target>/<repo>/`.
-- Ficheros `failed_assessment.json` cuando un repositorio no puede procesarse correctamente.
+- Reportes RESQUI por repositorio en `outputs/resqui/<project>/<owner>_<repo>/`.
+- Ficheros `failed_assessment.json` cuando un repositorio no puede procesarse correctamente, conservando los resultados válidos anteriores.
 
 Modificaciones realizadas sobre RESQUI/QualityPipelines:
 
@@ -179,107 +179,42 @@ Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filteri
 Se ha:
 
 - Integrado `sw-metadata-bot` como herramienta encargada de analizar la calidad de los metadatos de los repositorios procesados
-- Preparado el uso del bot mediante una imagen Docker `sw-metadata-bot:latest` y posteriormente creado `sw-metadata-bot-nltk:latest` con los recursos necesarios nltk para su ejecución.
+- Preparado `sw-metadata-bot` 0.5.3 mediante las imágenes `sw-metadata-bot:latest` y `sw-metadata-bot-conf:latest`
 - Adaptado su ejecución vía `execute-command` de n8n
 - Configurado el montaje del volumen compartido de `outputs` para persistir los resultados del análisis
 - Generado dinámicamente un archivo `config.json` con la lista de repositorios obtenidos durante el workflow
 - Configurado el uso de `GITHUB_API_TOKEN` para permitir la consulta de repositorios y la publicación de issues
-- Incorporado el análisis incremental mediante `previous_report`, permitiendo reutilizar ejecuciones anteriores cuando se indique
+- Incorporado el análisis incremental: el bot localiza la snapshot anterior y reutiliza los artefactos de repositorios sin cambios
 - Añadida la fase opcional de publicación de issues tras la generación de los informes de metadatos, controlada desde `launch_issue` en los workflows de n8n
 
-El servicio `sw-metadata-bot` se ejecuta dentro del flujo de n8n después de obtener la lista de repositorios que forman parte del análisis. Para cada ejecución se crea un directorio específico dentro de:
+El bot recibe el inventario completo para que cada snapshot conserve también los repositorios no modificados. Para cada ejecución se crea un directorio específico dentro de:
 
-- `/outputs/sw-metadata-bot/<target>/`
+- `outputs/sw-metadata-bot/<project>/runs/<snapshot>/`
 
 ---
 
 
-### 4. Flujo actual(container n8n)
-El sistema utiliza **n8n** como motor de orquestación para coordinar la ejecución completa del pipeline de análisis. 
+## 4. Workflow modular de n8n
 
-Actualmente el despliegue se apoya en el workflow modular:
+`SQOO_modular_workflow.json` es el único workflow principal. Orquesta, en este orden, `soca_workflow.json`, `rsfc_workflow.json`, `resqui_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
 
-- `SQOO_modular_workflow.json`: workflow principal modular de SQOO. Orquesta los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
-- `resqui_workflow.json`: subworkflow de RESQUI preparado para ejecutar la evaluacion con workers `worker_resqui`.
+El nodo `Conf` define:
 
-La versión modular facilita aislar y mantener cada fase sin cambiar el contrato global del pipeline. El workflow principal pasa entre fases los campos `target`, `type`, `mode`, `repos`, `repos_url`, `repo_count` y `launch_issue` según corresponda.
+- `project`: nombre estable de la ejecución.
+- `organizations`: organizaciones o usuarios de GitHub, indicando `org` y `type`.
+- `extra_repositories`: repositorios adicionales.
+- `launch_issue`: activa o desactiva la publicación de issues.
 
-**Nota:** `resqui_workflow.json` aun no esta integrado en `SQOO_modular_workflow.json`; se mantiene como subworkflow independiente y su integracion en el flujo principal se realizara proximamente.
+### Etapas
 
-
-
-#### Descripción general del flujo
-
-Los workflows implementan un pipeline completo que abarca:
-
-1. **Extracción de repositorios**
-2. **Procesamiento de metadatos (SOCA)**
-3. **Evaluación de calidad (RSFC)**
-4. **Evaluación de metadatos (sw-metadata-bot)**
-5. **Generación de portal software enriquecido**
-6. **Envío de indicadores a DashVERSE**
-
-
-
-####  Etapas del workflow
-
-##### 1. Inicialización 
-
-- Trigger manual (`Execute Workflow`)
-- Definición del objetivo (`target`) y tipo (`user` / `org`)
-- Ejecución del contenedor: ```soca-heavy:latest ```
-- Ejecución del pipeline SOCA por los workers
-- Generación de metadatos por repositorio
-
-##### 2. Lectura y procesamiento de repositorios
-
-- Lectura del archivo generado: `repos.txt`
-- Transformación a lista de URLs
-- Cálculo del número total de repositorios (repo_count)
-- Control de finalización procesamiento de repositorios: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
-
-
-##### 3. Evaluación RSFC
-- Envío de repositorios a los workers RSFC, evaluando la calidad de software
-- Control de finalización: se espera a que los jsons generados sean iguales a la cantidad de repositorios de `repos.txt`
-
-##### Subworkflow RESQUI (pendiente de integracion)
-
-- `resqui_workflow.json` publica los repositorios en la cola `resqui_jobs`.
-- Los workers `worker_resqui` ejecutan RESQUI con la configuracion incluida en `containers/resqui_container/resqui_runner/configurations/`.
-- Los resultados se escriben en `outputs/resqui/<target>/`.
-- Este subworkflow aun no forma parte del workflow principal modular; se integrara proximamente.
-
-##### 4. Análisis de metadatos con sw-metadata-bot
-
-n8n ejecuta `sw-metadata-bot` para analizar la calidad de los metadatos de los repositorios y, si se habilita, generar issues automáticos cuando se detectan carencias. Todo siguiendo este proceso:
-
-- Generado un `config.json` con los repositorios obtenidos en el workflow
-
-- Ejecutado el análisis mediante `sw-metadata-bot run-analysis`
-- Reutilizado ejecuciones anteriores mediante `previous_report` cuando aplica
-- Comprobado que existe `run_report.json` para la ejecución generada
-- Publicados los issues generados mediante `sw-metadata-bot publish` solo cuando `launch_issue` está activado
-
-En `SQOO_modular_workflow.json` esta decisión se define en el nodo `Conf` y se propaga al subworkflow `sw-metadata-bot_workfow`.
-
-##### 5. Generación del portal
-
-- Se ejecuta `genportal.py` cuando ya existen los reportes de RSFC y sw-metadata-bot.
-- El portal incorpora metadatos SOCA, indicadores RSFC e informes/issues de sw-metadata-bot.
-- Portal persistido en `outputs/soca/<target>/portal/` y publicado por Nginx.
-- Incluye dashboards embebidos mediante iframe directo a Superset/DashVERSE.
-
-Salida generada: portal software enriquecido con reportes y metadatos
-
-
-##### 6. Envío de assessments a DashVERSE
-
-- Lectura de los archivos generados: `rsfc_assessment.json` por cada repositorio
-- Extracción y transformación de los datos del assessment añadiendo un @id y el `author` como keys del json-ld
-
-- Iteración sobre cada repositorio y sus checks mediante nodos `Split Out`
-- Envío de datos mediante peticiones HTTP POST a la API de DashVERSE `/assessment_raw`
+1. SOCA consulta GitHub y compara el inventario con `repository-state.json`. Genera `repos.txt`, `repos-updated.txt` y `repos-removed.txt`.
+2. `If has changes` continúa el pipeline cuando hay repositorios actualizados o eliminados; si no hay cambios, consolida directamente el estado.
+3. Solo los repositorios nuevos o modificados pasan por los workers de SOCA, RSFC y RESQUI. Los retirados se eliminan de sus salidas persistidas.
+4. RSFC y RESQUI guardan resultados por `owner_repo` y notifican el estado real del lote mediante `status.json`.
+5. sw-metadata-bot recibe el inventario completo, reutiliza la snapshot anterior para repositorios sin cambios y publica issues solo si `launch_issue` está activado.
+6. SOCA genera el portal enriquecido, que Nginx publica en `http://localhost:8030/portals/<project>/`.
+7. `If repo updated` llama a DashVERSE solo si existen assessments nuevos; una ejecución con solo eliminaciones pasa directamente a la consolidación.
+8. El estado pendiente se consolida como `repository-state.json` únicamente cuando finaliza el pipeline.
 
 ---
 
@@ -287,7 +222,7 @@ Salida generada: portal software enriquecido con reportes y metadatos
 
 
 
-## 4. Requisitos(Requirements)
+## 5. Requisitos
 #### Requisitos generales
    - Docker/Docker Desktop
    - Estar loggeado en Docker/Docker Desktop
@@ -330,34 +265,34 @@ Antes de empezar en Windows hay que tener Docker Desktop instalado, abierto y co
 
          
 
-#### Herramientas usadadas en el proyecto:
-- SOCA 0.0.3: 
-https://github.com/oeg-upm/soca/releases/tag/0.0.3
+#### Herramientas usadas en el proyecto:
+- SOCA 0.0.4:
+https://github.com/oeg-upm/soca/releases
 
-- RSFC 0.1.5: 
-https://github.com/oeg-upm/rsfc/releases/tag/v0.1.5
+- RSFC 0.1.7:
+https://github.com/oeg-upm/rsfc/releases/tag/v0.1.7
 
-- SOMEF 0.10.3:
-https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.10.3
+- SOMEF 0.11.1:
+https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.11.1
 
 - DASHVERSE 0.2.0: 
 https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.2.0
 
-- sw-metadata-bot 0.5.0:
-https://github.com/SoftwareUnderstanding/sw-metadata-bot/releases/tag/v0.5.0
+- sw-metadata-bot 0.5.3:
+https://github.com/SoftwareUnderstanding/sw-metadata-bot/releases/tag/v0.5.3
 
-- RsMetaCheck 0.2.1:
-https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
+- RsMetaCheck >=0.3.3:
+https://github.com/SoftwareUnderstanding/RsMetaCheck/releases
       
       
 ---
 
 
-## 5. Instalación/Despliegue
+## 6. Instalación/Despliegue
 
-#### 5.1 Previa
+#### 6.1 Previa
  Se debe crear un archivo `.env` en el directorio `/containers` que tenga las variables entorno: 
-   - `GITHUB_API_TOKEN`: siguiendo el formato `GITHUB_TOKEN=xxxxxx`, siendo el `xxxxxx` el token personal obtenido desde github ( token classic) marcándo el scope 'public_repo' 
+   - `GITHUB_API_TOKEN`: token personal de GitHub; para publicar issues debe permitir acceso a repositorios públicos
 
    - `RABBITMQ_USER` usuario de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
    - `RABBITMQ_PASSWORD` contraseña de RabbitMQ puesto en el servicio `rabbitmq` del `/containers/docker-compose.yml`
@@ -371,9 +306,11 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
    - `DASHBOARD_ORG_EMBED_ID` id o slug del dashboard SQO-org importado en DashVERSE/Superset
    - `DASHBOARD_REPO_EMBED_ID` id o slug del dashboard SQO-repo importado en DashVERSE/Superset
 
-   - ``SUPERSET_PUBLIC_DOMAIN`` dominio publico usado por el portal para cargar los dashboards embebidos. En Docker Desktop/Windows se debe usar `http://host.docker.internal:8088` para que el portal generado desde los contenedores apunte correctamente a Superset.
+   - `DASHVERSE_JWT` token generado por la API de DashVERSE para publicar assessments desde n8n
 
-      ejemplo en `/containers/.env.example`. Se pueden usar tal cual las variables del archivo menos `GITHUB_TOKEN`, `OUTPUTS`, `DASHBOARD_ORG_EMBED_ID` y `DASHBOARD_REPO_EMBED_ID`.
+   - `SUPERSET_PUBLIC_DOMAIN` dominio público usado por el navegador para cargar los dashboards. En local se utiliza `http://localhost:8088`.
+
+      El archivo `/containers/.env.example` contiene todos los nombres necesarios; hay que sustituir los tokens, rutas e identificadores de dashboard.
 
 
 **A tener en cuenta**:  
@@ -382,15 +319,15 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases/tag/0.2.1
 -  El nº o slug de dashboard es el que aparezca tras importar en DashVERSE la plantilla contenida en `/integrations/dashboard`. Los dashboards deben estar publicados y permitir embebido desde el portal.
 
 
-#### 5.2 Instalación/Despliegue del orquestador
+#### 6.2 Instalación/Despliegue del orquestador
 Siguiendo los pasos en orden secuencial:
 
-**NOTA** el paso 1 actualmente está compactado en los `/scripts/build-docker-images.sh` para terminales WSL/Linux y `/scripts/build-docker-images.ps1` para powershell de windows. Ejecutando dichos scripts se instalan automáticamente las imágenes docker.
+Las imágenes pueden construirse con `scripts/build-docker-images.sh` en WSL/Linux o `scripts/build-docker-images.ps1` en PowerShell. Los mandatos equivalentes son:
 
 0. Importar los submodulos del repositorio:
    - SQOO usa `containers/resqui_container/QualityPipelines-2.0` como submodulo para incluir el codigo fuente de RESQUI/QualityPipelines.
    - Si se clona el repositorio desde cero, usar:
-      - Mandato: `git clone --recurse-submodules https://github.com/SergioZSZ/QualityPipelines`
+      - Mandato: `git clone --recurse-submodules https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG.git`
    - Si el repositorio ya estaba clonado o se acaba de hacer `git pull`, ejecutar desde la raiz de SQOO:
       - Mandato: `git submodule update --init --recursive`
    - Para comprobar que el submodulo esta descargado:
@@ -404,7 +341,7 @@ Siguiendo los pasos en orden secuencial:
       - Directorio desde el que crearla: `/containers/rsfc_container` 
       - Mandato: `docker build -t rsfc-heavy .`
    - `sw-metadata-bot`:
-      - Directorio desde el que crearla: `/integrations/sw-metadata-bot-0.5.0`
+      - Directorio desde el que crearla: `/integrations/sw-metadata-bot-0.5.3`
       - Mandato: `docker build -t sw-metadata-bot .`
    - `sw-metadata-bot-conf`:
       - Directorio desde el que crearla: `/containers/sw-metadata-bot_container` 
@@ -422,23 +359,20 @@ Siguiendo los pasos en orden secuencial:
     1. Crear cuenta de usuario en n8n
     2. Importar los workflows desde `/containers/n8n_container/workflows/`
 5. Importar y usar el workflow modular:
-   - Importar `SQOO_modular_workflow.json` y los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
-   - Importar tambien `resqui_workflow.json` si se quiere probar RESQUI de forma independiente.
+   - Importar `SQOO_modular_workflow.json` y los subworkflows `soca_workflow.json`, `rsfc_workflow.json`, `resqui_workflow.json`, `sw-metadata-bot_workfow.json` y `dashverse_workflow.json`.
    - Despues revisar los nodos `Call '<subworkflow>'` del workflow principal para que apunten a los subworkflows importados en la instancia de n8n.
-   - **Nota:** `resqui_workflow.json` aun no esta integrado en `SQOO_modular_workflow.json`; se mantiene como subworkflow preparado para su integracion proximamente.
 6. Editar el nodo inicial de configuración con la organización/usuario deseado:
-   - `target`: nombre de la organización o usuario.
-   - `type`: `org` o `user`.
-   - `mode`: `manual` cuando se use un archivo de repositorios, o el modo configurado para descubrimiento automático.
-   - `repos`: nombre del archivo de repositorios cuando `mode` sea `manual`.
+   - `project`: nombre estable para las salidas y el estado incremental.
+   - `organizations`: lista de objetos con `org` y `type` (`org` o `user`).
+   - `extra_repositories`: lista opcional de URLs adicionales.
    - `launch_issue`: `true` para publicar issues con `sw-metadata-bot publish`, `false` para ejecutar solo el análisis de metadatos.
 7. Ejecutar manualmente
 
-Tras ello se ejecutará el workflow obteniendo en `outputs` las extracciones, reportes RSFC, informes de sw-metadata-bot y el portal final enriquecido antes del envío a DashVERSE. Los portales generados por SOCA se sirven con Nginx en `http://localhost:8030/portals/<target>/`, donde `<target>` coincide con la organizacion o usuario configurado en el workflow. Las paginas `dashboard-org.html` y `dashboard-repo.html` cargan los dashboards de DashVERSE mediante iframe directo usando `SUPERSET_PUBLIC_DOMAIN`.
+Tras ello se obtienen en `outputs` los metadatos SOCA, assessments RSFC y RESQUI, snapshots de sw-metadata-bot y el portal final. Nginx sirve el portal en `http://localhost:8030/portals/<project>/`.
 
 
 
-#### 5.3 Instalación/Despliegue de DashVERSE
+#### 6.3 Instalación/Despliegue de DashVERSE
 **PREVIA**
 Todos los scripts de `/integrations/DashVERSE-0.2.0/scripts` deben tener permisos de ejecución para la instalación de DashVERSE en Linux `chmod +x *.sh`
 
@@ -481,7 +415,7 @@ tras ello, realizar `make sync-apply` para importar los indicadores y dimensione
 
 7. Port-forward de los puertos del servicio (en un terminal WSL mantenerlo abierto):
       mandato: `make port-forward` 
-      **NOTA:** si se esta desplegando en servidores y no en local, si se quiere tener accesible el subdominio para acceder se debe sustituir la línea 21 por `--address 0.0.0.0 -n "$NS" "svc/$svc" "$local_port:$remote_port" 2>/dev/null || true` en el script `/integrations/DashVERSE-0.2.0/scripts/port-forward.sh.sh`
+      **NOTA:** en un despliegue remoto, el script `scripts/port-forward.sh` debe exponer los servicios en una interfaz accesible y protegida adecuadamente.
 
    Desde Windows se puede acceder en el navegador a `http://localhost:8088`, `http://localhost:8080`, `http://localhost:3000` y `http://localhost:8000` mientras ese terminal siga abierto.
 
@@ -496,12 +430,12 @@ tras ello, realizar `make sync-apply` para importar los indicadores y dimensione
 10. generar conexión a la BBDD y dashboards base de DashVERSE:
       mandato: ``make setup-dashboards``
 
-11. Se necesita un token jwt para las peticiones desde n8n. Para ello con el servicio desplegado ir a http://localhost:8000 y hacerse una cuenta EVERSE. Después hacer login y generar un token auth. Expiran tras un mes. Este token debe ponerse en los nodos que hacen peticiones http a dashVERSE del flujo n8n en el campo Authorization dentro de Headers como `Bearer TU_TOKEN`.
+11. En `http://localhost:8000`, crear una cuenta, iniciar sesión y generar el token de autenticación. Guardarlo como `DASHVERSE_JWT` en `containers/.env`; n8n construye la cabecera `Bearer` automáticamente.
 
 12. Importar los dashboards encontrados en `/integrations/dashboards` si se quieren mantener tambien los dashboards SQOO antiguos. También editarlos desde la pestaña de navegación `Dashboards` para darle acceso a los roles que se quieran configurar (Admin y Public por ejemplo). También habrá que configurar los permisos de los roles. Para ello acceder a `Settings/list roles` y editar los permisos de los roles, mínimo del Public.
 
    
-#### 5.4 Encendido y apagado del servicio DashVERSE:
+#### 6.4 Encendido y apagado del servicio DashVERSE:
 
 ##### apagar todo:
 1. ``Cntrl+C`` para cerrar el port-forwarding desde el terminal abierto
@@ -516,7 +450,7 @@ tras ello, realizar `make sync-apply` para importar los indicadores y dimensione
 
 
 
-## 6. Estudios sobre el proyecto
+## 7. Estudios sobre el proyecto
 
 
 
@@ -529,26 +463,7 @@ https://software-quality-observatory-orchestrator-tfg.readthedocs.io/es/latest/e
 ---
 
 
-
-# 7. Issues
-
-## NEXT STEPS:
-
-
-
-
- ### General:
-- (Si da tiempo) automatizar sugerencias para mejorar los repositorios
-
-### Opcional:
-- Ver si merece la pena hacer un RO
-- Realizar un nuevo estudio de consumo de memoria + espacio en disco
-- documentar manual de uso de usuario de dashverse
----
-
-
-
-# 8. Support
+## 8. Soporte
 Para cualquier problema escribir una issue en:
 https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/issues
 

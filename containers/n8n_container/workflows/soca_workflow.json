@@ -3,163 +3,16 @@
   "nodes": [
     {
       "parameters": {
-        "operation": "text",
-        "binaryPropertyName": "=data",
-        "options": {
-          "encoding": "utf8"
-        }
-      },
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1.1,
-      "position": [
-        320,
-        48
-      ],
-      "id": "6926b27f-bae0-4a16-a1de-72b238cb6d99",
-      "name": "Extract from File"
-    },
-    {
-      "parameters": {
         "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e PROJECT=\"{{ $json.project }}\" \\\n-e ORGANIZATIONS_JSON='{{ JSON.stringify($json.organizations || []) }}' \\\n-e EXTRA_REPOSITORIES_JSON='{{ JSON.stringify($json.extra_repositories || []) }}' \\\n-e GITHUB_TOKEN=\"{{ $env.GITHUB_API_TOKEN }}\" \\\n-e RABBITMQ_HOST=\"{{ $env.RABBITMQ_HOST }}\" \\\n-e RABBITMQ_USER=\"{{ $env.RABBITMQ_USER }}\" \\\n-e RABBITMQ_PASSWORD=\"{{ $env.RABBITMQ_PASSWORD }}\" \\\nsoca-heavy:latest \\\npython -m soca_runner.main"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -32,
-        48
+        -240,
+        16
       ],
       "id": "c0ec8864-f567-4469-bce4-c89ceea6b5f1",
       "name": "Execute soca-runner"
-    },
-    {
-      "parameters": {
-        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/repos.txt",
-        "options": {
-          "fileExtension": ""
-        }
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1.1,
-      "position": [
-        160,
-        48
-      ],
-      "id": "97e36988-076e-408c-a565-a41a6da0d00f",
-      "name": "Read target repos"
-    },
-    {
-      "parameters": {
-        "jsCode": "const repos = $json.data\n  .split('\\n')\n  .map(r => r.trim())\n  .filter(r => r !== '');\n\nreturn [\n  {\n    json: {\n      repos_url: repos,\n      repo_count: repos.length\n    }\n  }\n];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        496,
-        48
-      ],
-      "id": "1b9be4d4-91c9-418c-bdef-c6978fb0da37",
-      "name": "Code repo_url list & repo count"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        1312,
-        240
-      ],
-      "id": "e623eb39-a919-4966-8920-c619dee8f3ff",
-      "name": "Wait",
-      "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
-    },
-    {
-      "parameters": {
-        "jsCode": "return [\n  {\n    json: {\n      count: Number($json.stdout.trim())\n    }\n  }\n];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        912,
-        48
-      ],
-      "id": "80fb7636-cd7d-481d-b115-01e1f7597269",
-      "name": "Process metadata count"
-    },
-    {
-      "parameters": {
-        "command": "=find /root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/metadata -maxdepth 1 -type f -name \"*.json\" | wc -l"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        720,
-        48
-      ],
-      "id": "5369a196-c34f-4cf1-9b7f-95108ce7b81c",
-      "name": "find metadatas json"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "ea58b61e-9efd-4e17-9011-96d6ea283f75",
-              "leftValue": "={{ $node[\"Process metadata count\"].json.count}}",
-              "rightValue": "={{ $node[\"Code repo_url list & repo count\"].json.repo_count }}",
-              "operator": {
-                "type": "number",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "looseTypeValidation": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        1120,
-        48
-      ],
-      "id": "8fe49503-bdfc-4599-9413-d552e072f67c",
-      "name": "If completed soca jobs",
-      "alwaysOutputData": false
-    },
-    {
-      "parameters": {
-        "mode": "chooseBranch"
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        1392,
-        -80
-      ],
-      "id": "8ddfb09f-14e7-421f-90fa-5df5575f8e20",
-      "name": "Merge"
-    },
-    {
-      "parameters": {
-        "mode": "raw",
-        "jsonOutput": "=\n{\n\"repos_url\": {{ $json.repos_url }},\n\"repo_count\": {{ $json.repo_count }},\n\"project\": {{ $node[\"Trigger\"].json.project }}\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        1568,
-        -80
-      ],
-      "id": "9c1a807b-e9b4-4293-b5b3-2a4e8abcbf5a",
-      "name": "Edit Fields"
     },
     {
       "parameters": {
@@ -169,120 +22,388 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -368,
+        -496,
         16
       ],
       "id": "a4fc405c-5785-49a4-83ac-b9a98fb4f345",
       "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/repos-updated.txt",
+        "options": {
+          "fileExtension": ""
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        -160
+      ],
+      "id": "97e36988-076e-408c-a565-a41a6da0d00f",
+      "name": "Read updated repos"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "=data",
+        "options": {
+          "encoding": "utf8"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        -160
+      ],
+      "id": "6926b27f-bae0-4a16-a1de-72b238cb6d99",
+      "name": "Extract updated repos"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e7505975-1f8c-4499-b626-8861a2427b2b",
+              "name": "updated_text",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        -160
+      ],
+      "id": "d7443017-2290-47d3-9144-554d5ba9e3a9",
+      "name": "Set updated repos text"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/repos-removed.txt",
+        "options": {
+          "fileExtension": ""
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        208
+      ],
+      "id": "694d3db6-ee43-483b-b037-eaa10a2fcab3",
+      "name": "Read removed repos"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "=data",
+        "options": {
+          "encoding": "utf8"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        208
+      ],
+      "id": "5586132c-ed4d-40ca-8373-ffeb1517b5d4",
+      "name": "Extract removed repos"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8edf762f-4614-4b34-a536-98da1f9bde81",
+              "name": "removed_text",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        208
+      ],
+      "id": "9e59fdc0-b3f6-4bd8-b315-2099aa0867d5",
+      "name": "Set removed repos text"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        592,
+        96
+      ],
+      "id": "1403e4ce-26d3-4215-a8a3-ed8a5e6eb848",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/repos.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        16
+      ],
+      "id": "5c8fd543-7776-4519-abe5-e51fcd7a1ecb",
+      "name": "Read all repos"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "=data",
+        "options": {
+          "encoding": "utf8"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        144,
+        16
+      ],
+      "id": "37c7a1e9-35b4-4892-9c09-70f2d764581b",
+      "name": "Extract all repos"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8edf762f-4614-4b34-a536-98da1f9bde81",
+              "name": "all_repos_text",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        352,
+        16
+      ],
+      "id": "6596694b-5c74-4988-b0bf-fbe15da5a397",
+      "name": "Set all repos text"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1856,
+        208
+      ],
+      "id": "2f786091-8ef5-4abd-896e-49fbf739cb4a",
+      "name": "Wait",
+      "webhookId": "6ddc46bd-8f5f-45d5-a3d0-03f984f5d555"
+    },
+    {
+      "parameters": {
+        "jsCode": "const status = JSON.parse($json.stdout.trim());\n\nreturn [{\n  json: status,\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        16
+      ],
+      "id": "54975e62-159d-44ba-8310-3b19636ff81d",
+      "name": "Process metadata count"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1984,
+        -304
+      ],
+      "id": "b2da3425-ef6e-452d-bafb-77a9e625023f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "command": "=cat \"/root/.n8n-files/soca/{{$node[\"Trigger\"].json.project}}/status.json\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        16
+      ],
+      "id": "f85c03fe-2df9-4ed6-9c97-40b668b68254",
+      "name": "check status"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseList = (value) =>\n  String(value ?? '')\n    .split(/\\r?\\n/)\n    .map(repo => repo.trim())\n    .filter(Boolean);\n\nconst reposUpdated = parseList($json.updated_text);\nconst reposRemoved = parseList($json.removed_text);\nconst allRepos = parseList($json.all_repos_text);\n\nreturn [{\n  json: {\n    repos_url: reposUpdated,\n    repo_count: reposUpdated.length,\n\n    all_repos_url: allRepos,\n    all_repo_count: allRepos.length,\n\n    repos_removed: reposRemoved,\n    removed_count: reposRemoved.length,\n\n    has_changes:\n      reposUpdated.length > 0 || reposRemoved.length > 0,\n\n    project: $(\"Trigger\").first().json.project,\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        16
+      ],
+      "id": "7ea9e3d6-322e-47c2-bbaa-be3389b3e59d",
+      "name": "Build incremental repository payload"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "processing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "7b9c6314-acf6-41d9-915d-de172b3612f7"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "524474ae-0002-4066-b993-574b9cfedfca",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "db4e912c-fae5-47ca-a143-96d3c71582c0",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1664,
+        0
+      ],
+      "id": "36783104-0005-47a5-b5b5-c2de70ad86da",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=SOCA failed: {{ JSON.stringify($json.failed_repos || []) }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        48
+      ],
+      "id": "15e114da-921b-4228-abc1-6d14fe5a23c5",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        848,
+        16
+      ],
+      "id": "4374d5ce-1855-4fbc-87a6-5d2e4e18825a",
+      "name": "Merge all repos"
     }
   ],
   "pinData": {},
   "connections": {
-    "Extract from File": {
-      "main": [
-        [
-          {
-            "node": "Code repo_url list & repo count",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Execute soca-runner": {
       "main": [
         [
           {
-            "node": "Read target repos",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Read target repos": {
-      "main": [
-        [
-          {
-            "node": "Extract from File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code repo_url list & repo count": {
-      "main": [
-        [
-          {
-            "node": "find metadatas json",
+            "node": "Read updated repos",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Merge",
+            "node": "Read removed repos",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait": {
-      "main": [
-        [
+          },
           {
-            "node": "find metadatas json",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Process metadata count": {
-      "main": [
-        [
-          {
-            "node": "If completed soca jobs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "find metadatas json": {
-      "main": [
-        [
-          {
-            "node": "Process metadata count",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If completed soca jobs": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 1
-          }
-        ],
-        [
-          {
-            "node": "Wait",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields",
+            "node": "Read all repos",
             "type": "main",
             "index": 0
           }
@@ -299,6 +420,201 @@
           }
         ]
       ]
+    },
+    "Read updated repos": {
+      "main": [
+        [
+          {
+            "node": "Extract updated repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract updated repos": {
+      "main": [
+        [
+          {
+            "node": "Set updated repos text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read removed repos": {
+      "main": [
+        [
+          {
+            "node": "Extract removed repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract removed repos": {
+      "main": [
+        [
+          {
+            "node": "Set removed repos text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set updated repos text": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set removed repos text": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Merge all repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read all repos": {
+      "main": [
+        [
+          {
+            "node": "Extract all repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract all repos": {
+      "main": [
+        [
+          {
+            "node": "Set all repos text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set all repos text": {
+      "main": [
+        [
+          {
+            "node": "Merge all repos",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "check status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process metadata count": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check status": {
+      "main": [
+        [
+          {
+            "node": "Process metadata count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build incremental repository payload": {
+      "main": [
+        [
+          {
+            "node": "check status",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge all repos": {
+      "main": [
+        [
+          {
+            "node": "Build incremental repository payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -306,7 +622,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "81c59eff-6f6c-4612-a87c-ccf9342a8ab9",
+  "versionId": "98d6ca8e-deb9-4cf4-ab46-b9c8933e94fb",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

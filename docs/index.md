@@ -1,51 +1,28 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18879858.svg)](https://doi.org/10.5281/zenodo.18879858)[![Project Status: Active ](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)[![GitHub release](https://img.shields.io/github/v/release/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG?include_prereleases)](https://github.com/SergioZSZ/Software-Quality-Observatory-Orchestrator-TFG/releases)![RSFC_Coverage](https://img.shields.io/badge/rsfc-coverage_83%25-green)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18879858.svg)](https://doi.org/10.5281/zenodo.18879858) [![Project Status: Active](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 # TFG – Orquestación automatizada de evaluación de software y generación de catálogo
 
-## 1. Objetivo del proyecto
+## Objetivo
 
-El objetivo del TFG es diseñar e implementar un sistema reproducible que:
+SQOO descubre repositorios de GitHub, extrae sus metadatos, evalúa la calidad del software y publica los resultados en un portal y en DashVERSE. El proceso es reproducible, incremental y se orquesta con n8n.
 
-1. Extraiga automáticamente repositorios de GitHub
-2. Genere metadatos estructurados del software
-3. Evalúe la calidad del software mediante indicadores automáticos
-4. Evalúe la calidad de los metadatos del software y, si se habilita, suba Issues automáticas a GitHub
-5. Prepare la información para su integración en dashboards (DashVERSE) y catálogos (SOCA)
-6. Permita orquestar todo el proceso mediante workflows automatizados
+## Arquitectura
 
-El sistema se basa en la integración y orquestación de herramientas existentes dentro de una arquitectura desacoplada y reproducible.
+| Componente | Función |
+| --- | --- |
+| n8n | Orquesta el workflow modular y sus subworkflows |
+| SOCA | Descubre cambios, extrae metadatos y genera el portal |
+| RSFC | Evalúa indicadores FAIR de software |
+| RESQUI | Ejecuta evaluaciones configurables de QualityPipelines |
+| RabbitMQ | Distribuye trabajos entre workers paralelos |
+| sw-metadata-bot | Evalúa metadatos e inicia issues opcionales |
+| Nginx | Publica los portales SOCA |
+| DashVERSE | Almacena y visualiza assessments RSFC y RESQUI |
 
+## Flujo actual
 
+`SQOO_modular_workflow.json` es el workflow principal. Recibe un `project`, organizaciones o usuarios de GitHub, repositorios adicionales y la opción `launch_issue`.
 
+SOCA compara el inventario actual con el estado anterior. Los repositorios nuevos o modificados se procesan mediante SOCA, RSFC y RESQUI, mientras que los eliminados se retiran de las salidas persistidas. sw-metadata-bot conserva una snapshot completa, el portal se regenera y DashVERSE solo recibe assessments nuevos.
 
-## 2. Arquitectura del sistema
----
-| Componente       | Rol                                    |
-| ---------------- | -------------------------------------- |
-| n8n              | Orquestación mediante workflows end-to-end y modulares |
-| soca_container   | extracción metadatos-repos y jobs soca |
-| rsfc_container   | creación de jobs rsfc                  |
-| rabbitmq         | message broker                         |
-| worker_rsfc      | procesamiento jobs indicadores         |
-| worker_soca      | procesamiento jobs metadatos           |
-| rate_limiter_rsfc| limitador tokens githubAPI worker_rsfc |
-| nginx            | publicacion del portal SOCA |
-| DashVerse        | observatorio de evaluación             |
-| sw-metadata-bot  | Generación de issues sobre metadatos   |
-
-
-
-
-
-![Diagrama de flujo](images/flujo_SQOO.png)
-
-
-
-
-Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
-
-- Reproducibilidad
-- Portabilidad
-- Independencia del sistema operativo
-- Aislamiento de dependencias
-- Escalabilidad
+Consulta [Workflow](flujo.md) para el detalle y [Instalación](instalacion.md) para desplegar el sistema.

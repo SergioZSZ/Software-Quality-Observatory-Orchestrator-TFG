@@ -2,6 +2,6 @@
 
 echo "configuring somef..."
 TOKEN="${GITHUB_API_TOKEN}"
-printf "%s\n\n\n\n\n\n" "$TOKEN" | uv run somef configure
+printf "%s\n\n\n\n\n\n\n\n\n\n\n" "$TOKEN" | uv run somef configure
 
 exec "$@"

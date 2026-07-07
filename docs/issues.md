@@ -1,12 +1,5 @@
-# 7. Issues
+# Mejoras pendientes
 
-## NEXT STEPS:
-
- ### General:
-- Update de la documentación completa
-
-### Opcional:
-- Ver si merece la pena hacer un RO
-- Realizar un nuevo estudio de consumo de memoria + espacio en disco
-- documentar manual de uso de usuario de dashverse
-
+- Evaluar la generación de Research Objects.
+- Repetir el estudio de memoria y espacio en disco con el pipeline incremental.
+- Ampliar el manual de usuario de DashVERSE.
