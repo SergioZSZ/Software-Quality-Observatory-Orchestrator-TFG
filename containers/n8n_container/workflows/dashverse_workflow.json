@@ -184,7 +184,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const source = \"rsfc\"; \n\nreturn $input.all().map(item => {\n  const assessment = item.json.assessment;\n  const repoUrl = assessment.assessedSoftware?.url || null;\n\n  const match = repoUrl?.match(\n    /^https?:\\/\\/github\\.com\\/([^/]+)\\/[^/]+\\/?$/i\n  );\n  const owner = match?.[1] || null;\n\n  const generatedId =\n    repoUrl && assessment.dateCreated\n      ? `${repoUrl}/assessment/${source}/${encodeURIComponent(assessment.dateCreated)}`\n      : null;\n\n  item.json.assessment = {\n    ...assessment,\n    \"@id\": assessment[\"@id\"] || generatedId,\n    author: assessment.author ?? owner,\n  };\n\n  return item;\n});"
+        "jsCode": "const assessmentSource = \"rsfc\";\n\nreturn $input.all().map(item => {\n  const assessment = item.json.assessment ?? item.json;\n  const repoUrl = assessment.assessedSoftware?.url ?? null;\n\n  const match = repoUrl?.match(\n    /^https?:\\/\\/github\\.com\\/([^/]+)\\/([^/?#]+)\\/?$/i\n  );\n\n  const owner = match?.[1] ?? null;\n  const repo = match?.[2] ?? null;\n\n  const generatedId =\n    repoUrl && assessment.dateCreated\n      ? `${repoUrl}/assessment/${assessmentSource}/${encodeURIComponent(assessment.dateCreated)}`\n      : null;\n\n  const existingCreatorName =\n    typeof assessment.creator === \"object\"\n      ? assessment.creator?.name\n      : assessment.creator;\n\n  const existingAuthorName =\n    typeof assessment.author === \"object\"\n      ? assessment.author?.name\n      : assessment.author;\n\n  // Prioridad: owner real del repo > creator existente > author existente > fallback\n  const creatorName =\n    owner ??\n    existingCreatorName ??\n    existingAuthorName ??\n    \"Unknown\";\n\n  item.json.assessment = {\n    ...assessment,\n\n    \"@id\": assessment[\"@id\"] || generatedId,\n\n    creator: {\n      ...(typeof assessment.creator === \"object\" ? assessment.creator : {}),\n      name: creatorName,\n    },\n\n    // Compatibilidad con validadores antiguos de DashVERSE\n    author: {\n      name: creatorName,\n    },\n\n    assessedSoftware: {\n      ...assessment.assessedSoftware,\n      name: assessment.assessedSoftware?.name || repo,\n      url: repoUrl,\n    },\n  };\n\n  return item;\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -194,19 +194,6 @@
       ],
       "id": "6cdca9cb-b8e4-4508-b496-f4869ef6eb2e",
       "name": "Code input @id + author in json-ld RSFC"
-    },
-    {
-      "parameters": {
-        "jsCode": "const source = \"resqui\";\n\nreturn $input.all().map(item => {\n  const assessment = item.json.assessment;\n  const repoUrl = assessment.assessedSoftware?.url || null;\n\n  const match = repoUrl?.match(\n    /^https?:\\/\\/github\\.com\\/([^/]+)\\/[^/]+\\/?$/i\n  );\n  const owner = match?.[1] || null;\n\n  const generatedId =\n    repoUrl && assessment.dateCreated\n      ? `${repoUrl}/assessment/${source}/${encodeURIComponent(assessment.dateCreated)}`\n      : null;\n\n  item.json.assessment = {\n    ...assessment,\n    \"@id\": assessment[\"@id\"] || generatedId,\n    author: assessment.author ?? owner,\n  };\n\n  return item;\n});"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        96,
-        48
-      ],
-      "id": "a77be7c5-1b78-4967-8ab8-4548292f43c1",
-      "name": "Code input @id + author in json-ld RESQUI"
     }
   ],
   "pinData": {},
@@ -264,7 +251,7 @@
       "main": [
         [
           {
-            "node": "Code input @id + author in json-ld RESQUI",
+            "node": "Post assessments_raw RESQUI",
             "type": "main",
             "index": 0
           }
@@ -303,17 +290,6 @@
           }
         ]
       ]
-    },
-    "Code input @id + author in json-ld RESQUI": {
-      "main": [
-        [
-          {
-            "node": "Post assessments_raw RESQUI",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "active": false,
@@ -321,7 +297,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "1f2c2be1-932e-4aef-bf97-d9e68c031c45",
+  "versionId": "45ffd8fe-9059-4318-9a70-734f894122cc",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },
