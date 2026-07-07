@@ -1,0 +1,277 @@
+dashboard_title: Overview
+description: null
+css: "/* Friendlier empty-state styling (matches other dashboards) */\n.chart-container .ant-empty,\n.chart-container .empty-state,\n.chart-container .superset-chart-no-results,\n.chart-container .empty-chart { padding: 24px !important; }\n.chart-container .ant-empty-description,\n.chart-container .empty-state-text,\n.chart-container .superset-chart-no-results-text,\n.chart-container .empty-chart-message {\n    font-size: 14px !important;\n    color: #5a6270 !important;\n    font-weight: 500;\n}\n.chart-container .ant-empty-description::after,\n.chart-container .empty-state-text::after,\n.chart-container .superset-chart-no-results-text::after,\n.chart-container .empty-chart-message::after {\n    content: \"Adjust the filters at the top, or read the chart description for guidance.\";\n    display: block;\n    margin-top: 10px;\n    font-size: 12px;\n    color: #888;\n    font-style: italic;\n    font-weight: normal;\n}\n\n/* KPI card chrome: subtle gradient, hover elevation, consistent inner\
+  \ padding */\n.dashboard-component-chart-holder { transition: box-shadow 0.2s, transform 0.2s; }\n.dashboard-component-chart-holder:hover {\n    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.10);\n    transform: translateY(-1px);\n}\n.chart-container .big-number-total, .chart-container .big_number_total {\n    background: linear-gradient(135deg, #ffffff, #f8fafc);\n    border-radius: 8px;\n    padding: 8px 10px;\n}\n.chart-container .big-number-total .header-line,\n.chart-container .big_number_total .header-line {\n    font-weight: 700;\n    letter-spacing: -0.01em;\n}\n.chart-container .big-number-total .subheader-line,\n.chart-container .big_number_total .subheader-line {\n    color: #5a6270;\n    text-transform: uppercase;\n    letter-spacing: 0.06em;\n    font-weight: 600;\n}\n"
+slug: global
+certified_by: null
+certification_details: null
+published: true
+uuid: 0dd60c19-2aac-4cfc-b650-fa85970101be
+position:
+  GRID_ID:
+    id: GRID_ID
+    type: GRID
+    parents:
+    - ROOT_ID
+    children:
+    - ROW-1
+    - ROW-4
+    - ROW-5
+    - ROW-7
+    - ROW-13
+  ROOT_ID:
+    id: ROOT_ID
+    type: ROOT
+    children:
+    - GRID_ID
+  HEADER_ID:
+    id: HEADER_ID
+    meta:
+      text: Dashboard
+    type: HEADER
+  CHART-1:
+    id: CHART-1
+    meta:
+      width: 4
+      height: 40
+      chartId: 100
+      sliceName: Total Assessments
+      uuid: 04a5f0a9-87de-4262-a4c9-19eb93052c5a
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-1
+    children: []
+  CHART-2:
+    id: CHART-2
+    meta:
+      width: 4
+      height: 40
+      chartId: 101
+      sliceName: Total Software
+      uuid: 00896a2d-ac2a-4800-a361-dd9838896222
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-1
+    children: []
+  CHART-5:
+    id: CHART-5
+    meta:
+      width: 4
+      height: 40
+      chartId: 104
+      sliceName: Total Projects
+      uuid: 2f5d8c7e-7a3a-4c61-9b1c-9e2f6a9e7b41
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-1
+    children: []
+  ROW-1:
+    id: ROW-1
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-1
+    - CHART-5
+    - CHART-2
+  CHART-12:
+    id: CHART-12
+    meta:
+      width: 12
+      height: 60
+      chartId: 111
+      sliceName: Dimension Profile
+      uuid: 7f71f69e-f937-4297-9f31-018d9d756442
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-4
+    children: []
+  ROW-4:
+    id: ROW-4
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-12
+  CHART-13:
+    id: CHART-13
+    meta:
+      width: 12
+      height: 60
+      chartId: 112
+      sliceName: Assessment Activity Over Time
+      uuid: 321421a3-b5bf-488e-8fcc-da707f7ceb60
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-5
+    children: []
+  ROW-5:
+    id: ROW-5
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-13
+  CHART-15:
+    id: CHART-15
+    meta:
+      width: 12
+      height: 60
+      chartId: 114
+      sliceName: Top Failing Indicators
+      uuid: 3df8ccd7-afe1-4365-8e27-d846ed34c8a7
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-7
+    children: []
+  ROW-7:
+    id: ROW-7
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-15
+  CHART-21:
+    id: CHART-21
+    meta:
+      width: 12
+      height: 65
+      chartId: 120
+      sliceName: Checking Tools Usage
+      uuid: a3d1728c-6fb5-4c33-b8b3-da21daee40db
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-13
+    children: []
+  ROW-13:
+    id: ROW-13
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-21
+metadata:
+  color_scheme: supersetColors
+  label_colors: {}
+  default_filters: '{}'
+  expanded_slices:
+    '100': true
+    '101': true
+    '111': true
+    '112': true
+    '114': true
+    '120': true
+    '104': true
+  refresh_frequency: 0
+  chart_configuration:
+    '100':
+      id: 100
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 101
+        - 111
+        - 112
+        - 114
+        - 120
+        - 104
+    '101':
+      id: 101
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 100
+        - 111
+        - 112
+        - 114
+        - 120
+        - 104
+    '111':
+      id: 111
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 100
+        - 101
+        - 112
+        - 114
+        - 120
+        - 104
+    '112':
+      id: 112
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 100
+        - 101
+        - 111
+        - 114
+        - 120
+        - 104
+    '114':
+      id: 114
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 100
+        - 101
+        - 111
+        - 112
+        - 120
+        - 104
+    '120':
+      id: 120
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 100
+        - 101
+        - 111
+        - 112
+        - 114
+        - 104
+    '104':
+      id: 104
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 100
+        - 101
+        - 111
+        - 112
+        - 114
+        - 120
+  shared_label_colors: {}
+  cross_filters_enabled: false
+  native_filter_configuration: []
+  show_native_filters: false
+version: 1.0.0

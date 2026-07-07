@@ -1,0 +1,744 @@
+dashboard_title: Assessments
+description: null
+css: "/* Friendlier empty-state styling */\n.chart-container .ant-empty,\n.chart-container .empty-state,\n.chart-container .superset-chart-no-results,\n.chart-container .empty-chart { padding: 24px !important; }\n.chart-container .ant-empty-description,\n.chart-container .empty-state-text,\n.chart-container .superset-chart-no-results-text,\n.chart-container .empty-chart-message {\n    font-size: 14px !important;\n    color: #5a6270 !important;\n    font-weight: 500;\n}\n.chart-container .ant-empty-description::after,\n.chart-container .empty-state-text::after,\n.chart-container .superset-chart-no-results-text::after,\n.chart-container .empty-chart-message::after {\n    content: \"Adjust the filters at the top, or read the chart description for guidance.\";\n    display: block;\n    margin-top: 10px;\n    font-size: 12px;\n    color: #888;\n    font-style: italic;\n    font-weight: normal;\n}\n/* heatmap charts: leave breathing room below the canvas so x-axis labels stay visible when the description banner is shown */\n#chart-id-207 .chart-container,\n#chart-id-215 .chart-container {\n    padding-bottom: 18px;\n}\n\n/* KPI card chrome: subtle gradient, hover elevation, consistent inner padding */\n.dashboard-component-chart-holder { transition: box-shadow 0.2s, transform 0.2s; }\n.dashboard-component-chart-holder:hover {\n    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.10);\n    transform: translateY(-1px);\n}\n.chart-container .big-number-total, .chart-container .big_number_total {\n    background: linear-gradient(135deg, #ffffff, #f8fafc);\n    border-radius: 8px;\n    padding: 8px 10px;\n}\n.chart-container .big-number-total .header-line,\n.chart-container .big_number_total .header-line {\n    font-weight: 700;\n    letter-spacing: -0.01em;\n}\n.chart-container .big-number-total .subheader-line,\n.chart-container .big_number_total .subheader-line {\n    color: #5a6270;\n    text-transform: uppercase;\n    letter-spacing: 0.06em;\n    font-weight: 600;\n}\n"
+slug: assessments
+certified_by: null
+certification_details: null
+published: true
+uuid: 1820539b-3d1e-4eb6-ae9a-ce9b7ac2be64
+position:
+  GRID_ID:
+    id: GRID_ID
+    type: GRID
+    parents:
+    - ROOT_ID
+    children:
+    - ROW-9
+    - ROW-PROFILE-TREND
+    - ROW-PROJECT-TREND
+    - ROW-11
+    - ROW-3
+    - ROW-5
+    - ROW-IMPR-PROFILE
+    - ROW-6
+    - ROW-FAILED-PROFILE
+    - ROW-7
+    - ROW-SW-IMPR-VIZ
+    - ROW-10
+  ROOT_ID:
+    id: ROOT_ID
+    type: ROOT
+    children:
+    - GRID_ID
+  HEADER_ID:
+    id: HEADER_ID
+    meta:
+      text: Dashboard
+    type: HEADER
+  CHART-6:
+    id: CHART-6
+    meta:
+      width: 6
+      height: 65
+      chartId: 205
+      sliceName: Dimension Profile
+      uuid: 7f71f69e-f937-4297-9f31-018d9d756442
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-3
+    children: []
+  ROW-3:
+    id: ROW-3
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-6
+    - CHART-OUTCOME-MIX
+  CHART-9:
+    id: CHART-9
+    meta:
+      width: 12
+      height: 65
+      chartId: 208
+      sliceName: Top Performing Software
+      uuid: b3b748b4-45c1-4427-b847-46b57599a6d8
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-5
+    children: []
+  CHART-10:
+    id: CHART-10
+    meta:
+      width: 12
+      height: 65
+      chartId: 209
+      sliceName: Improvement Targets
+      uuid: f2826f04-9e34-47fd-b3b7-96f8cf09fa80
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-6
+    children: []
+  CHART-11:
+    id: CHART-11
+    meta:
+      width: 12
+      height: 65
+      chartId: 210
+      sliceName: Failed Checks Detail
+      uuid: 6e6cb154-cb9b-42c9-a508-dd6d6d122e2a
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-7
+    children: []
+  ROW-5:
+    id: ROW-5
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-9
+  ROW-6:
+    id: ROW-6
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-10
+  CHART-14:
+    id: CHART-14
+    meta:
+      width: 12
+      height: 65
+      chartId: 213
+      sliceName: Quality Across Projects
+      uuid: 310ec87c-c999-4001-a628-bc7489f0f52c
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-9
+    children: []
+  CHART-15:
+    id: CHART-15
+    meta:
+      width: 12
+      height: 65
+      chartId: 214
+      sliceName: Software Improvement Targets
+      uuid: 8ef6aaaa-18a6-405e-b394-101f9bf3e6df
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-10
+    children: []
+  ROW-7:
+    id: ROW-7
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-11
+  ROW-9:
+    id: ROW-9
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-14
+  ROW-10:
+    id: ROW-10
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-15
+  CHART-16:
+    id: CHART-16
+    meta:
+      width: 12
+      height: 110
+      chartId: 215
+      sliceName: Outcomes Heatmap
+      uuid: 557a32e9-c95a-4726-bdcd-c96f49c36fed
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-11
+    children: []
+  ROW-11:
+    id: ROW-11
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-16
+  CHART-OUTCOME-MIX:
+    id: CHART-OUTCOME-MIX
+    meta:
+      width: 6
+      height: 65
+      chartId: 220
+      sliceName: Outcome Mix
+      uuid: 49a686de-52d9-4987-b057-d00c43659430
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-3
+    children: []
+  CHART-OUTCOME-TREND:
+    id: CHART-OUTCOME-TREND
+    meta:
+      width: 12
+      height: 55
+      chartId: 221
+      sliceName: Outcome Trend
+      uuid: 70b43be8-543b-4426-ac71-c3ec22d9f619
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-PROFILE-TREND
+    children: []
+  ROW-PROFILE-TREND:
+    id: ROW-PROFILE-TREND
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-OUTCOME-TREND
+  ROW-SW-IMPR-VIZ:
+    id: ROW-SW-IMPR-VIZ
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-SW-IMPR-VIZ
+  CHART-SW-IMPR-VIZ:
+    id: CHART-SW-IMPR-VIZ
+    meta:
+      width: 12
+      height: 60
+      chartId: 222
+      sliceName: Software Improvement Visual
+      uuid: 7df64705-8129-41be-babc-db0ff8ec062f
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-SW-IMPR-VIZ
+    children: []
+  CHART-IMPR-PROFILE:
+    id: CHART-IMPR-PROFILE
+    meta:
+      width: 12
+      height: 65
+      chartId: 231
+      sliceName: Improvement Targets by Indicator
+      uuid: 75c59cb8-3dec-4073-8c64-1e42e61a48a0
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-IMPR-PROFILE
+    children: []
+  CHART-FAILED-PROFILE:
+    id: CHART-FAILED-PROFILE
+    meta:
+      width: 12
+      height: 65
+      chartId: 230
+      sliceName: Failed Checks by Software
+      uuid: 8368b886-5ed1-4c0d-9425-236d888dd12c
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-FAILED-PROFILE
+    children: []
+  ROW-IMPR-PROFILE:
+    id: ROW-IMPR-PROFILE
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-IMPR-PROFILE
+  ROW-FAILED-PROFILE:
+    id: ROW-FAILED-PROFILE
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-FAILED-PROFILE
+  CHART-PROJECT-TREND:
+    id: CHART-PROJECT-TREND
+    meta:
+      width: 12
+      height: 55
+      chartId: 240
+      sliceName: Project Trend
+      uuid: 31fe6eda-9c0f-4e3a-b2c1-2a8f471d5e60
+    type: CHART
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - ROW-PROJECT-TREND
+    children: []
+  ROW-PROJECT-TREND:
+    id: ROW-PROJECT-TREND
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    type: ROW
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    children:
+    - CHART-PROJECT-TREND
+metadata:
+  color_scheme: supersetColors
+  label_colors: {}
+  default_filters: '{}'
+  expanded_slices:
+    '205': true
+    '208': true
+    '209': true
+    '210': true
+    '213': true
+    '214': true
+    '215': true
+    '220': true
+    '221': true
+    '222': true
+    '230': true
+    '231': true
+    '240': true
+  refresh_frequency: 0
+  chart_configuration:
+    '205':
+      id: 205
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 208
+        - 209
+        - 210
+        - 213
+        - 214
+        - 215
+        - 220
+        - 221
+        - 222
+        - 230
+        - 231
+        - 240
+    '208':
+      id: 208
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 209
+        - 210
+        - 213
+        - 214
+        - 215
+        - 220
+        - 221
+        - 222
+        - 230
+        - 231
+        - 240
+    '209':
+      id: 209
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 210
+        - 213
+        - 214
+        - 215
+        - 220
+        - 221
+        - 222
+        - 230
+        - 231
+        - 240
+    '210':
+      id: 210
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 213
+        - 214
+        - 215
+        - 220
+        - 221
+        - 222
+        - 230
+        - 231
+        - 240
+    '213':
+      id: 213
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 210
+        - 214
+        - 215
+        - 220
+        - 221
+        - 222
+        - 230
+        - 231
+        - 240
+    '214':
+      id: 214
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 210
+        - 213
+        - 215
+        - 220
+        - 221
+        - 222
+        - 230
+        - 231
+        - 240
+    '215':
+      id: 215
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 210
+        - 213
+        - 214
+        - 220
+        - 221
+        - 222
+        - 230
+        - 231
+        - 240
+    '220':
+      id: 220
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 210
+        - 213
+        - 214
+        - 215
+        - 221
+        - 222
+        - 230
+        - 231
+        - 240
+    '221':
+      id: 221
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 210
+        - 213
+        - 214
+        - 215
+        - 222
+        - 230
+        - 231
+        - 240
+    '222':
+      id: 222
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 210
+        - 213
+        - 214
+        - 215
+        - 220
+        - 221
+        - 230
+        - 231
+        - 240
+    '230':
+      id: 230
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 210
+        - 213
+        - 214
+        - 215
+        - 220
+        - 221
+        - 222
+        - 231
+        - 240
+    '231':
+      id: 231
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 210
+        - 213
+        - 214
+        - 215
+        - 220
+        - 221
+        - 222
+        - 230
+        - 240
+    '240':
+      id: 240
+      crossFilters:
+        scope: global
+        chartsInScope:
+        - 205
+        - 208
+        - 209
+        - 210
+        - 213
+        - 214
+        - 215
+        - 220
+        - 221
+        - 222
+        - 230
+        - 231
+  shared_label_colors: {}
+  cross_filters_enabled: true
+  native_filter_configuration:
+  - id: NATIVE_FILTER-author
+    name: Author
+    type: NATIVE_FILTER
+    scope:
+      excluded: []
+      rootPath:
+      - ROOT_ID
+    targets:
+    - column:
+        name: author_username
+      datasetUuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156
+    filterType: filter_select
+    chartsInScope:
+    - 205
+    - 208
+    - 210
+    - 213
+    - 214
+    - 215
+    - 230
+    - 231
+    - 240
+    controlValues:
+      multiSelect: true
+      inverseSelection: false
+      searchAllOptions: false
+      enableEmptyFilter: false
+    defaultDataMask:
+      filterState:
+        value: null
+    cascadeParentIds: []
+  - id: NATIVE_FILTER-project
+    name: Project
+    type: NATIVE_FILTER
+    scope:
+      excluded: []
+      rootPath:
+      - ROOT_ID
+    targets:
+    - column:
+        name: project_name
+      datasetUuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156
+    filterType: filter_select
+    chartsInScope:
+    - 205
+    - 208
+    - 209
+    - 210
+    - 213
+    - 214
+    - 215
+    - 230
+    - 231
+    - 240
+    controlValues:
+      multiSelect: true
+      inverseSelection: false
+      searchAllOptions: false
+      enableEmptyFilter: false
+    defaultDataMask:
+      filterState:
+        value: null
+    cascadeParentIds:
+    - NATIVE_FILTER-author
+  - id: NATIVE_FILTER-software
+    name: Software
+    type: NATIVE_FILTER
+    scope:
+      excluded: []
+      rootPath:
+      - ROOT_ID
+    targets:
+    - column:
+        name: software_name
+      datasetUuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156
+    filterType: filter_select
+    chartsInScope:
+    - 205
+    - 208
+    - 210
+    - 213
+    - 214
+    - 215
+    - 230
+    - 231
+    - 240
+    controlValues:
+      multiSelect: true
+      inverseSelection: false
+      searchAllOptions: false
+      enableEmptyFilter: false
+    defaultDataMask:
+      filterState:
+        value: null
+    cascadeParentIds:
+    - NATIVE_FILTER-author
+    - NATIVE_FILTER-project
+  - id: NATIVE_FILTER-dimension
+    name: Dimension
+    type: NATIVE_FILTER
+    scope:
+      excluded: []
+      rootPath:
+      - ROOT_ID
+    targets:
+    - column:
+        name: dimension_name
+      datasetUuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156
+    filterType: filter_select
+    chartsInScope:
+    - 205
+    - 208
+    - 209
+    - 210
+    - 213
+    - 214
+    - 215
+    - 230
+    - 231
+    - 240
+    controlValues:
+      multiSelect: true
+      inverseSelection: false
+      searchAllOptions: false
+      enableEmptyFilter: false
+    defaultDataMask:
+      filterState:
+        value: null
+    cascadeParentIds:
+    - NATIVE_FILTER-author
+    - NATIVE_FILTER-project
+    - NATIVE_FILTER-software
+  - id: NATIVE_FILTER-date
+    name: Assessment date
+    type: NATIVE_FILTER
+    scope:
+      excluded: []
+      rootPath:
+      - ROOT_ID
+    targets:
+    - column:
+        name: assessed_at
+      datasetUuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156
+    filterType: filter_time
+    chartsInScope:
+    - 205
+    - 208
+    - 210
+    - 213
+    - 214
+    - 215
+    - 230
+    - 231
+    - 240
+    controlValues:
+      enableEmptyFilter: false
+    defaultDataMask:
+      filterState:
+        value: null
+    cascadeParentIds: []
+version: 1.0.0

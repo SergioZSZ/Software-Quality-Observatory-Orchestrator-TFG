@@ -1,0 +1,45 @@
+SET search_path TO api, public;
+
+BEGIN;
+
+-- dimensions
+{% for r in dimension_files.results %}
+{%   set d = r.content | from_json %}
+{%   if d.abbreviation and d.name %}
+{%     set name = d.name | replace("'", "''") %}
+{%     set desc = (d.description | default('')) | replace("'", "''") %}
+{%     set src  = (d.source | default({}) | to_json) | replace("'", "''") %}
+INSERT INTO dimensions (identifier, name, description, status, source)
+VALUES ('{{ d.abbreviation }}', '{{ name }}', '{{ desc }}', 'Active', '{{ src }}'::jsonb)
+ON CONFLICT (identifier) DO UPDATE SET
+    name = EXCLUDED.name,
+    description = EXCLUDED.description,
+    source = EXCLUDED.source,
+    updated_at = CURRENT_TIMESTAMP;
+{%   endif %}
+{% endfor %}
+
+-- indicators
+{% for r in indicator_files.results %}
+{%   set i = r.content | from_json %}
+{%   if i.abbreviation and i.name %}
+{%     set name = i.name | replace("'", "''") %}
+{%     set desc = (i.description | default('')) | replace("'", "''") %}
+{%     set status = (i.status | default('Active')) | replace("'", "''") %}
+{%     set dim = (i.qualityDimension | default({}) | to_json) | replace("'", "''") %}
+{%     set contact = (i.contact | default({}) | to_json) | replace("'", "''") %}
+{%     set src = (i.source | default({}) | to_json) | replace("'", "''") %}
+INSERT INTO indicators (identifier, name, description, status, quality_dimension, contact, source)
+VALUES ('{{ i.abbreviation }}', '{{ name }}', '{{ desc }}', '{{ status }}', '{{ dim }}', '{{ contact }}'::jsonb, '{{ src }}'::jsonb)
+ON CONFLICT (identifier) DO UPDATE SET
+    name = EXCLUDED.name,
+    description = EXCLUDED.description,
+    status = EXCLUDED.status,
+    quality_dimension = EXCLUDED.quality_dimension,
+    contact = EXCLUDED.contact,
+    source = EXCLUDED.source,
+    updated_at = CURRENT_TIMESTAMP;
+{%   endif %}
+{% endfor %}
+
+COMMIT;

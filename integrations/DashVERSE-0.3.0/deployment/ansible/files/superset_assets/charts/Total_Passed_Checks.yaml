@@ -1,0 +1,24 @@
+slice_name: Passed Checks
+description: Number of checks whose outcome is Pass.
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    label: passed
+    expressionType: SQL
+    sqlExpression: COUNT(*) FILTER (WHERE outcome = 'Pass')
+  header_font_size: 0.25
+  subheader_font_size: 0.1
+  subheader: Checks With Pass Outcome
+  color_picker:
+    r: 17
+    g: 119
+    b: 51
+    a: 1
+  number_format: ',d'
+query_context: null
+cache_timeout: null
+uuid: 7b9e3a40-b1f2-4d8e-9f7c-5d1e6c4a8b22
+version: 1.0.0
+dataset_uuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156

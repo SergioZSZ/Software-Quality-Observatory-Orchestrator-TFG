@@ -1,0 +1,24 @@
+slice_name: Total Checks
+description: Total checks performed across all assessments. Each assessment contributes its own checks; counts grow with activity.
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    label: count
+    expressionType: SQL
+    sqlExpression: COUNT(*)
+  header_font_size: 0.25
+  subheader_font_size: 0.1
+  subheader: Total Checks Performed
+  color_picker:
+    r: 0
+    g: 114
+    b: 178
+    a: 1
+  number_format: ',d'
+query_context: null
+cache_timeout: null
+uuid: 659bb956-250c-4d2b-86c3-aa95ad8add7c
+version: 1.0.0
+dataset_uuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156

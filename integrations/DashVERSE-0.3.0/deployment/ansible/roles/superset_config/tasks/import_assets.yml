@@ -1,0 +1,126 @@
+---
+
+- name: Stage assets in a wrapper folder for the import bundle
+  shell: |
+    set -e
+    rm -rf /tmp/dashverse_bundle /tmp/dashverse_chart_bundle /tmp/dashverse-superset-assets.zip /tmp/dashverse-superset-charts.zip
+    mkdir -p /tmp/dashverse_bundle/dashverse_assets
+    cp -r "{{ playbook_dir }}/../files/superset_assets/." /tmp/dashverse_bundle/dashverse_assets/
+    rm -f /tmp/dashverse_bundle/dashverse_assets/README.md
+    # Chart-import bundle: same files but metadata.type=Slice
+    cp -r /tmp/dashverse_bundle /tmp/dashverse_chart_bundle
+    sed -i 's/^type: Dashboard$/type: Slice/' /tmp/dashverse_chart_bundle/dashverse_assets/metadata.yaml
+    cd /tmp/dashverse_chart_bundle && zip -qr /tmp/dashverse-superset-charts.zip dashverse_assets
+    cd /tmp/dashverse_bundle && zip -qr /tmp/dashverse-superset-assets.zip dashverse_assets
+  changed_when: true
+
+- name: Import charts (overwrite honored)
+  shell: |
+    curl -s -X POST "{{ superset_api }}/chart/import/" \
+        -H "Authorization: Bearer {{ access_token }}" \
+        -H "Cookie: {{ session_cookie }}" \
+        -H "X-CSRFToken: {{ csrf_token }}" \
+        -F "formData=@/tmp/dashverse-superset-charts.zip" \
+        -F 'passwords={"databases/{{ database_name }}.yaml":"{{ database_password }}"}' \
+        -F "overwrite=true" \
+        -w "\nHTTP_STATUS:%{http_code}\n"
+  register: superset_charts_import
+  failed_when: "'HTTP_STATUS:200' not in superset_charts_import.stdout"
+
+- name: Show chart import result
+  debug:
+    var: superset_charts_import.stdout_lines
+
+- name: Reconcile chart UUIDs from YAML so dashboard position blocks resolve
+  shell: |
+    set -uo pipefail
+    fixed=0
+    skipped=0
+    failed=0
+    for f in "{{ playbook_dir }}"/../files/superset_assets/charts/*.yaml; do
+        slice_name=$(awk '/^slice_name:/ { sub(/^slice_name:[[:space:]]*/, ""); print; exit }' "$f")
+        target_uuid=$(awk '/^uuid:/ { sub(/^uuid:[[:space:]]*/, ""); print; exit }' "$f")
+        [ -z "$slice_name" ] || [ -z "$target_uuid" ] && { skipped=$((skipped+1)); continue; }
+        # Escape single quotes for SQL literal safety
+        sql_slice=$(printf '%s' "$slice_name" | sed "s/'/''/g")
+        # Run the UPDATE; capture the affected row count from psql output
+        result=$(kubectl exec -n dashverse deploy/postgresql -- \
+            psql -U {{ database_user }} -d {{ database_db }} -tA -v ON_ERROR_STOP=1 -c \
+            "UPDATE slices SET uuid = '${target_uuid}'::uuid \
+             WHERE slice_name = '${sql_slice}' \
+               AND (uuid IS NULL OR uuid::text <> '${target_uuid}') \
+             RETURNING id, slice_name;" 2>&1)
+        rc=$?
+        if [ "$rc" -ne 0 ]; then
+            echo "  failed: '${slice_name}' rc=${rc} output=${result}"
+            failed=$((failed+1))
+            continue
+        fi
+        if [ -n "$result" ]; then
+            echo "  fixed: '${slice_name}' -> ${target_uuid}"
+            fixed=$((fixed+1))
+        else
+            skipped=$((skipped+1))
+        fi
+    done
+    echo "chart uuid reconcile: fixed=${fixed} skipped=${skipped} failed=${failed}"
+  register: chart_uuid_reconcile
+  changed_when: "'fixed=0' not in chart_uuid_reconcile.stdout"
+  failed_when: false
+
+- name: Show chart UUID reconciliation result
+  debug:
+    var: chart_uuid_reconcile.stdout_lines
+
+- name: Import dashboard bundle into Superset
+  shell: |
+    curl -s -X POST "{{ superset_api }}/dashboard/import/" \
+        -H "Authorization: Bearer {{ access_token }}" \
+        -H "Cookie: {{ session_cookie }}" \
+        -H "X-CSRFToken: {{ csrf_token }}" \
+        -F "formData=@/tmp/dashverse-superset-assets.zip" \
+        -F 'passwords={"databases/{{ database_name }}.yaml":"{{ database_password }}"}' \
+        -F "overwrite=true" \
+        -w "\nHTTP_STATUS:%{http_code}\n"
+  register: superset_assets_import
+  failed_when: "'HTTP_STATUS:200' not in superset_assets_import.stdout"
+
+- name: Show dashboard import result
+  debug:
+    var: superset_assets_import.stdout_lines
+
+- name: Invalidate Superset chart-data cache for all DashVERSE datasets
+  shell: |
+    curl -s -X POST "{{ superset_api }}/cachekey/invalidate" \
+      -H "Authorization: Bearer {{ access_token }}" \
+      -H "Cookie: {{ session_cookie }}" \
+      -H "X-CSRFToken: {{ csrf_token }}" \
+      -H "Content-Type: application/json" \
+      -d '{"datasource_uids": [
+        "36f136b1-53e0-41c9-9f21-180bdea10683__table",
+        "9ccd1028-35e4-4b23-9d3b-178fac4ed156__table",
+        "4372e3b3-6fa2-4369-b068-74204fa4d16f__table",
+        "3a34e152-6e74-46ce-8f6c-14189a402411__table",
+        "164f117c-f8f7-42df-88d4-445b1159d457__table",
+        "eacc0b0c-6e6c-4c75-84c2-115ef1ffc527__table",
+        "6ac66a0a-6568-4438-83cf-9ff9e634dab1__table",
+        "354c08ce-1f0c-447f-b414-7c8d1885a022__table"
+      ]}' \
+      -w "\nHTTP_STATUS:%{http_code}\n"
+  register: superset_cache_invalidate
+  changed_when: "'HTTP_STATUS:200' in superset_cache_invalidate.stdout or 'HTTP_STATUS:201' in superset_cache_invalidate.stdout"
+  failed_when: false   # cache bust failing should not fail the whole setup
+
+- name: Show cache invalidation result
+  debug:
+    var: superset_cache_invalidate.stdout_lines
+
+- name: Clean up temp bundles
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/dashverse-superset-assets.zip
+    - /tmp/dashverse-superset-charts.zip
+    - /tmp/dashverse_bundle
+    - /tmp/dashverse_chart_bundle

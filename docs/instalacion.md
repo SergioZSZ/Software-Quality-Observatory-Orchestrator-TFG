@@ -88,58 +88,189 @@ En el nodo `Conf` configurar:
 
 El portal quedará disponible en `http://localhost:8030/portals/<project>/`.
 
-## DashVERSE 0.2.0
+## DashVERSE 0.3.0
 
-En Windows, el despliegue se realiza desde Ubuntu en WSL con Docker Desktop y su integración WSL activada. Se recomienda trabajar en el sistema de archivos Linux, no bajo `/mnt/c`.
+### 1. Entrar en DashVERSE
 
-### Requisitos
-
-- Docker
-- Make
-- OpenTofu
-- Minikube
-- Helm
-- kubectl
-- Ansible
-
-### Despliegue
+Desde la raíz del repositorio SQOO:
 
 ```bash
-cd integrations/DashVERSE-0.2.0
+cd integrations/DashVERSE-0.3.0
+```
+
+Comprobar los mandatos disponibles:
+
+```bash
+just --list
+```
+
+Comprobar dependencias:
+
+```bash
+just check-deps
+```
+
+### 2. Arrancar Minikube
+
+```bash
 minikube config set driver docker
 minikube start --cpus=4 --memory=4096 --driver=docker
-helm repo add Superset https://apache.github.io/superset --force-update
-helm repo update
-make deploy
-make sync-apply
-make status
-make port-forward
 ```
 
-Mientras `make port-forward` esté activo se exponen:
+Comprobar el estado:
 
+```bash
+minikube status
+kubectl get ns
+```
+
+### 3. Desplegar DashVERSE
+
+```bash
+just forward_address=0.0.0.0 deploy
+```
+
+Este mandato realiza el despliegue completo:
+
+- comprueba las dependencias;
+- comprueba o arranca Minikube;
+- construye las imágenes de backend y frontend;
+- aplica la infraestructura con OpenTofu;
+- configura los port-forwards;
+- sincroniza el catálogo de indicadores y dimensiones de EVERSE;
+- importa dashboards, charts y datasets en Superset.
+
+Si el despliegue falla en la importación de dashboards con `zip: not found`:
+
+```bash
+sudo apt update
+sudo apt install -y zip unzip
+just setup-dashboards
+```
+
+### 4. Comprobar servicios
+
+```bash
+just status
+```
+
+Consultar credenciales generadas:
+
+```bash
+just show-access
+```
+
+Consultar logs generales:
+
+```bash
+just logs
+```
+
+Logs concretos:
+
+```bash
+just logs-postgres
+just logs-postgrest
+just logs-superset
+just logs-backend
+just logs-frontend
+```
+
+### 5. URLs expuestas
+
+Con los port-forwards activos se exponen los siguientes servicios:
+
+- Frontend DashVERSE: `http://localhost:8080`
 - Superset: `http://localhost:8088`
-- Demo portal: `http://localhost:8080`
 - API de assessments: `http://localhost:3000`
-- API de autenticación: `http://localhost:8000`
+- API de autenticación/backend: `http://localhost:8000`
+- Documentación de PostgREST: `http://localhost:3001`
+- Documentación del backend: `http://localhost:8001`
 
-Las credenciales se consultan con:
+Comprobaciones rápidas:
 
 ```bash
-bash ./scripts/show-access.sh
+curl -I http://localhost:8088/health
+curl http://localhost:3000/
 ```
 
-Los dashboards base se configuran con `make setup-dashboards`. Las plantillas SQOO se importan desde `integrations/dashboards/` y deben publicarse con permisos para el rol utilizado, por ejemplo `Public`.
+### 6. Crear usuario
 
-Para obtener `DASHVERSE_JWT`, crear una cuenta e iniciar sesión en `http://localhost:8000`. El token se guarda en `containers/.env`; no se copia manualmente en los nodos de n8n.
+Acceder al backend:
 
-### Parada y arranque posterior
+```text
+http://localhost:8000
+```
+
+Crear un usuario para SQOO, por ejemplo:
+
+```text
+username: sqoo
+email: sqoo@example.org
+password: <password>
+```
+
+### 7. Generar el token JWT
+
+DashVERSE 0.3.0 incluye un mandato rápido para generar el JWT:
 
 ```bash
-# Parar
-minikube stop
+just jwt <usuario> '<password>'
+```
 
-# Volver a iniciar
-minikube start
-make port-forward
+Ejemplo:
+
+```bash
+just jwt sqoo '<password>'
+```
+
+
+
+### 8. Configurar SQOO
+
+En `containers/.env` configurar:
+
+```env
+DASHVERSE_JWT=<token_generado_con_just_jwt>
+SUPERSET_PUBLIC_DOMAIN=http://localhost:8088
+```
+
+### 9. Reimportar dashboards o resincronizar catálogo
+
+Reimportar dashboards de Superset:
+
+```bash
+just setup-dashboards
+```
+
+Resincronizar indicadores y dimensiones EVERSE:
+
+```bash
+just trigger-sync
+```
+
+### 10. Parada y arranque posterior
+
+Parar Minikube:
+
+```bash
+minikube stop
+```
+
+Volver a arrancar:
+
+```bash
+minikube start --driver=docker
+```
+
+Comprobar el servicio de port-forward:
+
+```bash
+just port-forward-status
+```
+
+Si los port-forwards no están activos:
+
+```bash
+just forward_address=0.0.0.0 port-forward
 ```

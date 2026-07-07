@@ -158,7 +158,7 @@ def rsfc_indicators_generation(job_id,target,repo_url,base_dir,token):
             )
 
         try:
-            response = rfsc_runner(str(staging_path),repo_url,token)
+            response = rfsc_runner(str(staging_path), repo_url, token, target)
             last_status = response.status
 
             if last_status["status"] == "success":

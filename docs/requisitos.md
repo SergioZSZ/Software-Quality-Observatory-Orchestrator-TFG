@@ -11,26 +11,62 @@ En Windows, Docker Desktop debe tener activada la integración con WSL si se des
 
 ## DashVERSE
 
-DashVERSE se despliega desde Linux o Ubuntu en WSL. Requiere:
+DashVERSE 0.3.0 se despliega desde Linux sobre Kubernetes local con Minikube. Todos los comandos de `kubectl`, `minikube`, `tofu`, `ansible-playbook` y `just` deben ejecutarse desde el mismo entorno para compartir el contexto de Kubernetes.
 
-- Make
-- OpenTofu
-- Minikube
-- Helm
-- kubectl
-- Ansible
+Requisitos principales:
 
-`kubectl`, `make deploy`, `make sync-apply`, `make setup-dashboards` y `make port-forward` deben ejecutarse desde el mismo entorno para compartir el contexto de Kubernetes.
+- Docker Engine con Compose v2.
+- Git.
+- Minikube.
+- kubectl.
+- Helm.
+- OpenTofu (`tofu`).
+- Ansible (`ansible-playbook`).
+- Just.
+- curl.
+- jq.
+- base64.
+- zip y unzip.
+- netcat (`nc`).
 
-## Versiones integradas
+Instalación de utilidades habituales en Debian/Ubuntu:
 
-| Herramienta | Versión |
-| --- | --- |
-| SOCA | 0.0.4 |
-| RSFC | 0.1.7 |
-| SOMEF | 0.11.0 |
-| DashVERSE | 0.2.0 |
-| sw-metadata-bot | 0.5.3 |
-| RsMetaCheck | >=0.3.3 |
+```bash
+sudo apt update
+sudo apt install -y \
+  git \
+  curl \
+  jq \
+  unzip \
+  zip \
+  ansible \
+  netcat-openbsd
+```
 
-RESQUI utiliza el submódulo `QualityPipelines-2.0` fijado por el repositorio.
+Además, deben estar instalados Docker, Minikube, kubectl, Helm, OpenTofu y Just.
+
+Comprobación desde la raíz de DashVERSE:
+
+```bash
+cd integrations/DashVERSE-0.3.0
+just check-deps
+```
+
+#### Herramientas usadas en el proyecto:
+- SOCA 0.0.4:
+https://github.com/oeg-upm/soca/releases
+
+- RSFC 0.1.7:
+https://github.com/oeg-upm/rsfc/releases/tag/v0.1.7
+
+- SOMEF 0.11.1:
+https://github.com/KnowledgeCaptureAndDiscovery/somef/releases/tag/0.11.1
+
+- DASHVERSE 0.3.0: 
+https://github.com/EVERSE-ResearchSoftware/DashVERSE/releases/tag/v0.3.0
+
+- sw-metadata-bot 0.5.3:
+https://github.com/SoftwareUnderstanding/sw-metadata-bot/releases/tag/v0.5.3
+
+- RsMetaCheck >=0.3.3:
+https://github.com/SoftwareUnderstanding/RsMetaCheck/releases

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}{{ dashboard.title }} - DashVERSE{% endblock %}
+
+{% block body_class %} class="embed"{% endblock %}
+
+{% block content %}
+<section class="dashboard-embed" style="position: relative;">
+    <div id="dashboard-skeleton" class="dashboard-skeleton" aria-hidden="true">
+        <div class="skeleton-row">
+            <div class="skeleton-bar skeleton-kpi"></div>
+            <div class="skeleton-bar skeleton-kpi"></div>
+            <div class="skeleton-bar skeleton-kpi"></div>
+        </div>
+        <div class="skeleton-bar skeleton-chart"></div>
+        <div class="skeleton-row">
+            <div class="skeleton-bar skeleton-chart skeleton-narrow"></div>
+            <div class="skeleton-bar skeleton-chart"></div>
+        </div>
+    </div>
+    {% if embedded_uuid %}
+    <div id="dashboard-mount" data-slug="{{ slug }}" data-embedded-uuid="{{ embedded_uuid }}" data-superset-url="{{ superset_external_url }}" data-hide-filters="{{ '1' if dashboard.hide_filters else '0' }}"></div>
+    {% else %}
+    <iframe
+        id="dashboard-frame"
+        data-slug="{{ slug }}"
+        data-superset-port="8088"
+        data-superset-url="{{ superset_external_url }}"
+        {% if native_filters_key %}data-native-filters-key="{{ native_filters_key }}"{% endif %}
+        {% if encoded_software_filter %}data-native-filters="{{ encoded_software_filter }}"{% endif %}
+        frameborder="0"
+        allowfullscreen
+        title="{{ dashboard.title }} Dashboard"
+    ></iframe>
+    {% endif %}
+</section>
+
+{% if embedded_uuid %}
+<script src="https://unpkg.com/@superset-ui/embedded-sdk@0.1.0-alpha.10/bundle/index.js"></script>
+<script>
+(function() {
+    var mount = document.getElementById('dashboard-mount');
+    var supersetUrl = mount.getAttribute('data-superset-url');
+    if (!supersetUrl) {
+        var host = window.location.hostname;
+        var protocol = window.location.protocol;
+        supersetUrl = protocol + '//' + host + ':8088';
+    }
+    var embeddedUuid = mount.getAttribute('data-embedded-uuid');
+    var hideFilters = mount.getAttribute('data-hide-filters') === '1';
+
+    supersetEmbeddedSdk.embedDashboard({
+        id: embeddedUuid,
+        supersetDomain: supersetUrl,
+        mountPoint: mount,
+        // frontend mints a fresh, short-lived guest token per request. the
+        // sdk calls this each time it needs to authenticate the iframe.
+        fetchGuestToken: function() {
+            return fetch('/superset/guest-token/' + mount.getAttribute('data-slug'), {
+                method: 'POST',
+                credentials: 'same-origin',
+            }).then(function(r) { return r.json(); })
+              .then(function(j) { return j.token; });
+        },
+        dashboardUiConfig: {
+            hideTitle: true,
+            hideChartControls: false,
+            filters: hideFilters
+                ? { visible: false, expanded: false }
+                : { expanded: true },
+            // standalone=3 was added in Superset 4.x to hide the filter
+            // bar entirely (not just collapse it). The SDK's
+            // filters.visible flag was introduced earlier but only
+            // collapses in some builds. Belt-and-suspenders.
+            urlParams: hideFilters ? { standalone: '3' } : {},
+        },
+    });
+
+    // fade the skeleton once the iframe mounts. the embed sdk doesn't
+    // expose a stable onload hook so wait a moment for the iframe and
+    // then watch its load event.
+    var skel = document.getElementById('dashboard-skeleton');
+    if (skel) {
+        var hideSkeleton = function() {
+            skel.classList.add('hide');
+            setTimeout(function() { skel.style.display = 'none'; }, 600);
+        };
+        var tries = 0;
+        var pollIframe = function() {
+            var iframe = mount.querySelector('iframe');
+            if (iframe) {
+                iframe.addEventListener('load', hideSkeleton);
+                // safety net: hide after 8s regardless
+                setTimeout(hideSkeleton, 8000);
+            } else if (tries++ < 50) {
+                setTimeout(pollIframe, 100);
+            } else {
+                hideSkeleton();
+            }
+        };
+        pollIframe();
+    }
+})();
+</script>
+<style>
+#dashboard-mount,
+#dashboard-mount iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    flex: 1;
+    min-height: 0;
+    display: block;
+}
+</style>
+{% else %}
+<script>
+(function() {
+    var iframe = document.getElementById('dashboard-frame');
+    var slug = iframe.getAttribute('data-slug');
+    var supersetUrl = iframe.getAttribute('data-superset-url');
+    var nativeFiltersKey = iframe.getAttribute('data-native-filters-key');
+    var nativeFilters = iframe.getAttribute('data-native-filters');
+
+    if (!supersetUrl) {
+        var supersetPort = iframe.getAttribute('data-superset-port');
+        var host = window.location.hostname;
+        var protocol = window.location.protocol;
+        supersetUrl = protocol + '//' + host + ':' + supersetPort;
+    }
+
+    var url = supersetUrl + '/superset/dashboard/' + slug + '/?standalone=2';
+    if (nativeFiltersKey) {
+        url += '&native_filters_key=' + nativeFiltersKey;
+    } else if (nativeFilters) {
+        url += '&native_filters=' + nativeFilters;
+    }
+    iframe.src = url;
+
+    var skel = document.getElementById('dashboard-skeleton');
+    if (skel) {
+        var hideSkeleton = function() {
+            skel.classList.add('hide');
+            setTimeout(function() { skel.style.display = 'none'; }, 600);
+        };
+        iframe.addEventListener('load', hideSkeleton);
+        setTimeout(hideSkeleton, 8000);
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

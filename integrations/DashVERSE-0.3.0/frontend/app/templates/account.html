@@ -1,0 +1,1090 @@
+{% extends "base.html" %}
+
+{% block title %}Account - DashVERSE{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Account</h1>
+    <p>Manage your account and API tokens.</p>
+</section>
+
+{% set s = stats or {} %}
+{% set pass_pct = (s.my_pass_rate * 100) | round(1) if s.my_pass_rate is not none else None %}
+<section class="account-stats" aria-label="Your assessment stats">
+    <div class="stat-card stat-neutral">
+        <div class="stat-value">{{ '{:,}'.format(s.my_assessments | default(0)) }}</div>
+        <div class="stat-label">Assessments</div>
+    </div>
+    <div class="stat-card stat-neutral">
+        <div class="stat-value">{{ '{:,}'.format(s.my_projects | default(0)) }}</div>
+        <div class="stat-label">Projects</div>
+    </div>
+    <div class="stat-card stat-neutral">
+        <div class="stat-value">{{ '{:,}'.format(s.my_software | default(0)) }}</div>
+        <div class="stat-label">Software</div>
+    </div>
+    <div class="stat-card stat-neutral">
+        <div class="stat-value">{{ '{:,}'.format(s.my_checks | default(0)) }}</div>
+        <div class="stat-label">Checks</div>
+    </div>
+    <div class="stat-card stat-positive">
+        <div class="stat-value">{{ '{:,}'.format(s.my_passed | default(0)) }}</div>
+        <div class="stat-label">Passed</div>
+    </div>
+    <div class="stat-card stat-negative">
+        <div class="stat-value">{{ '{:,}'.format(s.my_failed | default(0)) }}</div>
+        <div class="stat-label">Failed</div>
+    </div>
+    <div class="stat-card stat-neutral">
+        <div class="stat-value">{% if pass_pct is none %}-{% else %}{{ pass_pct }}%{% endif %}</div>
+        <div class="stat-label">Pass Rate</div>
+    </div>
+</section>
+
+<style>
+.account-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+.stat-card {
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-card);
+    padding: 0.95rem 1.1rem;
+    box-shadow: var(--shadow-card);
+    /* Stat cards display values, not navigation. They share their
+       visual chrome with the other cards on the site but intentionally
+       skip the hover-lift affordance used on .dashboard-card and
+       .learn-link -- a clickable card invites a click, a value card
+       doesn't. */
+}
+.stat-value {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+}
+.stat-label {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+.stat-neutral  .stat-value { color: #0072b2; }
+.stat-positive .stat-value { color: #117733; }
+.stat-negative .stat-value { color: #CC3311; }
+</style>
+
+{% if error %}
+<section class="about" style="text-align: left;">
+    <p style="color: #c0392b; margin: 0;">{{ error }}</p>
+</section>
+{% endif %}
+
+<section class="account-section">
+    <h2>Profile</h2>
+    <div class="profile-grid">
+        <div class="profile-row">
+            <span class="profile-label">Username</span>
+            <span class="profile-value">{{ user.username }}</span>
+        </div>
+        {% if profile.email %}
+        <div class="profile-row">
+            <span class="profile-label">Email</span>
+            <span class="profile-value">{{ profile.email }}</span>
+        </div>
+        {% endif %}
+        {% if profile.id %}
+        <div class="profile-row">
+            <span class="profile-label">User ID</span>
+            <span class="profile-value">{{ profile.id }}</span>
+        </div>
+        {% endif %}
+        <div class="profile-row">
+            <span class="profile-label">Role</span>
+            <span class="profile-value">{{ 'superuser' if user.is_superuser else 'standard user' }}</span>
+        </div>
+        {% if profile.is_active is defined %}
+        <div class="profile-row">
+            <span class="profile-label">Status</span>
+            <span class="profile-value">{{ 'active' if profile.is_active else 'inactive' }}</span>
+        </div>
+        {% endif %}
+        {% if profile.created_at %}
+        <div class="profile-row">
+            <span class="profile-label">Member since</span>
+            <span class="profile-value">{{ profile.created_at[:10] }}</span>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="account-section">
+    <h2>My projects</h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">
+        Assessments are grouped by project. New projects default to <strong>Public</strong> (visible to anonymous viewers on Overview and Assessments). Lower the tier per project to <strong>Authenticated</strong> (only logged-in users) or <strong>Private</strong> (only you). Deleting a project unassigns its software, which then stays private to you until you move it into another project.
+    </p>
+    {% if projects %}
+    <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+        <thead style="background: var(--color-light-bg);">
+            <tr>
+                <th style="text-align: left; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Name</th>
+                <th style="text-align: left; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Visibility</th>
+                <th style="text-align: left; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Software</th>
+                <th style="text-align: left; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Created</th>
+                <th style="text-align: right; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in projects %}
+            {% set sw_in_project = software | selectattr('project_id', 'equalto', p.id) | list %}
+            <tr style="border-top: 1px solid #e2e8f0;">
+                <td style="padding: 0.5rem 0.75rem;">
+                    <a href="/dashboard/assessments?project={{ p.name|urlencode }}" class="link-pill" title="View assessments in {{ p.name }}" style="display: inline-block; margin-bottom: 0.4rem;">{{ p.name }}</a>
+                    <form method="post" action="/account/projects/{{ p.id }}/rename" style="display: flex; gap: 0.4rem;">
+                        <input name="name" value="{{ p.name }}" maxlength="255" style="flex: 1; padding: 0.35rem; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 0.85rem;">
+                        <button type="submit" class="btn-secondary" style="cursor: pointer; font-size: 0.85rem; padding: 0.35rem 0.75rem;" title="Rename">Rename</button>
+                    </form>
+                </td>
+                <td style="padding: 0.75rem;">
+                    {% set vis_color = {'public': '#2f855a', 'authenticated': '#1d4ed8', 'private': '#c0392b'} %}
+                    <span style="color: {{ vis_color[p.visibility] }};">{{ p.visibility|capitalize }}</span>
+                </td>
+                <td style="padding: 0.75rem; font-size: 0.9rem; color: var(--color-text-muted);">
+                    {% if sw_in_project %}
+                    {{ sw_in_project | map(attribute='software_name') | join(', ') }}
+                    {% else %}
+                    (none)
+                    {% endif %}
+                </td>
+                <td style="padding: 0.75rem; font-size: 0.9rem; color: var(--color-text-muted);">{{ p.created_at[:10] if p.created_at else '' }}</td>
+                <td style="padding: 0.75rem; text-align: right; white-space: nowrap;">
+                    <button type="button" class="btn-secondary share-btn" style="cursor: pointer;"
+                        data-share-path="/dashboard/assessments?project={{ p.name|urlencode }}"
+                        data-share-label="{{ p.name }}">Share</button>
+                    <form method="post" action="/account/projects/{{ p.id }}/visibility" style="display: inline-flex; gap: 0.3rem;">
+                        <select name="visibility" style="padding: 0.4rem; border: 1px solid #cbd5e0; border-radius: 4px; font-size: 0.85rem;">
+                            <option value="private" {% if p.visibility == 'private' %}selected{% endif %}>Private</option>
+                            <option value="authenticated" {% if p.visibility == 'authenticated' %}selected{% endif %}>Authenticated</option>
+                            <option value="public" {% if p.visibility == 'public' %}selected{% endif %}>Public</option>
+                        </select>
+                        <button type="submit" class="btn-secondary" style="cursor: pointer;">Set</button>
+                    </form>
+                    {% if sw_in_project %}
+                    <button type="button" class="btn-secondary" style="cursor: not-allowed; opacity: 0.5;" title="Cannot delete: {{ sw_in_project|length }} software still assigned. Move or delete them first." disabled>Delete</button>
+                    {% else %}
+                    <form method="post" action="/account/projects/{{ p.id }}/delete" style="display: inline;" onsubmit='return confirm("Delete project " + {{ p.name|tojson }} + "? This cannot be undone.");'>
+                        <button type="submit" class="btn-secondary" style="cursor: pointer;">Delete</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">You don't have any projects yet. Create one below to start receiving assessments.</p>
+    {% endif %}
+
+    <form method="post" action="/account/projects" style="margin-top: 1rem; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; display: flex; gap: 0.5rem; align-items: end; flex-wrap: wrap;">
+        <label style="flex: 1; min-width: 200px;">
+            <span style="display: block; font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">New project name</span>
+            <input name="name" required maxlength="255" placeholder="e.g. data-pipeline" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px;">
+        </label>
+        <label style="display: flex; flex-direction: column; min-width: 180px;">
+            <span style="display: block; font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">Visibility</span>
+            <select name="visibility" style="padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px;">
+                <option value="public" selected>Public (anyone)</option>
+                <option value="authenticated">Authenticated (logged-in users)</option>
+                <option value="private">Private (only me)</option>
+            </select>
+        </label>
+        <button type="submit" class="btn-primary" style="cursor: pointer;">Create project</button>
+    </form>
+</section>
+
+{% if software %}
+{# inline SVG icon helpers reused in this section #}
+{% macro icon_share() %}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>{% endmacro %}
+{% macro icon_trash() %}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>{% endmacro %}
+
+<section class="account-section">
+    <h2>My software</h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">
+        Every piece of software you have assessed, grouped by its current project. Move a software to another project to change who can see its assessments, or override its visibility directly. Three tiers: <strong>public</strong> (anyone), <strong>authenticated</strong> (any logged-in user), <strong>private</strong> (only you). A per-software setting always wins over the project's tier.
+    </p>
+
+    {# Bucket software by project_id (preserve original list order within
+       each bucket). Build a list of (project, [sw, ...]) groups in
+       project_id-asc order, with the "Unassigned" group last. #}
+    {% set groups = namespace(byid={}) %}
+    {% set _unassigned = [] %}
+    {% for sw in software %}
+        {% if sw.project_id is none %}
+            {% set _ = _unassigned.append(sw) %}
+        {% else %}
+            {% if sw.project_id not in groups.byid %}
+                {% set _ = groups.byid.update({sw.project_id: []}) %}
+            {% endif %}
+            {% set _ = groups.byid[sw.project_id].append(sw) %}
+        {% endif %}
+    {% endfor %}
+    {% set vis_color = {'public': '#2f855a', 'authenticated': '#1d4ed8', 'private': '#c0392b'} %}
+
+    {% for p in projects %}
+        {% set sw_list = groups.byid.get(p.id, []) %}
+        {% if sw_list %}
+        <div class="software-group">
+            <div class="software-group-header">
+                <h3 class="software-group-name">{{ p.name }}</h3>
+                <span class="software-group-meta">
+                    <span class="vis-badge vis-{{ p.visibility }}">{{ p.visibility|capitalize }}</span>
+                    <span>{{ sw_list|length }} software</span>
+                </span>
+            </div>
+            <table class="account-table">
+                <thead>
+                    <tr>
+                        <th>Software</th>
+                        <th>Assessments</th>
+                        {% if projects | length > 1 %}<th>Move to</th>{% endif %}
+                        <th>Visibility</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sw in sw_list %}
+                    {% set effective = sw.visibility if sw.visibility else p.visibility %}
+                    <tr>
+                        <td><a href="/dashboard/assessments?software={{ sw.software_name|urlencode }}" class="link-pill" title="View assessments for {{ sw.software_name }}">{{ sw.software_name }}</a></td>
+                        <td class="muted">{{ sw.assessment_count }}</td>
+                        {% if projects | length > 1 %}
+                        <td>
+                            <form method="post" action="/account/software/assign" class="inline-form">
+                                <input type="hidden" name="software_name" value="{{ sw.software_name }}">
+                                <select name="project_id" class="form-select form-select-sm">
+                                    {% for pp in projects %}
+                                    <option value="{{ pp.id }}" {% if pp.id == sw.project_id %}selected{% endif %}>{{ pp.name }} ({{ pp.visibility }})</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn-secondary btn-sm">Move</button>
+                            </form>
+                        </td>
+                        {% endif %}
+                        <td>
+                            <div class="vis-current">
+                                <span class="vis-badge vis-{{ effective }}">{{ effective|capitalize }}</span>
+                                <span class="muted">{% if sw.visibility %}(override){% else %}(inherits){% endif %}</span>
+                            </div>
+                            <form method="post" action="/account/software/visibility" class="inline-form">
+                                <input type="hidden" name="software_name" value="{{ sw.software_name }}">
+                                <select name="visibility" class="form-select form-select-sm">
+                                    <option value="clear" {% if not sw.visibility %}selected{% endif %}>Inherit from project</option>
+                                    <option value="public" {% if sw.visibility == 'public' %}selected{% endif %}>Public (anyone)</option>
+                                    <option value="authenticated" {% if sw.visibility == 'authenticated' %}selected{% endif %}>Authenticated (logged-in users)</option>
+                                    <option value="private" {% if sw.visibility == 'private' %}selected{% endif %}>Private (only me)</option>
+                                </select>
+                                <button type="submit" class="btn-secondary btn-sm">Set</button>
+                            </form>
+                        </td>
+                        <td class="actions-cell">
+                            <div class="action-cluster">
+                                <button type="button" class="btn-secondary btn-sm share-btn"
+                                    data-share-path="/dashboard/assessments?software={{ sw.software_name|urlencode }}"
+                                    data-share-label="{{ sw.software_name }}" title="Share link">
+                                    {{ icon_share() }} Share
+                                </button>
+                                <form method="post" action="/account/software/delete" class="inline-form" onsubmit='return confirm("Delete all " + {{ sw.assessment_count|tojson }} + " assessment(s) for " + {{ sw.software_name|tojson }} + "? This cannot be undone.");'>
+                                    <input type="hidden" name="software_name" value="{{ sw.software_name }}">
+                                    <button type="submit" class="btn-secondary btn-sm" title="Delete all assessments">
+                                        {{ icon_trash() }} Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    {% if _unassigned %}
+    <div class="software-group">
+        <div class="software-group-header">
+            <h3 class="software-group-name">Unassigned</h3>
+            <span class="software-group-meta">
+                <span>{{ _unassigned|length }} software</span>
+            </span>
+        </div>
+        <table class="account-table">
+            <thead>
+                <tr>
+                    <th>Software</th>
+                    <th>Assessments</th>
+                    {% if projects %}<th>Move to</th>{% endif %}
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sw in _unassigned %}
+                <tr>
+                    <td><a href="/dashboard/assessments?software={{ sw.software_name|urlencode }}" class="link-pill" title="View assessments for {{ sw.software_name }}">{{ sw.software_name }}</a></td>
+                    <td class="muted">{{ sw.assessment_count }}</td>
+                    {% if projects %}
+                    <td>
+                        <form method="post" action="/account/software/assign" class="inline-form">
+                            <input type="hidden" name="software_name" value="{{ sw.software_name }}">
+                            <select name="project_id" class="form-select form-select-sm">
+                                <option value="" selected disabled>(unassigned)</option>
+                                {% for pp in projects %}
+                                <option value="{{ pp.id }}">{{ pp.name }} ({{ pp.visibility }})</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-secondary btn-sm">Move</button>
+                        </form>
+                    </td>
+                    {% endif %}
+                    <td style="text-align: right; white-space: nowrap;">
+                        <button type="button" class="btn-secondary btn-sm share-btn"
+                            data-share-path="/dashboard/assessments?software={{ sw.software_name|urlencode }}"
+                            data-share-label="{{ sw.software_name }}" title="Share link">
+                            {{ icon_share() }} Share
+                        </button>
+                        <form method="post" action="/account/software/delete" class="inline-form" onsubmit='return confirm("Delete all " + {{ sw.assessment_count|tojson }} + " assessment(s) for " + {{ sw.software_name|tojson }} + "? This cannot be undone.");'>
+                            <input type="hidden" name="software_name" value="{{ sw.software_name }}">
+                            <button type="submit" class="btn-secondary btn-sm" title="Delete all assessments">
+                                {{ icon_trash() }} Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+
+<style>
+/* My software grouped layout: one sub-card per project, then a table
+   inside each card. Uses the same border/shadow tokens as the rest of
+   the site so the cards feel like a single visual family. */
+.software-group {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: 0;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+.software-group-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem 0.65rem;
+    background: var(--color-light-bg);
+    border-bottom: 1px solid var(--color-border-soft);
+}
+.software-group-name {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: 'Outfit', 'Inter', sans-serif;
+}
+.software-group-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+/* Inline tables inside the project group cards. */
+.account-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.account-table thead th {
+    text-align: left;
+    padding: 0.6rem 0.95rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--color-border-soft);
+}
+.account-table tbody td {
+    padding: 0.7rem 0.95rem;
+    border-top: 1px solid var(--color-border-soft);
+    vertical-align: bottom;
+    font-size: 0.93rem;
+}
+.account-table tbody tr:first-child td { border-top: 0; }
+.account-table .muted { color: var(--color-text-muted); }
+
+/* Visibility badge: small pill that matches the dashboard palette. */
+.vis-badge {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    background: var(--color-surface);
+    border: 1px solid currentColor;
+}
+.vis-public        { color: #117733; }
+.vis-authenticated { color: #1d4ed8; }
+.vis-private       { color: #CC3311; }
+.vis-current {
+    font-size: 0.83rem;
+    margin-bottom: 0.35rem;
+}
+
+/* Themed form controls: shared by My software, My projects, API tokens
+   and Run-an-assessment forms. Uses the same border + focus tokens as
+   the rest of the site so inputs/selects feel like one family. */
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    font-family: inherit;
+    font-size: 0.94rem;
+    color: var(--color-text);
+    background: var(--color-surface);
+    transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+}
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.16);
+}
+.form-select-sm {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.86rem;
+}
+
+/* Inline-form: select + button on one line. The button keeps its
+   intrinsic width so it can't get crushed; the select absorbs the
+   remaining space. nowrap so we never get a button on its own row
+   beneath a tiny select. */
+.inline-form {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+.inline-form > .form-select { flex: 1 1 auto; min-width: 8rem; }
+.inline-form > .btn-secondary { flex: 0 0 auto; }
+
+/* Action cluster: groups Share + Delete (and any future row-level
+   actions) into a right-aligned, gap-spaced row that doesn't wrap. */
+.action-cluster {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+.actions-cell {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Bottom-align every cell content so the action buttons in one cell
+   line up with the form submit button in the neighbouring cell that
+   has a status row above its form. Without this the buttons float to
+   their cells' vertical centres and look misaligned across the row. */
+.account-table tbody td { vertical-align: bottom; }
+
+/* Small-button variant, same theme, tighter dimensions for tables. */
+.btn-sm {
+    padding: calc(0.35rem - 1.5px) calc(0.7rem - 1.5px);
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.btn-sm svg { flex: 0 0 14px; }
+</style>
+{% endif %}
+
+{% set recent = (stats or {}).my_recent or [] %}
+{% if recent %}
+<section class="account-section">
+    <h2>Recent activity</h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">Your last {{ recent | length }} assessments. The full list lives on the Assessments dashboard.</p>
+    <table class="account-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Software</th>
+                <th style="text-align: right;">Passed</th>
+                <th style="text-align: right;">Failed</th>
+                <th style="text-align: right;">N/A</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in recent %}
+            <tr>
+                <td class="muted">{{ r.assessed_at[:10] if r.assessed_at else '' }}</td>
+                <td><a href="/dashboard/assessments?software={{ r.software_name|urlencode }}" class="link-pill" title="View assessments for {{ r.software_name }}">{{ r.software_name }}</a></td>
+                <td style="text-align: right; color: #117733;">{{ r.passed }}</td>
+                <td style="text-align: right; color: #CC3311;">{{ r.failed }}</td>
+                <td style="text-align: right;" class="muted">{{ r.not_applicable }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endif %}
+
+
+<section class="account-section">
+    <h2>API tokens</h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 1rem;">
+        Long-lived bearer tokens for programmatic access (PostgREST, scripts).
+        Treat them like passwords.
+    </p>
+
+    {% if projects %}
+    <form method="post" action="/account/tokens" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: end; flex-wrap: wrap;">
+        <label style="flex: 1; min-width: 200px;">
+            <span style="display: block; font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">Token name <span style="font-weight: normal;">(optional)</span></span>
+            <input name="token_name" maxlength="100" placeholder="e.g. ci-pipeline" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px;">
+        </label>
+        <label style="min-width: 200px;">
+            <span style="display: block; font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">Project</span>
+            <select name="project_id" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px;">
+                {% for p in projects %}
+                <option value="{{ p.id }}">{{ p.name }} ({{ p.visibility }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label style="min-width: 140px;">
+            <span style="display: block; font-size: 0.9rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">Lifetime</span>
+            <select name="ttl_days" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 4px;">
+                <option value="7">7 days</option>
+                <option value="30">30 days</option>
+                <option value="60">60 days</option>
+                <option value="90" selected>90 days (max)</option>
+            </select>
+        </label>
+        <button type="submit" class="btn-primary" style="cursor: pointer;">Generate token</button>
+    </form>
+
+    {% if new_token %}
+    <div id="new-token" class="new-token-card" role="status" aria-live="polite">
+        <div class="new-token-head">
+            <span class="new-token-badge">New token</span>
+            <span class="new-token-warn">
+                Copy it now: this is the only time it will be shown.
+            </span>
+        </div>
+        <div class="new-token-body">
+            <pre id="new-token-value" class="new-token-value nohljsln" data-masked="1">{{ new_token }}</pre>
+            <div class="new-token-actions">
+                <button type="button" id="reveal-new-token" class="btn-secondary new-token-btn">Reveal</button>
+                <button type="button" id="copy-new-token" class="btn-primary new-token-btn">Copy</button>
+            </div>
+        </div>
+        <p id="new-token-meta" class="new-token-meta"></p>
+    </div>
+    <script>
+    (function() {
+        var card = document.getElementById('new-token');
+        var pre  = document.getElementById('new-token-value');
+        var copy = document.getElementById('copy-new-token');
+        var rev  = document.getElementById('reveal-new-token');
+        var meta = document.getElementById('new-token-meta');
+        if (!card || !pre) return;
+
+        // store the real token and render a masked placeholder so the
+        // raw JWT isn't visible at rest. Reveal swaps the displayed text;
+        // Copy always copies the real token.
+        var real = pre.textContent.trim();
+        var maskText = function(s) {
+            if (s.length <= 12) return '••••••••';
+            return s.slice(0, 6) + ' ' + '•'.repeat(40) + ' ' + s.slice(-6);
+        };
+        pre.textContent = maskText(real);
+
+        rev.addEventListener('click', function() {
+            var masked = pre.dataset.masked === '1';
+            if (masked) {
+                pre.textContent = real;
+                pre.dataset.masked = '0';
+                rev.textContent = 'Hide';
+            } else {
+                pre.textContent = maskText(real);
+                pre.dataset.masked = '1';
+                rev.textContent = 'Reveal';
+            }
+        });
+
+        copy.addEventListener('click', function() {
+            var prev = copy.textContent;
+            var done = function() {
+                copy.textContent = 'Copied!';
+                copy.classList.add('copy-btn-success');
+                setTimeout(function() {
+                    copy.classList.remove('copy-btn-success');
+                    copy.textContent = prev;
+                }, 1800);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(real).then(done, function() {
+                    copy.textContent = 'Copy failed';
+                });
+            } else {
+                var ta = document.createElement('textarea');
+                ta.value = real;
+                ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try { document.execCommand('copy'); done(); }
+                catch (e) { copy.textContent = 'Copy failed'; }
+                document.body.removeChild(ta);
+            }
+        });
+
+        // pull the JWT's exp claim so the user sees when this expires
+        // without having to scroll down to the table.
+        try {
+            var parts = real.split('.');
+            if (parts.length === 3) {
+                var pad = parts[1].length % 4;
+                var b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/') + (pad ? '='.repeat(4 - pad) : '');
+                var claims = JSON.parse(atob(b64));
+                if (claims.exp) {
+                    var exp = new Date(claims.exp * 1000);
+                    var days = Math.round((exp - Date.now()) / 86400000);
+                    var iso = exp.toISOString().slice(0, 10);
+                    meta.textContent = 'Expires ' + iso + ' (' + days + ' days)';
+                }
+            }
+        } catch (e) { /* metadata is nice-to-have, ignore parse errors */ }
+
+        // scroll the new-token card into view; the page reload after the
+        // form POST otherwise lands the user at the top of the document.
+        setTimeout(function() {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 60);
+    })();
+    </script>
+    {% endif %}
+
+    {% else %}
+    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: var(--color-text-muted);">
+        You need at least one project before you can generate an API token. Create one in the <strong>My projects</strong> section below.
+    </div>
+    {% endif %}
+
+    {% if tokens %}
+    <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+        <thead style="background: var(--color-light-bg);">
+            <tr>
+                <th style="text-align: left; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Name</th>
+                <th style="text-align: left; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Project</th>
+                <th style="text-align: left; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Created</th>
+                <th style="text-align: left; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Expires</th>
+                <th style="text-align: left; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Status</th>
+                <th style="text-align: right; padding: 0.75rem; font-size: 0.85rem; color: var(--color-text-muted);">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for token in tokens %}
+            {% set ns = namespace(proj_name=None) %}
+            {% for p in projects %}{% if p.id == token.project_id %}{% set ns.proj_name = p.name %}{% endif %}{% endfor %}
+            <tr style="border-top: 1px solid #e2e8f0;">
+                <td style="padding: 0.75rem;">{{ token.token_name or '(unnamed)' }}</td>
+                <td style="padding: 0.75rem; font-size: 0.9rem; color: var(--color-text-muted);">{{ ns.proj_name or '(default)' }}</td>
+                <td style="padding: 0.75rem; font-size: 0.9rem; color: var(--color-text-muted);">{{ token.created_at[:10] if token.created_at else '' }}</td>
+                <td style="padding: 0.75rem; font-size: 0.9rem; color: var(--color-text-muted);">{{ token.expires_at[:10] if token.expires_at else '' }}</td>
+                <td style="padding: 0.75rem;">
+                    {% if token.is_revoked %}
+                    <span style="color: #c0392b; font-size: 0.85rem;">revoked</span>
+                    {% else %}
+                    <span style="color: #2f855a; font-size: 0.85rem;">active</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 0.75rem; text-align: right;">
+                    {% if not token.is_revoked %}
+                    <form method="post" action="/account/tokens/{{ token.id }}/revoke" style="display: inline;" onsubmit="return confirm('Revoke this token?');">
+                        <button type="submit" class="btn-secondary" style="cursor: pointer;">Revoke</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="/account/tokens/{{ token.id }}/delete" style="display: inline;" onsubmit="return confirm('Permanently delete this revoked token?');">
+                        <button type="submit" class="btn-secondary" style="cursor: pointer;">Delete</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: var(--color-text-muted);">No tokens yet.</p>
+    {% endif %}
+</section>
+
+<section class="account-section">
+    <h2>Run an assessment</h2>
+    <p style="color: var(--color-text-muted); margin-bottom: 0.75rem;">
+        Use <a href="https://github.com/EVERSE-ResearchSoftware/resqui" target="_blank">resqui</a>
+        to assess a repository, then submit the result to DashVERSE.
+        Generate an API token above first; the recipes below assume it's
+        in the <code>DASHVERSE_TOKEN</code> environment variable.
+    </p>
+
+    <div class="run-tabs" role="tablist">
+        <button type="button" class="tab-btn active" data-tab="cli" role="tab" aria-selected="true">Command line</button>
+        <button type="button" class="tab-btn" data-tab="gha" role="tab" aria-selected="false">GitHub Actions</button>
+        <button type="button" class="tab-btn" data-tab="custom" role="tab" aria-selected="false">Custom upload</button>
+    </div>
+
+    <div class="tab-panel" id="tab-cli" role="tabpanel">
+        <p class="instance-url-note">
+            This instance's API URL: <code>{{ dashverse_api_url }}</code>.
+            Use it as <code>DASHVERSE_URL</code> below.
+        </p>
+        <ol class="howto-steps">
+            <li>
+                <p>Install resqui from the
+                    <a href="https://github.com/EVERSE-ResearchSoftware/QualityPipelines" target="_blank">QualityPipelines</a>
+                    repository (not on PyPI yet):</p>
+                <pre class="nohljsln">pip install "git+https://github.com/EVERSE-ResearchSoftware/QualityPipelines.git"</pre>
+            </li>
+            <li>
+                <p>Export your DashVERSE token, the API URL of this instance,
+                    and a personal
+                    <a href="https://github.com/settings/tokens" target="_blank">GitHub API token</a>
+                    (any token with the <code>public_repo</code> scope is fine):</p>
+                <pre class="nohljsln">export DASHVERSE_TOKEN="paste-your-dashverse-api-token"
+export DASHVERSE_URL="{{ dashverse_api_url }}"
+export RESQUI_GITHUB_TOKEN="paste-your-github-token"</pre>
+            </li>
+            <li>
+                <p>Run resqui against a remote repository (or omit <code>-u</code>
+                    to assess the current directory). The
+                    <code>-d</code> flag publishes the result directly to DashVERSE:</p>
+                <pre class="nohljsln">resqui \
+    -u https://github.com/EVERSE-ResearchSoftware/QualityPipelines.git \
+    -c configurations/basic.json \
+    -v \
+    -t $RESQUI_GITHUB_TOKEN \
+    -d $DASHVERSE_TOKEN</pre>
+            </li>
+        </ol>
+        <details class="expand-json" style="margin-top: 0.85rem;">
+            <summary>Show example output</summary>
+            <pre>$ resqui -u https://github.com/EVERSE-ResearchSoftware/QualityPipelines.git -c configurations/basic.json -v -t $RESQUI_GITHUB_TOKEN -d $DASHVERSE_TOKEN
+Loading configuration from 'configurations/basic.json'.
+GitHub API token ✔
+Repository URL: https://github.com/EVERSE-ResearchSoftware/QualityPipelines.git
+Project name: QualityPipelines
+Author: Tamas Gal
+Email: himself@tamasgal.com
+Version: v0.1.6
+Branch, tag or commit hash: dea5fe13df68e0f4541c4425823752f4b33f4b7e
+Checking indicators ...
+  has_license/HowFairIs (0.9s):
+    Found license file: 'LICENSE'.✔
+  has_citation/CFFConvert (0.3s):
+    Found valid CITATION.cff file in repository root.✔
+Summary has been written to resqui_summary.json
+Publishing summary ✔</pre>
+        </details>
+        <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-top: 0.75rem;">
+            Refresh the <a href="/dashboard/assessments">Assessments dashboard</a>
+            to see the new assessment.
+        </p>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-gha" role="tabpanel">
+        <p class="instance-url-note">
+            Uses the official
+            <a href="https://github.com/EVERSE-ResearchSoftware/resqui-github-action" target="_blank">resqui-github-action</a>.
+            The action assesses the repo and uploads the result when a
+            <code>dashverse_token</code> is provided.
+        </p>
+        <ol class="howto-steps">
+            <li>
+                <p>
+                    Add a <code>DASHVERSE_TOKEN</code> secret at
+                    <strong>Settings <span class="breadcrumb-sep">&rsaquo;</span> Secrets and variables <span class="breadcrumb-sep">&rsaquo;</span> Actions</strong>
+                    with the API token you generated above.
+                </p>
+            </li>
+            <li>
+                <p>Drop this workflow at <code>.github/workflows/dashverse.yml</code>:</p>
+{% raw %}<pre class="nohljsln">name: DashVERSE assessment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  assess:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run resqui
+        uses: EVERSE-ResearchSoftware/resqui-github-action@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          dashverse_token: ${{ secrets.DASHVERSE_TOKEN }}
+</pre>{% endraw %}
+            </li>
+            <li>
+                <p>Push to <code>main</code> (or trigger the workflow manually).
+                    Each run assesses the repository and uploads one
+                    assessment to DashVERSE.</p>
+            </li>
+        </ol>
+    </div>
+
+    <div class="tab-panel hidden" id="tab-custom" role="tabpanel">
+        <p class="instance-url-note">
+            For when your own application, CI job or measurement service
+            already produces quality data. Format it as an EVERSE
+            assessment JSON and POST it. resqui is not involved here.
+        </p>
+        <ol class="howto-steps">
+            <li>
+                <p>Produce an assessment JSON that conforms to the
+                    <a href="https://github.com/EVERSE-ResearchSoftware/schemas" target="_blank">EVERSE rsqa schema</a>.
+                    The DashVERSE API validates the payload at insert time.
+                    The minimum it needs:
+                </p>
+                <ul style="margin-top: 0.4rem; padding-left: 1.2rem; line-height: 1.55; font-size: 0.95rem;">
+                    <li><code>@context</code> referencing the rsqa schema (must contain <code>rsqa/</code>)</li>
+                    <li><code>@type</code> equal to <code>"SoftwareQualityAssessment"</code></li>
+                    <li><code>dateCreated</code>, <code>assessedSoftware.name</code>, and a <code>creator.name</code> (or legacy <code>author.name</code>)</li>
+                    <li>A non-empty <code>checks</code> array; each entry needs <code>assessesIndicator.@id</code>, <code>status.@id</code>, and <code>output</code></li>
+                </ul>
+                <p style="margin-top: 0.55rem;">A minimal payload that passes validation:</p>
+                <pre class="nohljsln">{
+  "@context": "https://w3id.org/everse/rsqa/0.0.1/",
+  "@type": "SoftwareQualityAssessment",
+  "dateCreated": "2026-05-29T10:00:00Z",
+  "creator": {
+    "name": "my-internal-quality-service",
+    "version": "1.4.0"
+  },
+  "assessedSoftware": {
+    "name": "my-tool",
+    "codeRepository": "https://github.com/your-org/your-repo"
+  },
+  "checks": [
+    {
+      "@type": "CheckResult",
+      "assessesIndicator": {
+        "@id": "https://w3id.org/everse/i/indicators/has_license"
+      },
+      "status": {
+        "@id": "schema:CompletedActionStatus"
+      },
+      "output": "pass"
+    }
+  ]
+}</pre>
+                <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-top: 0.4rem;">
+                    <code>output</code> accepts <code>pass</code> / <code>fail</code> /
+                    <code>not_applicable</code> (also <code>true</code> / <code>false</code> /
+                    <code>error</code>). Add an <code>evidence</code> string per check if you
+                    want the dashboards to show your reasoning. Pick indicator <code>@id</code>s
+                    from the
+                    <a href="https://everse.software/indicators/website/indicators.html" target="_blank">EVERSE indicators</a>.
+                </p>
+            </li>
+            <li>
+                <p>POST it to <code>/assessment</code> with your DashVERSE token:</p>
+                <pre class="nohljsln">curl -X POST {{ dashverse_api_url }}/assessment \
+    -H "Authorization: Bearer $DASHVERSE_TOKEN" \
+    -H "Content-Type: application/json" \
+    --data @assessment.json</pre>
+                <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-top: 0.35rem;">
+                    <code>201 Created</code> on success. The assessment lands
+                    in the project the token was issued for.
+                </p>
+            </li>
+        </ol>
+        <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-top: 0.75rem;">
+            Refresh the <a href="/dashboard/assessments">Assessments dashboard</a>
+            to see the new assessment.
+        </p>
+    </div>
+</section>
+
+<script>
+(function() {
+    var buttons = document.querySelectorAll('.run-tabs .tab-btn');
+    var panels  = document.querySelectorAll('.tab-panel');
+    buttons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var target = btn.getAttribute('data-tab');
+            buttons.forEach(function(b) {
+                var active = (b === btn);
+                b.classList.toggle('active', active);
+                b.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            panels.forEach(function(p) {
+                p.classList.toggle('hidden', p.id !== 'tab-' + target);
+            });
+        });
+    });
+})();
+</script>
+
+<dialog id="share-dialog" class="share-dialog" aria-labelledby="share-dialog-title">
+    <h3 id="share-dialog-title">Share link</h3>
+    <p class="share-dialog-body">Copy this URL and send it to whoever you want to share with. They will see whatever the current visibility setting allows them to see.</p>
+    <div class="share-dialog-input">
+        <input id="share-url-input" type="text" readonly>
+        <button type="button" id="share-copy-btn" class="btn-primary">Copy</button>
+    </div>
+    <div class="share-dialog-actions">
+        <button type="button" id="share-close-btn" class="btn-secondary">Close</button>
+    </div>
+</dialog>
+
+<style>
+.share-dialog {
+    border: 1px solid var(--color-border-soft);
+    border-radius: var(--radius-card);
+    padding: 1.25rem 1.5rem;
+    max-width: 560px;
+    min-width: 320px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-dropdown);
+    color: var(--color-text);
+}
+.share-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.4);
+}
+.share-dialog h3 {
+    margin: 0 0 0.45rem;
+    font-size: 1.1rem;
+    color: var(--color-text);
+}
+.share-dialog-body {
+    color: var(--color-text-muted);
+    margin: 0 0 0.85rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+.share-dialog-input {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+}
+.share-dialog-input input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.88rem;
+}
+.share-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+.share-btn {
+    margin-right: 0.35rem;
+}
+
+/* Bottom-align every table cell on /account so rows that mix
+   single-button cells with stacked status+form cells look anchored
+   to the same baseline. The default <td> alignment is `middle`
+   which makes lone buttons appear to float at the row's vertical
+   centre while stacked controls fill the cell top-to-bottom. */
+.account-section table tbody td {
+    vertical-align: bottom;
+}
+
+/* Inline forms (visibility / token actions / move-to-project) become
+   inline-flex so their select + button share a baseline rather than
+   stacking. Inline-flex also lets us hand the wrapper a small
+   bottom margin without disturbing inline siblings. */
+.account-section table tbody td > form {
+    vertical-align: bottom;
+}
+</style>
+
+<script>
+(function() {
+    var dialog   = document.getElementById('share-dialog');
+    var titleEl  = document.getElementById('share-dialog-title');
+    var input    = document.getElementById('share-url-input');
+    var copyBtn  = document.getElementById('share-copy-btn');
+    var closeBtn = document.getElementById('share-close-btn');
+    if (!dialog) return;
+
+    function resetCopyBtn() {
+        copyBtn.textContent = 'Copy';
+        copyBtn.classList.remove('copy-btn-success');
+    }
+
+    function showFeedback(label) {
+        copyBtn.textContent = label;
+        copyBtn.classList.add('copy-btn-success');
+        setTimeout(resetCopyBtn, 1600);
+    }
+
+    document.querySelectorAll('.share-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var label = btn.dataset.shareLabel || 'this resource';
+            var url   = window.location.origin + btn.dataset.sharePath;
+            titleEl.textContent = 'Share link to ' + label;
+            input.value = url;
+            resetCopyBtn();
+            if (typeof dialog.showModal === 'function') {
+                dialog.showModal();
+            } else {
+                dialog.setAttribute('open', '');
+            }
+            setTimeout(function() { input.select(); }, 30);
+        });
+    });
+
+    copyBtn.addEventListener('click', function() {
+        var done = function() { showFeedback('Copied'); };
+        var fail = function() { copyBtn.textContent = 'Copy failed'; };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(input.value).then(done, function() {
+                // fall back to execCommand if clipboard API was blocked
+                input.select();
+                try { document.execCommand('copy'); done(); } catch (e) { fail(); }
+            });
+        } else {
+            input.select();
+            try { document.execCommand('copy'); done(); } catch (e) { fail(); }
+        }
+    });
+
+    closeBtn.addEventListener('click', function() { dialog.close(); });
+    // close on backdrop click
+    dialog.addEventListener('click', function(ev) {
+        if (ev.target === dialog) { dialog.close(); }
+    });
+})();
+</script>
+{% endblock %}

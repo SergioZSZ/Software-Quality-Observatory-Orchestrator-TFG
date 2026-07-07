@@ -1,0 +1,43 @@
+slice_name: Checking Tools Usage
+description: Checks each tool ran, stacked by quality dimension. Bar length is the total checks; segments show which dimensions the tool covered.
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  x_axis: tool_name
+  groupby:
+  - dimension_name
+  metrics:
+  - label: checks
+    expressionType: SQL
+    sqlExpression: COUNT(*)
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: tool_name
+    operator: IS NOT NULL
+    comparator: ''
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: dimension_name
+    operator: IS NOT NULL
+    comparator: ''
+  color_scheme: supersetColors
+  label_colors:
+    FAIRness: '#0072B2'
+    Maintainability: '#009E73'
+    Functional suitability: '#E69F00'
+    Flexibility: '#CC79A7'
+    Security: '#56B4E9'
+  orientation: horizontal
+  stack: Stack
+  show_legend: true
+  show_value: false
+  rich_tooltip: true
+  y_axis_format: ',d'
+  row_limit: 50
+query_context: null
+cache_timeout: null
+uuid: a3d1728c-6fb5-4c33-b8b3-da21daee40db
+version: 1.0.0
+dataset_uuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156

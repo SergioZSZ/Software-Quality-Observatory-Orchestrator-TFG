@@ -27,10 +27,8 @@
 - Actualizado al commit https://github.com/EVERSE-ResearchSoftware/QualityPipelines/commit/141eaf25c366bf3a59115846c483bf63da6c7e31
 
 # DashVERSE
+- Actualizado a DashVERSE 0.3.0
 - Añadida la publicación de assessments de RSFC y RESQUI desde el workflow modular
-- Actualizado dashboard SQOO-ORG con chart TOP 5 softwares
-- Configurado Superset/DashVERSE para permitir dashboards embebidos mediante `iframe` de superset y uso del rol `Public` para usuarios invitados
-- Publicados los dashboards y añadidos los roles  `Public` en la configuración de acceso para permitir visualización
 - Habilitada la visualización embebida del dashboard SQOO-ORG restringida al dominio autorizado (http://localhost:8030 en caso local, caso desplegable poner dominio desde donde se visualizará)
 
 

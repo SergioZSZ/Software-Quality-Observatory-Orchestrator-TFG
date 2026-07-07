@@ -1,10 +1,10 @@
 from pathlib import Path
-import subprocess
+import subprocess, os
 from ..models import RunResponse
 from rsfc_runner.config import RETRYABLE_ERRORS
 
 # funcion para ejecutar subprocessos
-def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> dict:
+def run_command(personal_dir: str,cmd: list[str], input: str | None = None, env: dict | None = None)-> dict:
     try:
         result=subprocess.run(
             cmd,
@@ -13,7 +13,8 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> di
             text=True,
             check=True,
             cwd= personal_dir,
-            timeout= 3600
+            timeout= 3600,
+            env=env
         )
         
         #print("STDOUT:", result.stdout, flush=True)
@@ -62,7 +63,7 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> di
     
     
     
-def rfsc_runner(output_dir: str, repo_url: str, token: str | None = None) -> RunResponse:
+def rfsc_runner(output_dir: str, repo_url: str, token: str | None = None, target: str | None = None) -> RunResponse:
 
     cmd = ["rsfc","--repo",f"{repo_url}"]
     if token:
@@ -72,8 +73,13 @@ def rfsc_runner(output_dir: str, repo_url: str, token: str | None = None) -> Run
     personal_dir = Path(output_dir)
     personal_dir.mkdir(parents=True, exist_ok=True)
 
+    env = os.environ.copy()
+
+    if target:
+        env["SQOO_SOCA_TARGET"] = target
+        
     print(" (RSFC)Repo to process:", repo_url)
-    result = run_command(personal_dir, cmd)
+    result = run_command(personal_dir, cmd, env=env)
     
     
     # comprobacion de errores(evaluating para rate limit y timeout) en worker

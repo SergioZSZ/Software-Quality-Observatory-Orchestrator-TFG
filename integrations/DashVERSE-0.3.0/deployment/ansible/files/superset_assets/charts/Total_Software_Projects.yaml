@@ -1,0 +1,26 @@
+slice_name: Total Software
+description: Distinct software assessed in DashVERSE.
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    label: software
+    expressionType: SIMPLE
+    column:
+      column_name: software_name
+    aggregate: COUNT_DISTINCT
+  header_font_size: 0.25
+  subheader_font_size: 0.1
+  subheader: Distinct Software Assessed
+  color_picker:
+    r: 0
+    g: 114
+    b: 178
+    a: 1
+  number_format: ',d'
+query_context: null
+cache_timeout: null
+uuid: 00896a2d-ac2a-4800-a361-dd9838896222
+version: 1.0.0
+dataset_uuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156

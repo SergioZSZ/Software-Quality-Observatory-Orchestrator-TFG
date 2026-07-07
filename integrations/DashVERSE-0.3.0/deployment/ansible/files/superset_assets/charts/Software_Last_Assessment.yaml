@@ -1,0 +1,23 @@
+slice_name: Last Assessment
+description: Date of the most recent assessment in scope. Useful for confirming a CI job actually published.
+certified_by: null
+certification_details: null
+viz_type: big_number_total
+params:
+  metric:
+    label: last_assessment
+    expressionType: SQL
+    sqlExpression: TO_CHAR(MAX(assessed_at), 'YYYY-MM-DD')
+  header_font_size: 0.3
+  subheader_font_size: 0.15
+  subheader: Last Assessment
+  color_picker:
+    r: 0
+    g: 158
+    b: 115
+    a: 1
+query_context: null
+cache_timeout: null
+uuid: 810b31f2-2e24-4976-adcb-94575dbdca12
+version: 1.0.0
+dataset_uuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156

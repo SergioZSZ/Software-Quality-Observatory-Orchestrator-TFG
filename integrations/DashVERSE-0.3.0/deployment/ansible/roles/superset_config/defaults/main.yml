@@ -1,0 +1,59 @@
+---
+database_name: "DashVERSE PostgreSQL"
+database_driver: "postgresql"
+database_schema: "api"
+
+datasets:
+  - name: dimensions
+    table: dimensions
+    schema: "{{ database_schema }}"
+  - name: indicators
+    table: indicators
+    schema: "{{ database_schema }}"
+  - name: projects
+    table: projects
+    schema: "{{ database_schema }}"
+  - name: assessment_checks
+    table: assessment_checks
+    schema: "{{ database_schema }}"
+  - name: catalog_coverage
+    table: catalog_coverage
+    schema: "{{ database_schema }}"
+  - name: catalog_coverage_breakdown
+    table: catalog_coverage_breakdown
+    schema: "{{ database_schema }}"
+  - name: indicators_flat
+    table: indicators_flat
+    schema: "{{ database_schema }}"
+  - name: dimensions_with_links
+    table: dimensions_with_links
+    schema: "{{ database_schema }}"
+
+dashboards:
+  - name: "Overview"
+    slug: "global"
+    description: |
+      Portfolio-wide overview, anonymous-safe. Big-number counts of
+      assessments / software / checks, outcome distribution donut, outcomes
+      by dimension, monthly assessment activity, common failing indicators
+      and checking-tool usage. No filter bar.
+  - name: "Assessments"
+    slug: "assessments"
+    description: |
+      Per-software / per-project explorer over every assessment the viewer
+      is allowed to see. Quality profile (outcomes per dimension + outcome
+      mix + outcome trend), software comparison (rank, project breakdown,
+      outcomes heatmap), improvement targets, failed-check evidence and
+      recent assessments. Filterable by project, software, dimension,
+      outcome and assessment date.
+  - name: "Catalog"
+    slug: "catalog"
+    description: |
+      Reference view of the EVERSE quality model itself: catalog size, how
+      much of it has been exercised by assessments, coverage per tool, and
+      the full list of dimensions and indicators with their definitions.
+
+embeddable_dashboard_slugs:
+  - assessments
+  - global
+  - catalog

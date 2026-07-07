@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}DashVERSE{% endblock %}
+{% block body_class %} class="{{ 'home-anon' if not user else 'home-auth' }}"{% endblock %}
+
+{% block content %}
+<section class="hero">
+    {% if user %}
+    <h1>Welcome back, {{ user.username }}</h1>
+    <p>
+        Browse the dashboards, review your projects, or submit a new assessment
+        through the API. New to a feature? The
+        <a href="{{ url_for('concepts') }}">Concepts</a> page walks through how
+        dimensions, indicators and outcomes fit together.
+    </p>
+    {% else %}
+    <h1>DashVERSE</h1>
+    <p>
+        See how the research software in your community measures up against
+        the EVERSE quality model. New here? Start with the
+        <a href="{{ url_for('concepts') }}">Concepts</a> page to learn how the
+        numbers are built.
+    </p>
+    <p class="hero-actions">
+        <a href="/dashboard/global" class="btn-primary">View public Overview</a>
+        <a href="/register" class="btn-secondary">Register</a>
+    </p>
+    {% endif %}
+</section>
+
+{% if user %}
+<section class="dashboards" style="margin-bottom: 1.25rem;">
+    <h2>Your snapshot</h2>
+    <p class="snapshot-strip">
+        <strong>{{ stats.get('my_projects', 0) }}</strong> project{{ '' if stats.get('my_projects') == 1 else 's' }}
+        &middot;
+        <strong>{{ stats.get('my_software', 0) }}</strong> software in your scope
+        &middot;
+        <strong>{{ stats.get('my_assessments', 0) }}</strong> assessment{{ '' if stats.get('my_assessments') == 1 else 's' }} you've authored
+        {% if stats.get('my_last_assessment_at') %}
+        &middot; last on <strong>{{ stats.my_last_assessment_at[:10] }}</strong>
+        {% endif %}
+    </p>
+</section>
+
+<section class="dashboards" style="margin-bottom: 1.25rem;">
+    <h2>Quick actions</h2>
+    <ul class="quick-actions">
+        <li><a href="/account">Manage projects &amp; software</a></li>
+        <li><a href="/account#tokens">Generate an API token</a></li>
+        <li><a href="{{ api_docs_url }}" target="_blank">See API docs</a></li>
+    </ul>
+</section>
+
+<section class="dashboards">
+    <h2>Available Dashboards</h2>
+    <div class="dashboard-grid">
+        {% for slug, dash in dashboards.items() %}
+        <div class="dashboard-card">
+            <h3>{{ dash.title }}</h3>
+            <p class="description">{{ dash.description }}</p>
+            <p class="audience"><strong>For:</strong> {{ dash.audience }}</p>
+            <div class="card-links">
+                <a href="/dashboard/{{ slug }}" class="btn-primary">View Dashboard</a>
+                {% if dash.rsqkit_url %}
+                <a href="{{ dash.rsqkit_url }}" target="_blank" class="btn-secondary">RSQKit Guide</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% else %}
+<section class="learn-more">
+    <h2>Who is it for?</h2>
+    <div class="audience-row">
+        <div class="audience-item">
+            <strong>Researchers &amp; RSEs</strong>
+            <p>Assess your own software, track quality improvements over time, and demonstrate good practice to funders.</p>
+        </div>
+        <div class="audience-item">
+            <strong>Project leads</strong>
+            <p>Compare quality across the software in your portfolio and surface what needs fixing first.</p>
+        </div>
+        <div class="audience-item">
+            <strong>Policy &amp; funders</strong>
+            <p>Monitor adoption of FAIR and software-quality practices across funded projects without diving into per-repository detail.</p>
+        </div>
+        <div class="audience-item">
+            <strong>Trainers</strong>
+            <p>Spot common knowledge gaps in the community and shape course content with real assessment data.</p>
+        </div>
+    </div>
+</section>
+
+<section class="learn-more">
+    <h2>The EVERSE quality model</h2>
+    <div class="concepts-grid">
+        <div class="concept-card">
+            <h2>Dimensions</h2>
+            <p class="definition">
+                Broad quality concerns such as <strong>FAIRness</strong>,
+                <strong>Maintainability</strong>, <strong>Security</strong>
+                and <strong>Functional suitability</strong>. They group
+                related indicators together.
+            </p>
+            <a href="https://everse.software/indicators/website/dimensions.html" target="_blank" class="info-link">Browse all dimensions</a>
+        </div>
+        <div class="concept-card">
+            <h2>Indicators</h2>
+            <p class="definition">
+                Concrete, measurable criteria that automated tools can
+                check (e.g. "software has license", "software has
+                citation", "tests pass"). Each indicator belongs to one
+                or more dimensions.
+            </p>
+            <a href="https://everse.software/indicators/website/indicators.html" target="_blank" class="info-link">Browse all indicators</a>
+        </div>
+        <div class="concept-card">
+            <h2>Outcomes</h2>
+            <p class="definition">
+                Each check resolves to <strong>Pass</strong>,
+                <strong>Fail</strong> or <strong>Not applicable</strong>.
+                The dashboards aggregate these categorical outcomes.
+                No opaque "quality score", no compliance threshold.
+            </p>
+            <a href="{{ url_for('concepts') }}" class="info-link">Read the Concepts page</a>
+        </div>
+    </div>
+</section>
+
+<section class="dashboards" style="margin-bottom: 1.25rem;">
+    <h2>How DashVERSE works</h2>
+    <ol class="how-steps">
+        <li>Run a quality assessment with
+            <a href="https://github.com/EVERSE-ResearchSoftware/QualityPipelines" target="_blank">QualityPipelines</a>.</li>
+        <li>Submit the result via the DashVERSE API using a personal token.</li>
+        <li>Your software's outcomes land on the dashboards and feed the
+            portfolio-wide numbers on the Overview.</li>
+    </ol>
+</section>
+
+<section class="dashboards" style="margin-bottom: 1.25rem;">
+    <h2>Want to add your own?</h2>
+    <div class="action-panel">
+        <p>
+            Create projects, manage software visibility and submit
+            assessments through your personal API token.
+        </p>
+        <div class="panel-actions">
+            <a href="/register" class="btn-primary">Register</a>
+        </div>
+    </div>
+</section>
+
+{% endif %}
+
+<section class="learn-more" style="margin-bottom: 0;">
+    <h2>Resources</h2>
+    <div class="links-grid">
+        <a href="https://everse.software/indicators/website/indicators.html" target="_blank" class="learn-link">
+            <strong>EVERSE indicators</strong>
+            <span>The community-defined indicator catalog DashVERSE renders.</span>
+        </a>
+        <a href="https://everse.software/RSQKit/" target="_blank" class="learn-link">
+            <strong>RSQKit</strong>
+            <span>Topic guides linked from each chart's dimension and indicator labels.</span>
+        </a>
+        <a href="https://github.com/EVERSE-ResearchSoftware/QualityPipelines" target="_blank" class="learn-link">
+            <strong>QualityPipelines</strong>
+            <span>The resqui assessment runner. Install, run locally, push results here.</span>
+        </a>
+        <a href="https://github.com/EVERSE-ResearchSoftware/schemas" target="_blank" class="learn-link">
+            <strong>Schemas</strong>
+            <span>JSON-LD schemas the assessment payloads conform to.</span>
+        </a>
+        <a href="{{ api_docs_url }}" target="_blank" class="learn-link">
+            <strong>API docs</strong>
+            <span>PostgREST endpoints for submitting assessments and reading data.</span>
+        </a>
+    </div>
+</section>
+{% endblock %}

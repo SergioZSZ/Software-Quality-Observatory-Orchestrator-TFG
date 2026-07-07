@@ -1,0 +1,32 @@
+slice_name: Catalog Coverage
+description: How many of the EVERSE dimensions and indicators have at least one check against them. Pick a Project to scope to one software.
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_bar
+params:
+  x_axis: category
+  metrics:
+  - label: Tested
+    expressionType: SIMPLE
+    column:
+      column_name: item_id
+    aggregate: COUNT_DISTINCT
+  - label: Catalog
+    expressionType: SIMPLE
+    column:
+      column_name: catalog_total
+    aggregate: MAX
+  color_scheme: supersetColors
+  label_colors:
+    Tested: '#117733'
+    Catalog: '#009E73'
+  orientation: horizontal
+  show_legend: true
+  rich_tooltip: true
+  y_axis_format: ',d'
+  row_limit: 10
+query_context: null
+cache_timeout: null
+uuid: 81c3c9a0-eff6-4fa2-bfca-e515dc3d59f5
+version: 1.0.0
+dataset_uuid: 4372e3b3-6fa2-4369-b068-74204fa4d16f

@@ -1,0 +1,42 @@
+slice_name: Recent Assessments
+description: Most recent assessments, one row per assessment, ordered by date.
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  query_mode: aggregate
+  groupby:
+  - software_name
+  - assessment_id
+  - assessed_at
+  metrics:
+  - label: checks
+    expressionType: SQL
+    sqlExpression: COUNT(*)
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: assessment_id
+    operator: IS NOT NULL
+    comparator: ''
+  row_limit: 50
+  show_cell_bars: false
+  page_length: 50
+  table_filter: true
+  column_config:
+    software_name:
+      horizontalAlign: left
+    assessment_id:
+      horizontalAlign: right
+    assessed_at:
+      horizontalAlign: left
+    checks:
+      d3NumberFormat: ',d'
+      horizontalAlign: right
+  order_by_cols:
+  - '["assessed_at", false]'
+query_context: null
+cache_timeout: null
+uuid: 6f1c5ec3-8c56-4dc6-9027-0e59453ba9dd
+version: 1.0.0
+dataset_uuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156

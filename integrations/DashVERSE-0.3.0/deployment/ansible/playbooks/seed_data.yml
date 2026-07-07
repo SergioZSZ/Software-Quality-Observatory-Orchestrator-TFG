@@ -1,0 +1,7 @@
+---
+- name: Seed example assessment data
+  hosts: localhost
+  gather_facts: false
+
+  roles:
+    - seed_data

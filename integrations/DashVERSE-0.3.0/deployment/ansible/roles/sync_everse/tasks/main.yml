@@ -1,0 +1,73 @@
+---
+
+- name: List dimension files
+  uri:
+    url: "https://api.github.com/repos/EVERSE-ResearchSoftware/indicators/contents/dimensions"
+    return_content: yes
+  register: dimensions_listing
+  retries: 3
+  delay: 2
+  tags: [fetch]
+
+- name: Fail on rate-limit or non-array response (dimensions)
+  fail:
+    msg: "Unexpected listing response (likely GitHub rate-limit): {{ dimensions_listing.json }}"
+  when: dimensions_listing.json is mapping
+  tags: [fetch]
+
+- name: List indicator files
+  uri:
+    url: "https://api.github.com/repos/EVERSE-ResearchSoftware/indicators/contents/indicators"
+    return_content: yes
+  register: indicators_listing
+  retries: 3
+  delay: 2
+  tags: [fetch]
+
+- name: Fail on rate-limit or non-array response (indicators)
+  fail:
+    msg: "Unexpected listing response (likely GitHub rate-limit): {{ indicators_listing.json }}"
+  when: indicators_listing.json is mapping
+  tags: [fetch]
+
+- name: Download each dimension file
+  uri:
+    url: "{{ item.download_url }}"
+    return_content: yes
+  register: dimension_files
+  loop: "{{ dimensions_listing.json | selectattr('name', 'match', '.*\\.json$') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  retries: 3
+  delay: 2
+  tags: [fetch]
+
+- name: Download each indicator file
+  uri:
+    url: "{{ item.download_url }}"
+    return_content: yes
+  register: indicator_files
+  loop: "{{ indicators_listing.json | selectattr('name', 'match', '.*\\.json$') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  retries: 3
+  delay: 2
+  tags: [fetch]
+
+- name: Render upsert SQL
+  set_fact:
+    sync_sql: "{{ lookup('template', 'upsert.sql.j2') }}"
+  tags: [apply]
+
+- name: Apply upsert to PostgreSQL
+  command:
+    cmd: kubectl exec -i -n dashverse deploy/postgresql -- psql -U {{ database_user }} -d {{ database_db }} -v ON_ERROR_STOP=1
+    stdin: "{{ sync_sql }}"
+  register: sync_result
+  changed_when: "'INSERT' in sync_result.stdout or 'UPDATE' in sync_result.stdout"
+  tags: [apply]
+
+- name: Show sync apply summary
+  debug:
+    msg: "{{ sync_result.stdout_lines }}"
+  tags: [apply]

@@ -1,0 +1,65 @@
+slice_name: Software Improvement Targets
+description: Failing indicators for the selected software, ranked by frequency. Links open the RSQKit topic and the indicator definition.
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  query_mode: aggregate
+  groupby:
+  - software_name
+  - dimension_name
+  - indicator_name
+  - dimension_rsqkit_url
+  - indicator_url
+  metrics:
+  - label: failures
+    expressionType: SQL
+    sqlExpression: COUNT(*)
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: outcome
+    operator: ==
+    comparator: Fail
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: software_name
+    operator: IS NOT NULL
+    comparator: ''
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: indicator_name
+    operator: IS NOT NULL
+    comparator: ''
+  row_limit: 100
+  table_filter: true
+  show_cell_bars: true
+  align_pn: true
+  color_pn: false
+  page_length: 50
+  column_config:
+    failures:
+      d3NumberFormat: ',d'
+      horizontalAlign: right
+    dimension_rsqkit_url:
+      columnWidth: 240
+    indicator_url:
+      columnWidth: 240
+    software_name:
+      horizontalAlign: left
+    dimension_name:
+      horizontalAlign: left
+    indicator_name:
+      horizontalAlign: left
+  conditional_formatting:
+  - column: failures
+    colorScheme: '#D55E00'
+    operator: '>'
+    targetValue: 0
+  order_by_cols:
+  - '["failures", false]'
+query_context: null
+cache_timeout: null
+uuid: 8ef6aaaa-18a6-405e-b394-101f9bf3e6df
+version: 1.0.0
+dataset_uuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156

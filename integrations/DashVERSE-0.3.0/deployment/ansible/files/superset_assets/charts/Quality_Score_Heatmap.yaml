@@ -1,0 +1,43 @@
+slice_name: Outcomes Heatmap
+description: Failing checks per software-dimension pair. Brighter cells show where failures concentrate. Empty cells mean the pair is fully passing or has not been exercised.
+certified_by: null
+certification_details: null
+viz_type: heatmap_v2
+params:
+  x_axis: dimension_name
+  groupby:
+  - software_name
+  metric:
+    label: failures
+    expressionType: SQL
+    sqlExpression: COUNT(*) FILTER (WHERE outcome = 'Fail')
+  adhoc_filters:
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: dimension_name
+    operator: IS NOT NULL
+    comparator: ''
+  - clause: WHERE
+    expressionType: SIMPLE
+    subject: software_name
+    operator: IS NOT NULL
+    comparator: ''
+  linear_color_scheme: superset_seq_1
+  show_values: true
+  value_format: ',d'
+  show_legend: true
+  legend_type: continuous
+  legend_orientation: vertical
+  legend_position: right
+  legend_margin: 12
+  yscale_interval: 1
+  xscale_interval: 1
+  sort_x_axis: alpha_asc
+  sort_y_axis: alpha_asc
+  x_axis_label_rotation: 45
+  bottom_margin: 80
+query_context: null
+cache_timeout: null
+uuid: 557a32e9-c95a-4726-bdcd-c96f49c36fed
+version: 1.0.0
+dataset_uuid: 9ccd1028-35e4-4b23-9d3b-178fac4ed156
