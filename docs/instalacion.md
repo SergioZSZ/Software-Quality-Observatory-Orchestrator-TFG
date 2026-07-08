@@ -140,12 +140,6 @@ Este mandato realiza el despliegue completo:
 - sincroniza el catálogo de indicadores y dimensiones de EVERSE;
 - importa dashboards, charts y datasets en Superset.
 
-Si el despliegue falla en la importación de dashboards con `zip: not found`:
-
-```bash
-sudo apt update
-sudo apt install -y zip unzip
-just setup-dashboards
 ```
 
 ### 4. Comprobar servicios
@@ -209,6 +203,25 @@ username: sqoo
 email: sqoo@example.org
 password: <password>
 ```
+
+se debe hacer por curl:
+```bash
+curl -s -X POST http://127.0.0.1:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "user",
+    "email": "user@example.com",
+    "password": "yourpassword"
+  }' | jq
+```
+
+curl -s -X POST http://127.0.0.1:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "Community-OEG",
+    "email": "oeg@example.com",
+    "password": "VsXHjF7j4MN0wARgzW6A"
+  }' | jq
 
 ### 7. Generar el token JWT
 
