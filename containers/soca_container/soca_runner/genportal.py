@@ -1,7 +1,5 @@
-from .rabbitmq import publish_job
-from .models import PortalResponse
 import os
-from soca_runner.config import BASE_DIR, TARGET
+from soca_runner.config import BASE_DIR
 from .cruds import soca_portal
 def genportal():
     
