@@ -184,7 +184,23 @@ class Metadata(object):
 
         return None
 
+    def sw_metadata_bot_failure_message(self, record):
+        reason_code = str(record.get("reason_code", ""))
+        error = str(record.get("error", ""))
 
+        if reason_code == "missing_pitfall_file":
+            return "Metadata quality report unavailable: pitfall file was not generated."
+
+        if "410 Client Error" in error:
+            return "Issue publication failed: GitHub Issues are unavailable for this repository."
+
+        if "403 Client Error" in error:
+            return "Issue publication failed: insufficient permissions to create GitHub issue."
+
+        if reason_code == "publish_exception":
+            return "Issue publication failed."
+
+        return None
 
     def sw_metadata_bot_report_html(self):
         data = self.sw_metadata_bot_latest_record()
@@ -193,7 +209,7 @@ class Metadata(object):
             return ""
 
         record = data["record"]
-
+        failure_message = self.sw_metadata_bot_failure_message(record)
         pitfalls_count = record.get("pitfalls_count", 0) or 0
         warnings_count = record.get("warnings_count", 0) or 0
 
@@ -204,14 +220,16 @@ class Metadata(object):
         pitfall_label = "pitfall" if pitfalls_count == 1 else "pitfalls"
         warning_label = "warning" if warnings_count == 1 else "warnings"
 
-        if codemeta_status == "missing":
+        if failure_message:
+            quality_result = failure_message
+        elif codemeta_status == "missing":
             quality_result = "No CodeMeta file"
         else:
             quality_result = (
                 f"{pitfalls_count} {pitfall_label}, "
                 f"{warnings_count} {warning_label}"
             )
-
+            
         if issue_url:
             issue_link_html = f"""
             <div style="margin-top:4px; font-size:0.9em;">
