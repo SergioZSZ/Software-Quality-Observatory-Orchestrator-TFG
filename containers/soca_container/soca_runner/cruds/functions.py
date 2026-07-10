@@ -52,7 +52,7 @@ def soca_fetch(dir_base: str, target: str, type: str)-> FetchResponse:
     print("saving repos file in:", repos_file)
 
     # mandatos soca
-    fetch = ["soca", "fetch","-nd","-na","-nf", "-i", target, "-o", repos_file, f"--{type}"]
+    fetch = ["soca", "fetch","-nd","-na", "-i", target, "-o", repos_file, f"--{type}"]
 
     
     result_fetch = run_command(fetch)
