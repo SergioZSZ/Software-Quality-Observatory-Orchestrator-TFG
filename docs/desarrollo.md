@@ -2,7 +2,7 @@
 
 ## SOCA
 
-La imagen `soca-heavy` incorpora SOCA 0.0.4 y SOMEF 0.11.0. `soca_runner.main` recibe un proyecto, organizaciones o usuarios de GitHub y repositorios adicionales.
+La imagen `soca-heavy` incorpora SOCA 0.0.4 y SOMEF 0.11.2. `soca_runner.main` recibe un proyecto, organizaciones o usuarios de GitHub y repositorios adicionales.
 
 El runner mantiene `repository-state.json` y separa el inventario en repositorios actualizados y eliminados. Solo publica trabajos para los actualizados; los workers extraen los metadatos en staging y promueven el resultado de forma atómica. Un fallo conserva el resultado anterior y queda reflejado en `status.json`.
 

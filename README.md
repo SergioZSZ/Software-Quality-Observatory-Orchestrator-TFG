@@ -54,144 +54,65 @@ Cada herramienta se ejecuta en su propio entorno aislado, garantizando:
 ---
 
 
-## 3. Desarrollo
-### 3.1 Dockerización de SOCA
+## Desarrollo e integraciones
 
-Se ha:
+### SOCA
 
-- Preparado entorno aislado con poetry
-- Clonado y preparado SOCA
-- Adaptado su ejecución vía execute-command de n8n
-- Encapsulado en un contenedor Docker
-- Configurado volúmenes para persistencia de resultados
-- Orquestado mediante lanzamiento de jobs para la extracción de metadatos por workers en paralelo
-- Añadido seguimiento de estado para procesar solo repositorios nuevos o modificados y retirar los eliminados
-- Configurado `genportal.py` para crear el portal final tras RSFC y sw-metadata-bot
-Salida generada:
+La imagen `soca-heavy` incorpora SOCA 0.0.4 y SOMEF 0.11.2. `soca_runner.main` recibe un proyecto, organizaciones o usuarios de GitHub y repositorios adicionales.
 
-- Fetch de los repositorios y envío a n8n
-- Repositorios descargados
-- Metadatos estructurados
-- Portal web del catálogo
+El runner mantiene `repository-state.json` y separa el inventario en repositorios actualizados y eliminados. Solo publica trabajos para los actualizados; los workers extraen los metadatos en staging y promueven el resultado de forma atómica. Un fallo conserva el resultado anterior y queda reflejado en `status.json`.
 
+Los workers se escalan con:
 
-### 3.2 worker_soca container
-El contenedor worker se encarga de la extracción de metadatos de los repositorios obtenidos en el fetch; el portal se genera al final con los reportes.
+```bash
+docker compose up -d --scale worker_soca=N
+```
 
-Mientras que soca_container publica en una cola de trabajo en RabbitMQ con el usuario/organización del cual se van a extraer metadatos.
+Al final, `soca_runner.genportal` combina los metadatos con los resultados de calidad. Nginx publica los portales en `http://localhost:8030/portals/<project>/`.
 
-Cada worker ejecuta el módulo `python -u -m soca_runner.worker` que se dedica a:
+### RSFC
 
-1. Recibe un repositorio actualizado desde RabbitMQ
-2. Extrae los metadatos en un directorio temporal y promueve el resultado de forma atómica
-3. Conserva el resultado anterior y registra el error si la nueva extracción falla
+La imagen `rsfc-heavy` utiliza RSFC 0.1.7 y reutiliza los metadatos SOCA cuando están disponibles. El launcher publica los repositorios actualizados en `rsfc_jobs` y elimina las salidas de los repositorios retirados.
 
-El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_soca=N`` siendo N el número de workers que se levantarán.
+Cada worker:
 
-### 3.3 Dockerización de RSFC
+1. Espera un token del rate limiter cuando está activado.
+2. Ejecuta RSFC en staging.
+3. Valida `rsfc_output/rsfc_assessment.json`.
+4. Promueve el resultado o genera `failed_assessment.json` sin borrar el anterior.
+5. Actualiza `status.json` bajo bloqueo.
 
-Se ha:
+Los resultados se guardan en `outputs/rsfc/<project>/<owner>_<repo>/`.
 
-- Preparado entorno aislado con poetry
-- Instalado RSFC en el entorno
-- Actualizado a RSFC 0.1.7 y SOMEF 0.11.0
-- Reutilizados los metadatos ya generados por SOCA cuando están disponibles
-- Adaptado su ejecución vía execute-command de n8n
-- Encapsulado en contenedor independiente
-- Orquestado mediante lanzamiento de jobs a RabbitMQ la extraccion de indicadores
-- Implementado lanzamiento de workers para procesar los jobs usando la cola de trabajo de RabbitMQ
+### RESQUI
 
-Salida generada:
-- Generación de indicadores de calidad de cada repositorio en formato `json`
+`resqui-heavy` incorpora QualityPipelines como submódulo y forma parte del workflow modular. Sus workers consumen `resqui_jobs`, ejecutan la configuración seleccionada y guardan `resqui_summary.json` en `outputs/resqui/<project>/<owner>_<repo>/`.
 
-### 3.4 worker_rsfc container
-El contenedor worker se encarga del procesamiento asíncrono de los jobs generados por rsfc_container.
+El volumen `sqoo_resqui_work` permite que el worker y los contenedores de plugins compartan el workspace. `RESQUI_SHARED_WORKDIR` y `RESQUI_DOCKER_WORK_VOLUME` configuran este comportamiento.
 
-Mientras que rsfc_container actúa como encargado de registrar los jobs en la cola de trabajo de RabbitMQ correspondiente, los workers se encargan de consumir dichos jobs y ejecutar el análisis con RSFC.
+RESQUI utiliza el mismo patrón de staging, estado y eliminación de resultados retirados que RSFC. La configuración se encuentra en `containers/resqui_container/resqui_runner/configurations/`.
 
-Cada worker ejecuta el módulo `python -u -m rsfc_runner.worker` que se encarga de recibir los jobs publicados en RabbitMQ que:
+### sw-metadata-bot
 
-1. Recibe un job de RabbitMQ
-2. Ejecuta la evaluación del repositorio mediante rsfc
-3. Genera un `rsfc_assessment.json` o un `failed_assessment.json` sin eliminar un resultado válido anterior
-4. Espera a tener token para procesar siguiente trabajo (github rate limit)
-5. Responde a RabbitMQ habiendo procesado el job para recibir otro
+Las imágenes `sw-metadata-bot:latest` y `sw-metadata-bot-conf:latest` contienen sw-metadata-bot 0.5.3 y los recursos NLTK/SOMEF necesarios.
 
-El sistema permite escalar horizontalmente el número de workers mediante docker compose lanzándolo con``docker compose up --scale worker_rsfc=N`` siendo N el número de workers que se levantarán.
+n8n genera un `config.json` con el inventario completo. El bot localiza la snapshot anterior, compara commits y copia los artefactos de repositorios sin cambios. Los informes se guardan en `outputs/sw-metadata-bot/<project>/runs/<snapshot>/`.
 
+`launch_issue` separa el análisis de la publicación: si es `false`, no se llama a `sw-metadata-bot publish`.
 
-### 3.5 rate_limiter_rsfc container
-El contenedor rate_limiter se encarga del envío de tokens a una cola de RabbitMQ de tamaño 1. Los workers RSFC se esperarán a obtener un token de la cola para procesar los jobs para no saturar de peticiones GitHubAPI y no sobrepasar el RateLimit.
+### DashVERSE y portal
 
-### 3.6 Integracion de RESQUI
+`dashverse_workflow.json` lee los assessments de RSFC y RESQUI, completa `@id` y `author`, y publica en la API de DashVERSE usando `DASHVERSE_JWT`.
 
-Se ha integrado RESQUI en el workflow modular mediante el contenedor `resqui_container`. La imagen `resqui-heavy` instala el submódulo `QualityPipelines-2.0` y el runner que distribuye las evaluaciones entre workers.
+El portal incorpora:
 
-Componentes principales:
+- metadatos SOCA;
+- informes de RSFC y RESQUI;
+- informes e issues de sw-metadata-bot;
+- accesos a los dashboards de dashverse.
 
-- `worker_resqui`: consume mensajes de la cola `resqui_jobs` y ejecuta RESQUI para cada repositorio.
-- `rate_limiter_resqui`: publica tokens en `github_rate_limit_resqui` para controlar las peticiones a GitHubAPI.
-- `resqui_work`: volumen Docker nombrado como `sqoo_resqui_work`, compartido entre el worker y los contenedores Docker que RESQUI lanza para plugins como Gitleaks, Super-Linter o RSFC.
+Los identificadores de dashboards y el dominio de Superset se configuran con `DASHBOARD_ORG_EMBED_ID`, `DASHBOARD_REPO_EMBED_ID` y `SUPERSET_PUBLIC_DOMAIN`.
 
-Salida generada:
-
-- Reportes RESQUI por repositorio en `outputs/resqui/<project>/<owner>_<repo>/`.
-- Ficheros `failed_assessment.json` cuando un repositorio no puede procesarse correctamente, conservando los resultados válidos anteriores.
-
-Modificaciones realizadas sobre RESQUI/QualityPipelines:
-
-- Soporte opcional de workspace compartido mediante `RESQUI_SHARED_WORKDIR` y `RESQUI_DOCKER_WORK_VOLUME`.
-- Uso de `--rm` en contenedores de plugins para evitar acumulacion de contenedores Docker parados.
-- Inicializacion de `success = False` en funciones de OpenSSF Scorecard para evitar variables sin definir.
-
-### 3.7 DashVerse Service
-El servicio DashVerse sirve para la creación y visualización de los dashboards creados a partir de los indicadores de calidad obtenidos de las organizaciones. Dentro del directorio `/integrations/dashboards` existen 2 plantillas con diversos dashboards, los cuales son:
-
-#### SQOO-org:
-1. KPIs generales:
-   - Total de assessments procesados
-   - Total de repositorios
-   - Total de organizaciones visualizadas
-
-2. Análisis de resultados:
-    **NOTA** la importancia del indicador viene declarada en: https://everse.software/indicators/website/rs_tiers.htm (Relevant for Prototype Tool)
-
-    - Comparación de assessments que pasan los indicadores `Crucial` comparados con los assessments totales
-    - Comparación de assessments que pasan los indicadores `Recommended` comparados con los assessments totales
-    - Comparación de assessments que pasan los indicadores `Good to have` comparados con los assessments totales
-
-
-
-#### SQOO-repo:
-1. Relacionado a procesos:
-    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel total de procesos por tier
-    - Comparativa pocesos pasados de los assessments / procesos totales de los assessments para indicadores Crucial, Recommended y Good to have a nivel de indicador 
-    - Tabla con metadatos de los assessments procesados
-    - Tabla con los procesos fallidos del assessment + sugerencias
-
-Con las plantillas dada en `/integrations/dashboards` hay opciones cross-filtering, útiles por ejemplo para a seleccionar el nombre/id de un repositorio en el dashboard de metadatos, y que aparezcan en el dashboar de procesos de RSFC fallidos únicamente los procesos fallidos por ese repositorio.
-
-
-
-
-### 3.8 Integración de sw-metadata-bot
-
-Se ha:
-
-- Integrado `sw-metadata-bot` como herramienta encargada de analizar la calidad de los metadatos de los repositorios procesados
-- Preparado `sw-metadata-bot` 0.5.3 mediante las imágenes `sw-metadata-bot:latest` y `sw-metadata-bot-conf:latest`
-- Adaptado su ejecución vía `execute-command` de n8n
-- Configurado el montaje del volumen compartido de `outputs` para persistir los resultados del análisis
-- Generado dinámicamente un archivo `config.json` con la lista de repositorios obtenidos durante el workflow
-- Configurado el uso de `GITHUB_API_TOKEN` para permitir la consulta de repositorios y la publicación de issues
-- Incorporado el análisis incremental: el bot localiza la snapshot anterior y reutiliza los artefactos de repositorios sin cambios
-- Añadida la fase opcional de publicación de issues tras la generación de los informes de metadatos, controlada desde `launch_issue` en los workflows de n8n
-
-El bot recibe el inventario completo para que cada snapshot conserve también los repositorios no modificados. Para cada ejecución se crea un directorio específico dentro de:
-
-- `outputs/sw-metadata-bot/<project>/runs/<snapshot>/`
-
----
 
 
 ## 4. Workflow modular de n8n
