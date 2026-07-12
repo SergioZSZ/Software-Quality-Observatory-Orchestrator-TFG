@@ -51,10 +51,30 @@ class Metadata(object):
             return None
 
         repo_name = repo_url.rstrip("/").split("/")[-1]
+        repo_key = self.repository_output_key()
 
-        candidate = outputs_dir / "rsfc" / target_name / repo_name
+        target_dir = outputs_dir / "rsfc" / target_name
+        if not target_dir.exists():
+            return None
 
-        return candidate if candidate.exists() else None
+        candidates = []
+        if repo_key:
+            candidates.append(target_dir / repo_key)
+        candidates.append(target_dir / repo_name)
+
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+
+        candidate_names = {candidate.name.casefold() for candidate in candidates}
+        try:
+            for path in target_dir.iterdir():
+                if path.is_dir() and path.name.casefold() in candidate_names:
+                    return path
+        except Exception:
+            return None
+
+        return None
     
     
     # return del report
@@ -90,7 +110,7 @@ class Metadata(object):
             file = rsfc_output_dir / "rsfc_assessment.json"
             if file.exists():
                 data = json.loads(file.read_text(encoding="utf-8"))
-            return data 
+                return data
         
         return None
             
@@ -114,6 +134,145 @@ class Metadata(object):
         if str(check.get("output", "")).lower() == "true"
     )
         return passed, total
+
+
+# RESQUI
+
+    def repository_output_key(self):
+        repo_url = self.repo_url()
+        if not repo_url:
+            return None
+
+        parsed = urlparse(repo_url.rstrip("/"))
+        parts = [part for part in parsed.path.split("/") if part]
+
+        if len(parts) < 2:
+            return None
+
+        owner, repo = parts[-2], parts[-1]
+        if repo.endswith(".git"):
+            repo = repo[:-4]
+
+        return f"{owner}_{repo}".replace(".", "-")
+
+    def resqui_output_path(self):
+        metadata_dir = Path(self.repo_metadata_dir).resolve()
+        target_name = metadata_dir.parent.name
+        outputs_dir = metadata_dir.parent.parent.parent
+        target_dir = outputs_dir / "resqui" / target_name
+        repo_key = self.repository_output_key()
+
+        if not repo_key or not target_dir.exists():
+            return None
+
+        candidate = target_dir / repo_key
+        if candidate.exists():
+            return candidate
+
+        repo_key_lower = repo_key.casefold()
+        try:
+            for path in target_dir.iterdir():
+                if path.is_dir() and path.name.casefold() == repo_key_lower:
+                    return path
+        except Exception:
+            return None
+
+        return None
+
+    def resqui_report_path(self):
+        resqui_dir = self.resqui_output_path()
+        if not resqui_dir:
+            return None
+
+        return resqui_dir / "resqui_report.md"
+
+    def resqui_report_markdown(self):
+        report_path = self.resqui_report_path()
+
+        if not report_path:
+            return None
+
+        try:
+            return report_path.read_text(encoding="utf-8")
+        except Exception:
+            return None
+
+    def resqui_summary_json(self):
+        resqui_dir = self.resqui_output_path()
+        if not resqui_dir:
+            return None
+
+        summary_path = resqui_dir / "resqui_summary.json"
+        if not summary_path.exists():
+            return None
+
+        try:
+            return json.loads(summary_path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+
+    def resqui_report_score(self):
+        summary = self.resqui_summary_json()
+        if not summary:
+            return None
+
+        checks = summary.get("checks", [])
+        if not checks:
+            return None
+
+        resqui_checks = []
+        for check in checks:
+            checking_software = check.get("checkingSoftware") or {}
+            tool_name = str(checking_software.get("name", "")).strip().lower()
+
+            if tool_name == "rsfc":
+                continue
+
+            resqui_checks.append(check)
+
+        if not resqui_checks:
+            return None
+
+        passed_outputs = {"true", "valid", "secure", "passed", "pass"}
+        passed = sum(
+            1
+            for check in resqui_checks
+            if str(check.get("output", "")).strip().lower() in passed_outputs
+        )
+
+        return passed, len(resqui_checks)
+
+    def resqui_report_html(self):
+        report_md = self.resqui_report_markdown()
+        score = self.resqui_report_score()
+
+        if not report_md or not score:
+            return ""
+
+        passed, total = score
+        report_html = mistune.html(report_md)
+
+        return f"""
+        <b>
+            Quality:
+        </b>
+            {passed}/{total} checks
+            <b><a href="https://github.com/EVERSE-ResearchSoftware/QualityPipelines"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="text-decoration: underline; color: inherit;">
+                (by RESQUI)
+            </a>
+        </b>
+        <br>
+        <details class="quality-details">
+            <summary>Show RESQUI report</summary>
+
+            <div class="rsfc-report resqui-report">
+                {report_html}
+            </div>
+        </details>
+        """
     
 
 
@@ -1340,9 +1499,11 @@ class Metadata(object):
         # quality report
         rsfc_report_md = self.rsfc_report_markdown()
         rsfc_score = self.rsfc_report_score()
+        resqui_html = self.resqui_report_html()
+        resqui_score = self.resqui_report_score()
         sw_bot_html = self.sw_metadata_bot_report_html()
 
-        if (rsfc_report_md and rsfc_score) or sw_bot_html:
+        if (rsfc_report_md and rsfc_score) or resqui_html or sw_bot_html:
 
             body_parts = []
             tooltip_summary_parts = []
@@ -1377,6 +1538,13 @@ class Metadata(object):
                     </div>
                 </details>
                 """)
+
+            if resqui_html:
+                if resqui_score:
+                    passed, total = resqui_score
+                    tooltip_summary_parts.append(f"RESQUI {passed}/{total}")
+
+                body_parts.append(resqui_html)
 
             if sw_bot_html:
                 sw_bot_data = self.sw_metadata_bot_latest_record()

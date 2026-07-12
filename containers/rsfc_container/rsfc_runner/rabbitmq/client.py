@@ -1,6 +1,9 @@
-import json, pika, time
+import json, pika, time, socket
 
 from ..config import RABBITMQ_HOST, QUEUE_NAME,RABBITMQ_USER, RABBITMQ_PASSWORD, RATE_LIMIT_QUEUE
+
+_publish_connection = None
+_publish_channel = None
 
 # intentos de conexion a rabbit hasta que se pueda conectar
 def rabbit_connect():
@@ -24,14 +27,30 @@ def rabbit_connect():
 
             return connection
 
-        except pika.exceptions.AMQPConnectionError:
-            print("RabbitMQ not ready, retrying in 5s...", flush=True)
+        except (pika.exceptions.AMQPConnectionError, socket.gaierror) as exc:
+            print(f"RabbitMQ not ready ({exc}), retrying in 5s...", flush=True)
             time.sleep(5)
             
-# definicion de credenciales, conexion a rabbit de manera síncrona y abrir canal
-connection = rabbit_connect()
-channel = connection.channel()      
-            
+# canal de publicacion creado bajo demanda para evitar conexiones al importar
+def publish_channel():
+    global _publish_connection, _publish_channel
+
+    connection_closed = (
+        _publish_connection is None
+        or getattr(_publish_connection, "is_closed", False)
+    )
+    channel_closed = (
+        _publish_channel is None
+        or getattr(_publish_channel, "is_closed", False)
+    )
+
+    if connection_closed or channel_closed:
+        _publish_connection = rabbit_connect()
+        _publish_channel = _publish_connection.channel()
+
+    return _publish_channel
+
+
 def publish_job(job_id: str, repo_url: str, target: str, repos_count: int):
     
     # publicamos mensaje
@@ -43,6 +62,7 @@ def publish_job(job_id: str, repo_url: str, target: str, repos_count: int):
     }
     
     # publicamos mensaje (delivery mode 2 = mensaje queno se pierda y sea persistente)
+    channel = publish_channel()
     channel.basic_publish(exchange="", routing_key=QUEUE_NAME, body=json.dumps(message),
                             properties = pika.BasicProperties(delivery_mode=2))
     

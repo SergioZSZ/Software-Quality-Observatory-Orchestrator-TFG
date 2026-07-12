@@ -39,7 +39,7 @@ Los subworkflows reciben `repos_url` y `repos_removed`:
 - RSFC 0.1.7 evalúa los repositorios actualizados, reutiliza metadatos SOCA cuando existen y escribe en `outputs/rsfc/<project>/<owner>_<repo>/`.
 - RESQUI evalúa el mismo lote con QualityPipelines y escribe en `outputs/resqui/<project>/<owner>_<repo>/`.
 - Ambos eliminan las salidas persistidas de los repositorios retirados y conservan un resultado anterior si una nueva evaluación falla.
-- Los subworkflows esperan un estado terminal `completed` o `failed`; un lote fallido detiene el pipeline.
+- Los subworkflows esperan a que todos los repositorios se procesen. Cuando termina el lote, `status.json` queda en `completed` aunque haya repositorios fallidos; esos fallos se conservan en `failed_repos` y no detienen el pipeline.
 
 ## 3. sw-metadata-bot
 

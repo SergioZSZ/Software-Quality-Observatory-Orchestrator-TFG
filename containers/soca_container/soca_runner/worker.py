@@ -120,8 +120,6 @@ def record_repository_result(
         # Esperar a todos los workers antes de fijar el estado terminal.
         if processed_repos < expected_repos:
             status_data["status"] = "processing"
-        elif failed_repos:
-            status_data["status"] = "failed"
         else:
             status_data["status"] = "completed"
 

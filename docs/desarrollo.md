@@ -51,8 +51,8 @@ n8n genera un `config.json` con el inventario completo. El bot localiza la snaps
 El portal incorpora:
 
 - metadatos SOCA;
-- indicadores RSFC;
+- informes de RSFC y RESQUI;
 - informes e issues de sw-metadata-bot;
-- accesos a los dashboards SQOO-org y SQOO-repo.
+- accesos a los dashboards de dashverse.
 
 Los identificadores de dashboards y el dominio de Superset se configuran con `DASHBOARD_ORG_EMBED_ID`, `DASHBOARD_REPO_EMBED_ID` y `SUPERSET_PUBLIC_DOMAIN`.

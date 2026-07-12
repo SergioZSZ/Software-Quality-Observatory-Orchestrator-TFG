@@ -24,7 +24,9 @@ Copiar `containers/.env.example` como `containers/.env` y completar:
 - `RATE_LIMIT_RSFC_ENABLED` y `RATE_LIMIT_RESQUI_ENABLED`.
 - `OUTPUTS`: ruta absoluta de `containers/outputs`.
 - `PORTAL_PORT`: puerto de Nginx, `8030` por defecto.
-- `DASHBOARD_ORG_EMBED_ID` y `DASHBOARD_REPO_EMBED_ID`.
+- `DASHBOARD_ORG_EMBED_ID` id o slug del dashboard global importado en DashVERSE/Superset (por defecto `global`)
+- `DASHBOARD_REPO_EMBED_ID` id o slug del dashboard SQO-repo importado en DashVERSE/Superset (por defecto `assessments`)
+      ambos valores corresponden a dashboards por defecto de dashverse
 - `SUPERSET_PUBLIC_DOMAIN`: `http://localhost:8088` en local.
 - `DASHVERSE_JWT`: token generado por la API de DashVERSE.
 

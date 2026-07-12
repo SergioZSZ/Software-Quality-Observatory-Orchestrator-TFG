@@ -139,6 +139,7 @@ services:
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - RESQUI_SHARED_WORKDIR=/resqui-work
       - RESQUI_DOCKER_WORK_VOLUME=sqoo_resqui_work
+      - RATE_LIMIT_RESQUI_ENABLED=${RATE_LIMIT_RESQUI_ENABLED}
 
 
   rate_limiter_resqui:

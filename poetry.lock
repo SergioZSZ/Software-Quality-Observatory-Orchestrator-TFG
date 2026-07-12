@@ -2980,7 +2980,7 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<8)"]
 
 [[package]]
 name = "resqui"
-version = "0.2.1.dev11+g70f583858.d20260705"
+version = "0.2.1.dev11+g70f583858.d20260707"
 description = "EVERSE Research Software Quality Indicators"
 optional = false
 python-versions = ">=3.9"
@@ -3201,7 +3201,7 @@ ruamel-yaml-clib = "0.2.12"
 scikit-learn = "1.5.0"
 scipy = "1.15.3"
 six = "1.17.0"
-somef = "0.11.1"
+somef = "0.11.2"
 soupsieve = "2.7"
 tabulate = "0.9.0"
 textblob = "0.17.1"
@@ -3526,14 +3526,14 @@ url = "containers/soca_container/soca"
 
 [[package]]
 name = "somef"
-version = "0.11.1"
+version = "0.11.2"
 description = "SOftware Metadata Extraction Framework: A tool for automatically extracting relevant software metadata from a source code repository (README, package files, etc)."
 optional = false
 python-versions = "<3.13,>=3.11"
 groups = ["main"]
 files = [
-    {file = "somef-0.11.1-py3-none-any.whl", hash = "sha256:b60e9cfaca20d39ee6e599d7fa39989e6058e56f5292c666620b96effaed6f00"},
-    {file = "somef-0.11.1.tar.gz", hash = "sha256:6a4217e5fc6054e3642c36a802236868ee69bd9b56088f5ac08b5b3aca0556ef"},
+    {file = "somef-0.11.2-py3-none-any.whl", hash = "sha256:4e4bf7db17dccbf26f79f1113408548f120e79c44b20d6f7eb1f42761137bc43"},
+    {file = "somef-0.11.2.tar.gz", hash = "sha256:5b781773e7d0dcfccfef8b7e805475066aa4fc570988368da67cd70caf688d28"},
 ]
 
 [package.dependencies]

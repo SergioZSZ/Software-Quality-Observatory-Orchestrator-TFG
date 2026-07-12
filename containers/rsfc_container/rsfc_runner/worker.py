@@ -118,8 +118,6 @@ def record_rsfc_repository_result(target,repository_url,succeeded):
 
         if processed_repos < expected_repos:
             status_data["status"] = "processing"
-        elif failed_repos:
-            status_data["status"] = "failed"
         else:
             status_data["status"] = "completed"
 

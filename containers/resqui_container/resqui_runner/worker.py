@@ -4,8 +4,16 @@ from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
-from .cruds import resqui_runner
-from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE, RATE_LIMIT_RESQUI_ENABLED, RETRYABLE_ERRORS
+from .cruds import resqui_runner, resqui_report_generation
+from .config import (
+    BASE_DIR,
+    QUEUE_NAME,
+    TOKEN,
+    RATE_LIMIT_QUEUE,
+    RATE_LIMIT_RESQUI_ENABLED,
+    RETRYABLE_ERRORS,
+    RESQUI_CONF,
+)
 from .rabbitmq import rabbit_connect
 from .repository_state import build_resqui_repository_paths, promote_staged_resqui_results
 MAX_RETRIES = 7
@@ -117,8 +125,6 @@ def record_resqui_repository_result(target,repository_url,succeeded):
 
         if processed_repos < expected_repos:
             status_data["status"] = "processing"
-        elif failed_repos:
-            status_data["status"] = "failed"
         else:
             status_data["status"] = "completed"
 
@@ -144,8 +150,7 @@ def wait_for_token(channel):
             
             
 #llamada a resqui_runner y cambios de estado de la bbdd
-def resqui_indicators_generation(job_id,target,repo_url,base_dir,token):
-    
+def resqui_indicators_generation(job_id, target, repo_url, base_dir, token, conf_path):    
     repository_paths = build_resqui_repository_paths(base_dir,target,repo_url)
     repository_paths.staging_root.mkdir(parents=True,exist_ok=True)
 
@@ -164,9 +169,21 @@ def resqui_indicators_generation(job_id,target,repo_url,base_dir,token):
 
             if last_status["status"] == "success":
                 try:
-                    promote_staged_resqui_results(staging_path,repository_paths.active_dir,
-                                                )
-                except RuntimeError as exc:
+                    summary_path = staging_path / "resqui_summary.json"
+                    output_report_path = staging_path / "resqui_report.md"
+
+                    resqui_report_generation(
+                        input_path=summary_path,
+                        conf_path=conf_path,
+                        output_report_path=output_report_path,
+                    )
+
+                    promote_staged_resqui_results(
+                        staging_path,
+                        repository_paths.active_dir,
+                    )
+                                                
+                except Exception as exc:
                     last_status = {
                         "status": "error",
                         "returncode": -1,
@@ -222,7 +239,14 @@ def process_message(ch, method, properties, body):
         if RATE_LIMIT_RESQUI_ENABLED:
             wait_for_token(ch)
 
-        succeeded = resqui_indicators_generation(job_id,target,repo_url,BASE_DIR,TOKEN)
+        succeeded = resqui_indicators_generation(
+            job_id,
+            target,
+            repo_url,
+            BASE_DIR,
+            TOKEN,
+            RESQUI_CONF,
+        )
 
         total_time = time.time() - start
 

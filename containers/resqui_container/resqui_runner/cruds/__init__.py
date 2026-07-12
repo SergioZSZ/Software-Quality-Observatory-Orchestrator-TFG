@@ -1,1 +1,2 @@
 from .functions import resqui_runner
+from .resqui_generate_report import resqui_report_generation

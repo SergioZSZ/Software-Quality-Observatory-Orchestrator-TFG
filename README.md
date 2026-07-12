@@ -210,7 +210,7 @@ El nodo `Conf` define:
 1. SOCA consulta GitHub y compara el inventario con `repository-state.json`. Genera `repos.txt`, `repos-updated.txt` y `repos-removed.txt`.
 2. `If has changes` continúa el pipeline cuando hay repositorios actualizados o eliminados; si no hay cambios, consolida directamente el estado.
 3. Solo los repositorios nuevos o modificados pasan por los workers de SOCA, RSFC y RESQUI. Los retirados se eliminan de sus salidas persistidas.
-4. RSFC y RESQUI guardan resultados por `owner_repo` y notifican el estado real del lote mediante `status.json`.
+4. RSFC y RESQUI guardan resultados por `owner_repo` y notifican el estado del lote mediante `status.json`; los fallos por repositorio quedan registrados en `failed_repos` sin detener el pipeline.
 5. sw-metadata-bot recibe el inventario completo, reutiliza la snapshot anterior para repositorios sin cambios y publica issues solo si `launch_issue` está activado.
 6. SOCA genera el portal enriquecido, que Nginx publica en `http://localhost:8030/portals/<project>/`.
 7. `If repo updated` llama a DashVERSE solo si existen assessments nuevos; una ejecución con solo eliminaciones pasa directamente a la consolidación.
@@ -318,8 +318,9 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
    - `PORTAL_PORT` puerto del host desde el que Nginx publica los portales SOCA (por defecto `8030`)
 
-   - `DASHBOARD_ORG_EMBED_ID` id o slug del dashboard SQO-org importado en DashVERSE/Superset
-   - `DASHBOARD_REPO_EMBED_ID` id o slug del dashboard SQO-repo importado en DashVERSE/Superset
+   - `DASHBOARD_ORG_EMBED_ID` id o slug del dashboard global importado en DashVERSE/Superset (por defecto `global`)
+   - `DASHBOARD_REPO_EMBED_ID` id o slug del dashboard SQO-repo importado en DashVERSE/Superset (por defecto `assessments`)
+      ambos valores corresponden a dashboards por defecto de dashverse
 
    - `DASHVERSE_JWT` token generado por la API de DashVERSE para publicar assessments desde n8n
 
