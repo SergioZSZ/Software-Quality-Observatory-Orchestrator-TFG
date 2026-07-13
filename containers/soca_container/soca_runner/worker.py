@@ -8,6 +8,7 @@ from datetime import datetime
 from contextlib import contextmanager
 from pathlib import Path
 from .repository_state import parse_github_repository_url
+from .safe_logging import sanitize_data, sanitize_text
 
 STATUS_FILENAME = "status.json"
 STATUS_LOCK_FILENAME = "status.lock"
@@ -18,7 +19,24 @@ STATUS_LOCK_FILENAME = "status.lock"
 ###### Auxiliares
 
 def timestamp(msg):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {sanitize_text(msg)}", flush=True)
+
+
+def summarize_command_output(status: dict, max_chars: int = 1200) -> str:
+    parts = []
+    for field in ("stderr", "stdout"):
+        value = sanitize_text(status.get(field) or "")
+        if not isinstance(value, str):
+            value = sanitize_text(value)
+
+        value = value.strip()
+        if value:
+            parts.append(f"{field.upper()}:\n{value[-max_chars:]}")
+
+    if not parts:
+        parts.append(f"STATUS: {sanitize_data(status)}")
+
+    return "\n".join(parts)
 
 
 # obtener rutas del status y de su fichero de bloqueo
@@ -224,8 +242,22 @@ def handle_extract_metadata(target, repo_url):
             )
 
             if response.status["status"] == "error":
+                timestamp(
+                    f"[{target} - {repository_key}] "
+                    f"SOCA extraction failed:\n"
+                    f"{summarize_command_output(response.status)}"
+                )
                 raise RuntimeError(
-                    f"SOCA extraction failed: {response.status}"
+                    json.dumps(
+                        {
+                            "message": "SOCA extraction failed",
+                            "detail": sanitize_data(response.status),
+                            "error_summary": summarize_command_output(
+                                response.status
+                            ),
+                        },
+                        ensure_ascii=False,
+                    )
                 )
 
             # SOCA puede terminar con código cero sin generar ningún JSON.
@@ -255,6 +287,18 @@ def handle_extract_metadata(target, repo_url):
             f"extract_metadata failed: {exc}"
         )
 
+        error_detail = {
+            "message": "SOCA extract_metadata failed",
+            "error": sanitize_text(exc),
+        }
+
+        try:
+            parsed_error = json.loads(str(exc))
+            if isinstance(parsed_error, dict):
+                error_detail.update(sanitize_data(parsed_error))
+        except json.JSONDecodeError:
+            pass
+
         failed_file = (
             metadata_dir
             / f"failed_{repository_key}.json"
@@ -262,7 +306,7 @@ def handle_extract_metadata(target, repo_url):
 
         with failed_file.open("w", encoding="utf-8") as file:
             json.dump(
-                {"detail": str(exc)},
+                {"detail": sanitize_data(error_detail)},
                 file,
                 indent=2,
             )

@@ -16,14 +16,36 @@ from .config import (
 )
 from .rabbitmq import rabbit_connect
 from .repository_state import build_resqui_repository_paths, promote_staged_resqui_results
+from .safe_logging import sanitize_data, sanitize_text
 MAX_RETRIES = 7
 
 ## Auxiliares
 def timestamp(msg):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {sanitize_text(msg)}", flush=True)
     
 
-def write_repository_failed_assessment(active_dir: str | Path,response_status: dict) -> Path:
+def summarize_command_output(status: dict, max_chars: int = 1200) -> str:
+    parts = []
+    for field in ("stderr", "stdout"):
+        value = sanitize_text(status.get(field) or "")
+        if not isinstance(value, str):
+            value = sanitize_text(value)
+
+        value = value.strip()
+        if value:
+            parts.append(f"{field.upper()}:\n{value[-max_chars:]}")
+
+    if not parts:
+        parts.append(f"STATUS: {sanitize_data(status)}")
+
+    return "\n".join(parts)
+
+
+def write_repository_failed_assessment(
+    active_dir: str | Path,
+    response_status: dict,
+    attempts: list[dict] | None = None,
+) -> Path:
     active_path = Path(active_dir)
     active_path.mkdir(parents=True, exist_ok=True)
 
@@ -31,7 +53,11 @@ def write_repository_failed_assessment(active_dir: str | Path,response_status: d
 
     write_json_atomic(
         str(failed_file),
-        {"detail": response_status},
+        {
+            "detail": sanitize_data(response_status),
+            "error_summary": summarize_command_output(response_status),
+            "attempts": sanitize_data(attempts or []),
+        },
     )
 
     return failed_file
@@ -156,6 +182,7 @@ def resqui_indicators_generation(job_id, target, repo_url, base_dir, token, conf
 
     succeeded = False
     last_status = {}
+    attempts = []
 
     for attempt in range(MAX_RETRIES):
         staging_path = Path(
@@ -166,6 +193,13 @@ def resqui_indicators_generation(job_id, target, repo_url, base_dir, token, conf
         try:
             response = resqui_runner(str(staging_path),repo_url,token)
             last_status = response.status
+            attempts.append(
+                {
+                    "attempt": attempt + 1,
+                    "status": last_status,
+                    "summary": summarize_command_output(last_status),
+                }
+            )
 
             if last_status["status"] == "success":
                 try:
@@ -190,6 +224,11 @@ def resqui_indicators_generation(job_id, target, repo_url, base_dir, token, conf
                         "stdout": "",
                         "stderr": str(exc)
                     }
+                    attempts[-1] = {
+                        "attempt": attempt + 1,
+                        "status": last_status,
+                        "summary": summarize_command_output(last_status),
+                    }
                 else:
                     succeeded = True
                     break
@@ -203,10 +242,17 @@ def resqui_indicators_generation(job_id, target, repo_url, base_dir, token, conf
             retry_number = attempt + 1
 
             if retry_number >= MAX_RETRIES:
-                timestamp(f"[{job_id}] max retries reached")
+                timestamp(
+                    f"[{job_id}] max retries reached. "
+                    f"Last error:\n{summarize_command_output(last_status)}"
+                )
                 break
 
-            timestamp(f"[{job_id}] retry {retry_number}/{MAX_RETRIES} due to network error")
+            timestamp(
+                f"[{job_id}] retry {retry_number}/{MAX_RETRIES} "
+                f"due to network error. Last error:\n"
+                f"{summarize_command_output(last_status)}"
+            )
             time.sleep(min(2 ** retry_number * 5, 300))
 
         finally:
@@ -214,7 +260,11 @@ def resqui_indicators_generation(job_id, target, repo_url, base_dir, token, conf
                 shutil.rmtree(staging_path)
 
     if not succeeded:
-        write_repository_failed_assessment(repository_paths.active_dir, last_status)
+        write_repository_failed_assessment(
+            repository_paths.active_dir,
+            last_status,
+            attempts,
+        )
 
     status_data = record_resqui_repository_result(target, repo_url, succeeded)
 

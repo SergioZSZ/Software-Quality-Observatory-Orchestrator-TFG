@@ -1,4 +1,5 @@
 from ..models import FetchResponse, PortalResponse
+from ..safe_logging import sanitize_data, sanitize_text
 import os, subprocess, time
     
 # funcion para ejecutar subprocessos
@@ -19,12 +20,12 @@ def run_command(cmd: list[str], input: str | None = None):
         }
 
     except subprocess.CalledProcessError as e:
-        return {
+        return sanitize_data({
             "status": "error",
             "returncode": e.returncode,
             "stdout": e.stdout,
             "stderr": e.stderr
-        }
+        })
         
 
 
@@ -58,10 +59,10 @@ def soca_fetch(dir_base: str, target: str, type: str)-> FetchResponse:
     result_fetch = run_command(fetch)
 
     if result_fetch.get("stdout"):
-        print(f"SOCA stdout:\n{result_fetch['stdout']}", flush=True)
+        print(f"SOCA stdout:\n{sanitize_text(result_fetch['stdout'])}", flush=True)
 
     if result_fetch.get("stderr"):
-        print(f"SOCA stderr:\n{result_fetch['stderr']}", flush=True)
+        print(f"SOCA stderr:\n{sanitize_text(result_fetch['stderr'])}", flush=True)
 
     if result_fetch["status"]=="error":
         return FetchResponse(status=result_fetch)    
@@ -72,7 +73,7 @@ def soca_fetch(dir_base: str, target: str, type: str)-> FetchResponse:
             status={
                 "status": "error",
                 "returncode": 422,
-                "stdout": result_fetch.get("stdout", ""),
+                "stdout": sanitize_text(result_fetch.get("stdout", "")),
                 "stderr": "No se generó el fichero de repositorios",
             }
         )

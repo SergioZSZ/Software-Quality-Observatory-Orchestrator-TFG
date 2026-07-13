@@ -1,6 +1,7 @@
 from pathlib import Path
 import os, subprocess
 from ..models import RunResponse
+from ..safe_logging import sanitize_data, sanitize_text
 from resqui_runner.config import RETRYABLE_ERRORS, RESQUI_CONF
 
 # funcion para ejecutar subprocessos
@@ -30,10 +31,10 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> di
         return {
             "status": "error",
             "returncode": -1,
-            "stdout": exc.stdout or "",
+            "stdout": sanitize_text(exc.stdout or ""),
             "stderr": (
                 f"TimeoutExpired after {exc.timeout} seconds\n"
-                f"{exc.stderr or ''}"
+                f"{sanitize_text(exc.stderr or '')}"
             )
         }
     except subprocess.CalledProcessError as e:
@@ -43,16 +44,16 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> di
 
         # solo imprimimos si NO es retryable
         if not retryable:
-            print("STDOUT:", e.stdout, flush=True)
-            print("STDERR:", e.stderr, flush=True)
+            print("STDOUT:", sanitize_text(e.stdout), flush=True)
+            print("STDERR:", sanitize_text(e.stderr), flush=True)
             print("RETURN CODE:", e.returncode, flush=True)
         
-        return {
+        return sanitize_data({
             "status": "error",
             "returncode": -1,
             "stdout": e.stdout,
             "stderr": e.stderr
-        }
+        })
 
 
     
