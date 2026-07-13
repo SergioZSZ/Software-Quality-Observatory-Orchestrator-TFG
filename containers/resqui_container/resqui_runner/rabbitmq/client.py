@@ -1,6 +1,15 @@
 import json, pika, time
 
-from ..config import RABBITMQ_HOST, QUEUE_NAME,RABBITMQ_USER, RABBITMQ_PASSWORD, RATE_LIMIT_QUEUE
+from ..config import (
+    RABBITMQ_BLOCKED_CONNECTION_TIMEOUT_SECONDS,
+    RABBITMQ_HEARTBEAT_SECONDS,
+    RABBITMQ_HOST,
+    QUEUE_NAME,
+    RABBITMQ_PASSWORD,
+    RABBITMQ_RETRY_DELAY_SECONDS,
+    RABBITMQ_USER,
+    RATE_LIMIT_QUEUE,
+)
 
 # intentos de conexion a rabbit hasta que se pueda conectar
 def rabbit_connect():
@@ -12,8 +21,8 @@ def rabbit_connect():
                 pika.ConnectionParameters(
                     host=RABBITMQ_HOST,
                     credentials=credentials,
-                    heartbeat = 7200,
-                    blocked_connection_timeout=7200
+                    heartbeat=RABBITMQ_HEARTBEAT_SECONDS,
+                    blocked_connection_timeout=RABBITMQ_BLOCKED_CONNECTION_TIMEOUT_SECONDS
 
                 )
             )
@@ -26,7 +35,7 @@ def rabbit_connect():
 
         except pika.exceptions.AMQPConnectionError:
             print("RabbitMQ not ready, retrying in 5s...", flush=True)
-            time.sleep(5)
+            time.sleep(RABBITMQ_RETRY_DELAY_SECONDS)
             
 # definicion de credenciales, conexion a rabbit de manera síncrona y abrir canal
 connection = rabbit_connect()

@@ -2,7 +2,11 @@ from pathlib import Path
 import os, subprocess
 from ..models import RunResponse
 from ..safe_logging import sanitize_data, sanitize_text
-from resqui_runner.config import RETRYABLE_ERRORS, RESQUI_CONF
+from resqui_runner.config import (
+    RESQUI_COMMAND_TIMEOUT_SECONDS,
+    RETRYABLE_ERRORS,
+    RESQUI_CONF,
+)
 
 # funcion para ejecutar subprocessos
 def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> dict:
@@ -14,7 +18,7 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None)-> di
             text=True,
             check=True,
             cwd= personal_dir,
-            timeout= 3600
+            timeout=RESQUI_COMMAND_TIMEOUT_SECONDS
         )
         
         #print("STDOUT:", result.stdout, flush=True)

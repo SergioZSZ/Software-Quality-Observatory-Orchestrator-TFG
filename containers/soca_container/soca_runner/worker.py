@@ -3,7 +3,13 @@ import time, os, json, fcntl, tempfile
 from .rabbitmq.client import rabbit_connect, publish_job
 from .cruds.functions import soca_extract, soca_portal
 
-from .config import QUEUE_NAME, BASE_DIR, RATE_LIMIT_QUEUE, RATE_LIMIT_SOCA_ENABLED
+from .config import (
+    QUEUE_NAME,
+    BASE_DIR,
+    RATE_LIMIT_QUEUE,
+    RATE_LIMIT_SOCA_ENABLED,
+    RATE_LIMIT_WAIT_SECONDS,
+)
 from datetime import datetime
 from contextlib import contextmanager
 from pathlib import Path
@@ -157,7 +163,7 @@ def wait_for_token(channel):
             channel.basic_ack(method.delivery_tag)
             return
 
-        time.sleep(0.5)
+        time.sleep(RATE_LIMIT_WAIT_SECONDS)
 
 
 

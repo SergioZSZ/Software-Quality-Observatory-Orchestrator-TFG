@@ -2,13 +2,24 @@ import time, os, json, fcntl, tempfile, shutil
 
 from pathlib import Path
 from .cruds import rfsc_runner
-from .config import BASE_DIR, QUEUE_NAME, TOKEN, RATE_LIMIT_QUEUE, RATE_LIMIT_RSFC_ENABLED, RETRYABLE_ERRORS
+from .config import (
+    BASE_DIR,
+    QUEUE_NAME,
+    TOKEN,
+    RATE_LIMIT_QUEUE,
+    RATE_LIMIT_RSFC_ENABLED,
+    RATE_LIMIT_WAIT_SECONDS,
+    RETRYABLE_ERRORS,
+    RSFC_MAX_RETRIES,
+    RSFC_RETRY_DELAY_BASE_SECONDS,
+    RSFC_RETRY_DELAY_MAX_SECONDS,
+)
 from .rabbitmq import rabbit_connect
 from datetime import datetime
 from contextlib import contextmanager
 from .repository_state import build_rsfc_repository_paths, promote_staged_rsfc_results
 from .safe_logging import sanitize_data, sanitize_text
-MAX_RETRIES = 7
+MAX_RETRIES = RSFC_MAX_RETRIES
 
 
 def timestamp(msg):
@@ -162,7 +173,7 @@ def wait_for_token(channel):
             channel.basic_ack(method.delivery_tag)
             return
 
-        time.sleep(0.5)
+        time.sleep(RATE_LIMIT_WAIT_SECONDS)
 
             
             
@@ -233,7 +244,12 @@ def rsfc_indicators_generation(job_id,target,repo_url,base_dir,token):
                 f"due to network error. Last error:\n"
                 f"{summarize_command_output(last_status)}"
             )
-            time.sleep(min(2 ** retry_number * 5, 300))
+            time.sleep(
+                min(
+                    2 ** retry_number * RSFC_RETRY_DELAY_BASE_SECONDS,
+                    RSFC_RETRY_DELAY_MAX_SECONDS,
+                )
+            )
 
         finally:
             if staging_path.exists():

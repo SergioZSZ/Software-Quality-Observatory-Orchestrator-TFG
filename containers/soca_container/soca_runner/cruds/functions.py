@@ -1,5 +1,6 @@
 from ..models import FetchResponse, PortalResponse
 from ..safe_logging import sanitize_data, sanitize_text
+from ..config import FETCH_SETTLE_SECONDS
 import os, subprocess, time
     
 # funcion para ejecutar subprocessos
@@ -67,7 +68,7 @@ def soca_fetch(dir_base: str, target: str, type: str)-> FetchResponse:
     if result_fetch["status"]=="error":
         return FetchResponse(status=result_fetch)    
     
-    time.sleep(5)
+    time.sleep(FETCH_SETTLE_SECONDS)
     if not os.path.isfile(repos_file):
         return FetchResponse(
             status={

@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess, os
 from ..models import RunResponse
 from ..safe_logging import sanitize_data, sanitize_text
-from rsfc_runner.config import RETRYABLE_ERRORS
+from rsfc_runner.config import RSFC_COMMAND_TIMEOUT_SECONDS, RETRYABLE_ERRORS
 
 # funcion para ejecutar subprocessos
 def run_command(personal_dir: str,cmd: list[str], input: str | None = None, env: dict | None = None)-> dict:
@@ -14,7 +14,7 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None, env:
             text=True,
             check=True,
             cwd= personal_dir,
-            timeout= 3600,
+            timeout=RSFC_COMMAND_TIMEOUT_SECONDS,
             env=env
         )
         

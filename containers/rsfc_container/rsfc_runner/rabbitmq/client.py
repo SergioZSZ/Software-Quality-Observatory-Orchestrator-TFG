@@ -1,6 +1,15 @@
 import json, pika, time, socket
 
-from ..config import RABBITMQ_HOST, QUEUE_NAME,RABBITMQ_USER, RABBITMQ_PASSWORD, RATE_LIMIT_QUEUE
+from ..config import (
+    RABBITMQ_BLOCKED_CONNECTION_TIMEOUT_SECONDS,
+    RABBITMQ_HEARTBEAT_SECONDS,
+    RABBITMQ_HOST,
+    QUEUE_NAME,
+    RABBITMQ_PASSWORD,
+    RABBITMQ_RETRY_DELAY_SECONDS,
+    RABBITMQ_USER,
+    RATE_LIMIT_QUEUE,
+)
 
 _publish_connection = None
 _publish_channel = None
@@ -15,8 +24,8 @@ def rabbit_connect():
                 pika.ConnectionParameters(
                     host=RABBITMQ_HOST,
                     credentials=credentials,
-                    heartbeat = 7200,
-                    blocked_connection_timeout=7200
+                    heartbeat=RABBITMQ_HEARTBEAT_SECONDS,
+                    blocked_connection_timeout=RABBITMQ_BLOCKED_CONNECTION_TIMEOUT_SECONDS
 
                 )
             )
@@ -29,7 +38,7 @@ def rabbit_connect():
 
         except (pika.exceptions.AMQPConnectionError, socket.gaierror) as exc:
             print(f"RabbitMQ not ready ({exc}), retrying in 5s...", flush=True)
-            time.sleep(5)
+            time.sleep(RABBITMQ_RETRY_DELAY_SECONDS)
             
 # canal de publicacion creado bajo demanda para evitar conexiones al importar
 def publish_channel():

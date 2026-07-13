@@ -11,13 +11,16 @@ from .config import (
     TOKEN,
     RATE_LIMIT_QUEUE,
     RATE_LIMIT_RESQUI_ENABLED,
+    RATE_LIMIT_WAIT_SECONDS,
     RETRYABLE_ERRORS,
     RESQUI_CONF,
+    RESQUI_MAX_RETRIES,
+    RESQUI_RETRY_DELAY_SECONDS,
 )
 from .rabbitmq import rabbit_connect
 from .repository_state import build_resqui_repository_paths, promote_staged_resqui_results
 from .safe_logging import sanitize_data, sanitize_text
-MAX_RETRIES = 7
+MAX_RETRIES = RESQUI_MAX_RETRIES
 
 ## Auxiliares
 def timestamp(msg):
@@ -171,7 +174,7 @@ def wait_for_token(channel):
             channel.basic_ack(method.delivery_tag)
             return
 
-        time.sleep(0.5)
+        time.sleep(RATE_LIMIT_WAIT_SECONDS)
 
             
             
@@ -253,7 +256,7 @@ def resqui_indicators_generation(job_id, target, repo_url, base_dir, token, conf
                 f"due to network error. Last error:\n"
                 f"{summarize_command_output(last_status)}"
             )
-            time.sleep(min(2 ** retry_number * 5, 300))
+            time.sleep(RESQUI_RETRY_DELAY_SECONDS)
 
         finally:
             if staging_path.exists():
