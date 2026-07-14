@@ -4,7 +4,7 @@ INPUT = os.getenv("INPUT")
 
 FILE_DIR = os.path.dirname(__file__)
 BASE_DIR = os.path.abspath(os.path.join(FILE_DIR, ".."))
-RESQUI_CONF = os.path.abspath(os.path.join(BASE_DIR,"resqui_runner","configurations","complete_no_rsfc.json"))
+RESQUI_CONF = os.path.abspath(os.path.join(BASE_DIR,"resqui_runner","configurations",f"{os.getenv('RESQUI_CONF')}.json"))
 TOKEN = os.getenv("GITHUB_TOKEN")
 
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")

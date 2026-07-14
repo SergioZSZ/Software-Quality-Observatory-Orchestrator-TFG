@@ -1,36 +1,39 @@
 # General
-- Actualizado el workflow modular para procesar solo repositorios nuevos o modificados, retirar los eliminados y conservar el inventario completo
-- Integrado RESQUI en el pipeline modular y reforzada la persistencia de resultados de SOCA, RSFC y RESQUI ante fallos
-- Añadidos scripts de generación de imágenes docker 
-necesarias para el software: `/scripts/build-docker-images.ps1` (powershell) y `/scripts/build-docker-images.sh` WSL/Linux
-- Añadida nueva variable entorno ``DASHVERSE_JWT`` para meter el token para el acceso a dashverse de n8n
-- Añadido script para limpiar las issues obsoletas de sw-metadata-bot no pertenecientes a la snapshot que se le pase al script
+- Añadida nueva variable entorno `RESQUI_CONF` para seleccionar la configuración querida para los worker_resqui
+- Cambio de configuración para añadir repos y orgs al portal linkeddata, ejemplo:
+```json
+{
+  "project": "sergio-soca-incremental",
+  "organizations": [
+    {
+      "org": "SergioZSZ",
+      "type": "user"
+    }
+  ],
+  "extra_repositories": ["https://github.com/oeg-upm/soca"],
+  "launch_issue": false,
+
+  
+  "linkeddata_portal": {
+    "organizations": ["SergioZSZ"],
+    "extra_repositories": ["https://github.com/oeg-upm/soca"]
+  }
+}
+```
 
 # SW-METADATA-BOT
-- arreglado problema de configuración de github token en sw-metadata-bot
-- añadida configuración para elegir si lanzar issues o no
-- Actualizado bot a la versión 0.5.3 (dentro actualizado somef a 0.11.2 y rsmetacheck a 0.3.4)
 
-# NGINX
-- añadido contenedor nginx de despliegue de los portales soca generados
 
 # SOCA
-- Mejorada visualización de metadatos de portal software generado por soca
-- Actualizado somef dentro de soca a 0.11.2
-- Añadido filtrado por software por defecto (que no se vean ni ontologías ni webs)
-- Añadido botón `quality` en los cards, incluyendo el report de rsfc y pitfalls/warnings de sw-metadata-bot + link a la Issue generada por él
+- Añadida generación del portal linkeddata a partir del yaml base + orgs/repos que se metan desde conf en el workflow
 
 # RSFC
-- Actualizado RSFC a la versión 0.1.7.
-- Reutilizados los metadatos de SOCA y adaptada la integración a SOMEF 0.11.2
-- Corregidas las comprobaciones de versiones y del gestor de issues
+
 
 # RESQUI
-- Actualizado al commit https://github.com/EVERSE-ResearchSoftware/QualityPipelines/commit/141eaf25c366bf3a59115846c483bf63da6c7e31
+- Arreglados bugs de conexión timeout worker_resqui-rabbitmq
 
 # DashVERSE
-- Actualizado a DashVERSE 0.3.0
-- Añadida la publicación de assessments de RSFC y RESQUI desde el workflow modular
-- Habilitada la visualización embebida de los dashboards de dashverse restringida al dominio autorizado (http://localhost:8030 en caso local, caso desplegable poner dominio desde donde se visualizará)
+
 
 

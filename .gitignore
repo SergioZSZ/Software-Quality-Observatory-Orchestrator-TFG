@@ -2,8 +2,7 @@
 .vscode/
 
 AGENTS.md
-# jsons generated
-client/**.json
+
 
 # Environment variables
 .env
@@ -31,6 +30,7 @@ output/
 # Carpetas ignoradas manualmente
 ignore/
 backups/
+
 # Graphify local artifacts
 .graphifyignore
 graphify-out
@@ -45,4 +45,4 @@ postgres_data/
 Thumbs.db
 
 .codex
-containers/nginx/nginx.md
+

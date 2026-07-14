@@ -1,4 +1,4 @@
-import json, pika, time
+import json, pika, socket, time
 
 from ..config import (
     RABBITMQ_BLOCKED_CONNECTION_TIMEOUT_SECONDS,
@@ -33,7 +33,7 @@ def rabbit_connect():
 
             return connection
 
-        except pika.exceptions.AMQPConnectionError:
+        except (pika.exceptions.AMQPConnectionError, socket.gaierror):
             print("RabbitMQ not ready, retrying in 5s...", flush=True)
             time.sleep(RABBITMQ_RETRY_DELAY_SECONDS)
             
