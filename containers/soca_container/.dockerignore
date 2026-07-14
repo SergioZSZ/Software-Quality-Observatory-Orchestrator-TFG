@@ -33,6 +33,8 @@ __pycache__/
 # Output generado
 output/
 dist/
+!soca/src/linkeddata_portal/assets/dist/
+!soca/src/linkeddata_portal/assets/dist/**
 build/
 
 # IDE
