@@ -160,7 +160,7 @@ DashVERSE 0.3.0 se despliega desde Linux sobre Kubernetes local con Minikube. To
 
 Requisitos principales:
 
-- Docker Engine con Compose v2.
+- Docker Engine con Compose v2 o Podman para las imágenes de DashVERSE.
 - Git.
 - Minikube.
 - kubectl.
@@ -168,6 +168,7 @@ Requisitos principales:
 - OpenTofu (`tofu`).
 - Ansible (`ansible-playbook`).
 - Just.
+- Python.
 - curl.
 - jq.
 - base64.
@@ -185,15 +186,17 @@ sudo apt install -y \
   unzip \
   zip \
   ansible \
-  netcat-openbsd
+  netcat-openbsd \
+  python3 \
+  python3-venv
 ```
 
-Además, deben estar instalados Docker, Minikube, kubectl, Helm, OpenTofu y Just.
+Además, deben estar instalados Docker o Podman, Minikube, kubectl, Helm, OpenTofu y Just.
 
 Comprobación desde la raíz de DashVERSE:
 
 ```bash
-cd integrations/DashVERSE-0.3.0
+cd integrations/DashVERSE
 just check-deps
 ```
 
@@ -288,6 +291,8 @@ Las imágenes pueden construirse con `scripts/build-docker-images.sh` en WSL/Lin
       - Directorio desde el que crearla: `/containers/resqui_container`
       - Mandato: `docker build -t resqui-heavy .`
 
+   Estas son las imágenes del orquestador SQOO. Las imágenes propias de DashVERSE (`dashverse/backend` y `dashverse/frontend`) no se construyen con estos scripts: las construye `just deploy` desde `integrations/DashVERSE` usando `minikube image build`.
+
 2. Desde el directorio `/containers` ejecutar el mandato en la terminal `docker compose up -d --scale worker_rsfc=N --scale worker_soca=N --scale worker_resqui=N`, siendo N el nº de workers a lanzar (si es la primera vez desplegándolo usar la etiqueta `--build` )
 
    El servicio RESQUI usa el volumen Docker nombrado `sqoo_resqui_work` montado como `/resqui-work`. Este volumen permite que el worker `resqui-heavy` y los contenedores Docker lanzados por los plugins de RESQUI compartan el mismo workspace de trabajo. No debe sustituirse por un bind mount local si se quiere ejecutar RESQUI dentro de Docker con plugins.
@@ -317,7 +322,7 @@ Tras ello se obtienen en `outputs` los metadatos SOCA, assessments RSFC y RESQUI
 Desde la raíz del repositorio SQOO:
 
 ```bash
-cd integrations/DashVERSE-0.3.0
+cd integrations/DashVERSE
 ```
 
 Comprobar los mandatos disponibles:
@@ -356,7 +361,7 @@ Este mandato realiza el despliegue completo:
 
 - comprueba las dependencias;
 - comprueba o arranca Minikube;
-- construye las imágenes de backend y frontend;
+- construye las imágenes de backend y frontend dentro del runtime de Minikube;
 - aplica la infraestructura con OpenTofu;
 - configura los port-forwards;
 - sincroniza el catálogo de indicadores y dimensiones de EVERSE;

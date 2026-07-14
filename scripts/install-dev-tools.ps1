@@ -42,12 +42,15 @@ if (-not (Test-CommandExists "winget")) {
 # - Command: ejecutable que esperamos encontrar en PATH
 # - PackageId: identificador del paquete en winget
 $tools = @(
+    @{ Label = "Git"; Command = "git"; PackageId = "Git.Git" },
     @{ Label = "Docker Desktop"; Command = "docker"; PackageId = "Docker.DockerDesktop" },
     @{ Label = "Minikube"; Command = "minikube"; PackageId = "Kubernetes.minikube" },
     @{ Label = "Helm"; Command = "helm"; PackageId = "Helm.Helm" },
     @{ Label = "kubectl"; Command = "kubectl"; PackageId = "Kubernetes.kubectl" },
     @{ Label = "GNU Make"; Command = "make"; PackageId = "GnuWin32.Make" },
-    @{ Label = "OpenTofu"; Command = "tofu"; PackageId = "OpenTofu.Tofu" }
+    @{ Label = "OpenTofu"; Command = "tofu"; PackageId = "OpenTofu.Tofu" },
+    @{ Label = "Just"; Command = "just"; PackageId = "Casey.Just" },
+    @{ Label = "jq"; Command = "jq"; PackageId = "jqlang.jq" }
 )
 
 # Estas listas acumulan el resultado final para mostrar un resumen claro.
@@ -89,3 +92,5 @@ Write-Host "Needs a new terminal session: $([string]::Join(', ', $pendingRestart
 Write-Host ""
 # Docker puede estar instalado pero seguir requiriendo autenticación del usuario.
 Write-Host "Docker login remains manual. Run 'docker login' or sign in from Docker Desktop before deploying DashVERSE."
+Write-Host "DashVERSE deploy should run from Linux/WSL. In that environment, verify: cd integrations/DashVERSE && just check-deps"
+Write-Host "DashVERSE also needs ansible-playbook and nc/netcat in the Linux/WSL environment."

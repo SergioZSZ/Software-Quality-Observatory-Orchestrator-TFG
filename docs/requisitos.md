@@ -15,7 +15,7 @@ DashVERSE 0.3.0 se despliega desde Linux sobre Kubernetes local con Minikube. To
 
 Requisitos principales:
 
-- Docker Engine con Compose v2.
+- Docker Engine con Compose v2 o Podman para las imágenes de DashVERSE.
 - Git.
 - Minikube.
 - kubectl.
@@ -23,6 +23,7 @@ Requisitos principales:
 - OpenTofu (`tofu`).
 - Ansible (`ansible-playbook`).
 - Just.
+- Python.
 - curl.
 - jq.
 - base64.
@@ -40,15 +41,17 @@ sudo apt install -y \
   unzip \
   zip \
   ansible \
-  netcat-openbsd
+  netcat-openbsd \
+  python3 \
+  python3-venv
 ```
 
-Además, deben estar instalados Docker, Minikube, kubectl, Helm, OpenTofu y Just.
+Además, deben estar instalados Docker o Podman, Minikube, kubectl, Helm, OpenTofu y Just.
 
 Comprobación desde la raíz de DashVERSE:
 
 ```bash
-cd integrations/DashVERSE-0.3.0
+cd integrations/DashVERSE
 just check-deps
 ```
 

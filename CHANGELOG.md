@@ -1,4 +1,5 @@
 # General
+- Actualizados scripts de creación de imágenes docker y de instalación de herramientas para DashVERSE
 - Añadida nueva variable entorno `RESQUI_CONF` para seleccionar la configuración querida para los worker_resqui
 - Cambio de configuración para añadir repos y orgs al portal linkeddata, ejemplo:
 ```json

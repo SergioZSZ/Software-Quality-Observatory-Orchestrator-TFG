@@ -47,6 +47,8 @@ docker build -t sw-metadata-bot-conf:latest containers/sw-metadata-bot_container
 
 La imagen `sw-metadata-bot-conf` debe construirse después de `sw-metadata-bot`, ya que hereda de ella.
 
+Estas son las imágenes del orquestador SQOO. Las imágenes propias de DashVERSE (`dashverse/backend` y `dashverse/frontend`) no se construyen con estos scripts: las construye `just deploy` desde `integrations/DashVERSE` usando `minikube image build`.
+
 ### 4. Levantar los servicios
 
 ```bash
@@ -98,7 +100,7 @@ El portal quedará disponible en `http://localhost:8030/portals/<project>/`.
 Desde la raíz del repositorio SQOO:
 
 ```bash
-cd integrations/DashVERSE-0.3.0
+cd integrations/DashVERSE
 ```
 
 Comprobar los mandatos disponibles:
@@ -137,7 +139,7 @@ Este mandato realiza el despliegue completo:
 
 - comprueba las dependencias;
 - comprueba o arranca Minikube;
-- construye las imágenes de backend y frontend;
+- construye las imágenes de backend y frontend dentro del runtime de Minikube;
 - aplica la infraestructura con OpenTofu;
 - configura los port-forwards;
 - sincroniza el catálogo de indicadores y dimensiones de EVERSE;

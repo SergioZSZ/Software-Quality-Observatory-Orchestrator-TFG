@@ -61,3 +61,4 @@ build_image "sw-metadata-bot-conf:latest" "containers/sw-metadata-bot_container"
 
 echo
 echo "Docker image build sequence completed."
+echo "DashVERSE backend/frontend images are built separately by 'just deploy' from integrations/DashVERSE."

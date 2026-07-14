@@ -62,3 +62,4 @@ foreach ($item in $images) {
 
 Write-Host ""
 Write-Host "Docker image build sequence completed."
+Write-Host "DashVERSE backend/frontend images are built separately by 'just deploy' from integrations/DashVERSE."

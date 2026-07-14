@@ -1,16 +1,12 @@
 #!/usr/bin/env bash
-# -e: para si un comando falla
-# -u: para si usamos una variable no definida
-# -o pipefail: detecta errores dentro de pipelines
+# Instala/verifica las herramientas de desarrollo usadas por SQOO y DashVERSE.
 set -euo pipefail
 
 has_cmd() {
-    # Comprueba si un comando está disponible en PATH.
     command -v "$1" >/dev/null 2>&1
 }
 
 need_sudo() {
-    # Ejecuta el comando con sudo salvo que ya estemos como root.
     if [[ "${EUID}" -eq 0 ]]; then
         "$@"
     else
@@ -20,62 +16,72 @@ need_sudo() {
 
 install_apt_package() {
     local package_name="$1"
-    # Instalación estándar de paquetes del sistema en distribuciones basadas en apt.
     need_sudo apt-get install -y "$package_name"
 }
 
 install_snap_package() {
     local package_name="$1"
-    # Usamos --classic porque estas herramientas de CLI suelen necesitar acceso amplio al sistema.
     need_sudo snap install "$package_name" --classic
 }
 
-# Este script está orientado a Linux; en Windows usamos el .ps1.
 if [[ "$(uname -s)" != "Linux" ]]; then
     echo "This script is intended for Linux. Use scripts/install-dev-tools.ps1 on Windows."
     exit 1
 fi
 
-# El flujo Linux de este script asume apt para paquetes base.
 if ! has_cmd apt-get; then
     echo "apt-get is required for this script."
     echo "Install the tools manually on your distribution if it does not provide apt."
     exit 1
 fi
 
-# Y snap para las herramientas de despliegue que hemos decidido instalar así.
 if ! has_cmd snap; then
     echo "snap is required for minikube, helm, kubectl and OpenTofu in this script."
     echo "Install snapd first or adapt the script for your distribution."
     exit 1
 fi
 
-# Actualizamos el índice de paquetes antes de instalar nada con apt.
 need_sudo apt-get update
 
-# Arrays para el resumen final.
 already_present=()
 installed_now=()
 
-# Docker en Linux depende mucho de la distro y de la configuración del repositorio,
-# así que aquí solo avisamos si falta en vez de intentar forzar una instalación genérica.
 if has_cmd docker; then
     already_present+=("Docker")
+elif has_cmd podman; then
+    already_present+=("Podman")
 else
-    echo "Docker is not installed. Install it manually for your distribution before deploying DashVERSE."
+    echo "Docker or Podman is not installed. Install one container runtime before deploying DashVERSE."
 fi
 
-# make sí lo resolvemos con apt porque es una dependencia simple y estable.
-if has_cmd make; then
-    already_present+=("make")
+apt_packages=(
+    git
+    curl
+    jq
+    unzip
+    zip
+    ansible
+    netcat-openbsd
+    make
+    python3
+    python3-venv
+    coreutils
+)
+
+for package in "${apt_packages[@]}"; do
+    echo "Installing/verifying $package with apt..."
+    install_apt_package "$package"
+done
+installed_now+=("apt base packages")
+
+if has_cmd just; then
+    already_present+=("just")
 else
-    echo "Installing make with apt..."
-    install_apt_package make
-    installed_now+=("make")
+    echo "Installing just with apt..."
+    install_apt_package just
+    installed_now+=("just")
 fi
 
-# Para el resto del stack comprobamos primero si ya está instalado
-# y solo en caso contrario lanzamos la instalación.
 if has_cmd minikube; then
     already_present+=("minikube")
 else
@@ -108,12 +114,11 @@ else
     installed_now+=("OpenTofu")
 fi
 
-# Resumen final para ver rápidamente el estado del entorno tras ejecutar el script.
 echo
 echo "Installation summary"
 echo "--------------------"
 echo "Already available: ${already_present[*]:-none}"
 echo "Installed now: ${installed_now[*]:-none}"
 echo
-# Aunque Docker exista, el usuario aún puede necesitar autenticarse manualmente.
 echo "Docker login remains manual. Run 'docker login' before deploying DashVERSE."
+echo "DashVERSE dependency check: cd integrations/DashVERSE && just check-deps"
