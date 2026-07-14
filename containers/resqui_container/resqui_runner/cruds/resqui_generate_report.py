@@ -491,6 +491,7 @@ def checks_by_indicator_extract(checks: list):
 # creates the detailed results by indicator section
 def detailed_results_by_indicator_create(configured_indicators: list, checks: list):
     checks_by_indicator = checks_by_indicator_extract(checks)
+    detailed_results_by_plugin = {}
 
     detailed_results = """
 ## Detailed Results by Indicator
@@ -507,24 +508,40 @@ def detailed_results_by_indicator_create(configured_indicators: list, checks: li
         if len(indicator_checks) == 0:
             continue
 
+        if configured_plugin not in detailed_results_by_plugin:
+            detailed_results_by_plugin[configured_plugin] = []
+
+        detailed_results_by_plugin[configured_plugin].append(
+            {
+                "name": indicator_name,
+                "id": indicator_id,
+                "checks": indicator_checks,
+            }
+        )
+
+    for plugin, plugin_indicators in detailed_results_by_plugin.items():
         detailed_results += f"""
-### {indicator_name}
+### {plugin}
 """
 
-        for check in indicator_checks:
-            real_indicator_name = check_indicator_name_extract(check)
-            plugin_with_version = check_plugin_version_extract(check)
-            output = check.get("output")
-            process = check.get("process")
-            evidence = check.get("evidence")
+        for indicator in plugin_indicators:
+            indicator_name = indicator.get("name")
+            indicator_id = indicator.get("id")
 
-            anchor_id = markdown_anchor_create(f"{indicator_name}-{indicator_id}")
+            for check in indicator.get("checks", []):
+                plugin_with_version = check_plugin_version_extract(check)
+                output = check.get("output")
+                process = check.get("process")
+                evidence = check.get("evidence")
 
-            detailed_results += f"""
+                anchor_id = markdown_anchor_create(
+                    f"{plugin}-{indicator_name}-{indicator_id}"
+                )
+
+                detailed_results += f"""
 <a id="{anchor_id}"></a>
-#### {real_indicator_name}
+#### {indicator_name}
 
-- **Configured plugin:** {configured_plugin}
 - **Execution plugin:** {plugin_with_version}
 - **Indicator ID:** {indicator_id}
 - **Result:** {output}
