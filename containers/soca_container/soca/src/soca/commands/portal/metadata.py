@@ -2063,7 +2063,31 @@ class Metadata(object):
         return self.repo_url() + '/stargazers'
 
     def owner(self):
-        return safe_dic(safe_dic(safe_list(safe_dic(self.md, 'owner'), 0), 'result'), 'value')
+        owner = safe_dic(safe_dic(safe_list(safe_dic(self.md, 'owner'), 0), 'result'), 'value')
+        owner = self._clean_owner(owner)
+        if owner:
+            return owner
+
+        repo_url = self.repo_url()
+        if not repo_url:
+            return None
+
+        parsed_url = urlparse(repo_url.rstrip("/"))
+        path_parts = [part for part in parsed_url.path.split("/") if part]
+        if parsed_url.netloc.lower() != "github.com" or len(path_parts) < 2:
+            return None
+
+        return self._clean_owner(path_parts[-2])
+
+    def _clean_owner(self, owner):
+        if owner is None:
+            return None
+
+        owner = str(owner).strip()
+        if not owner or owner.lower() in {"none", "null", "undefined"}:
+            return None
+
+        return owner
 
     # IMPORTANT !!!!! ASSUMES only 1 CFF per repo
     # USE SOMEF as example it lists SOMEF CFF then WIDOCO then SOMEF then CAPTUM

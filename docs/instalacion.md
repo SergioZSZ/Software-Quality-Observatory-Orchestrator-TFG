@@ -22,6 +22,7 @@ Copiar `containers/.env.example` como `containers/.env` y completar:
 - `GITHUB_API_TOKEN`: token de GitHub para consultas y publicación de issues.
 - `RABBITMQ_USER` y `RABBITMQ_PASSWORD`.
 - `RATE_LIMIT_RSFC_ENABLED` y `RATE_LIMIT_RESQUI_ENABLED`.
+- `RESQUI_CONF`: nombre de la configuracion RESQUI que se cargara desde `containers/resqui_container/resqui_runner/configurations/`, sin extension `.json`. Por ejemplo, `RESQUI_CONF=complete_no_rsfc_superlinter`.
 - `OUTPUTS`: ruta absoluta de `containers/outputs`.
 - `PORTAL_PORT`: puerto de Nginx, `8030` por defecto.
 - `DASHBOARD_ORG_EMBED_ID` id o slug del dashboard global importado en DashVERSE/Superset (por defecto `global`)

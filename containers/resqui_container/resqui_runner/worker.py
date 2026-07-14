@@ -321,7 +321,7 @@ def process_message(ch, method, properties, body):
 
 # establecimiento de conexion con cola y escucha
 def worker():
-    timestamp(f"** WORKER STARTED **\n\t\t using configuration {RESQUI_CONF})")
+    timestamp(f"** WORKER STARTED **\n\t\t using configuration {RESQUI_CONF}")
     
     # definicion de credenciales, la conexion, credenciales y apertura de canal
     connection = rabbit_connect()

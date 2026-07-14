@@ -266,7 +266,7 @@ def list_owners(repo_metadata_dir):
                 repo_metadata = json.load(json_metadata)
                 md = Metadata(repo_metadata_dir, repo_metadata)
                 owner = md.owner()
-                if owner not in owners:
+                if owner and owner not in owners:
                     owners.append(owner)
 
     return owners

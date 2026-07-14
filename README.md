@@ -90,7 +90,7 @@ Los resultados se guardan en `outputs/rsfc/<project>/<owner>_<repo>/`.
 
 El volumen `sqoo_resqui_work` permite que el worker y los contenedores de plugins compartan el workspace. `RESQUI_SHARED_WORKDIR` y `RESQUI_DOCKER_WORK_VOLUME` configuran este comportamiento.
 
-RESQUI utiliza el mismo patrón de staging, estado y eliminación de resultados retirados que RSFC. La configuración se encuentra en `containers/resqui_container/resqui_runner/configurations/`.
+RESQUI utiliza el mismo patrón de staging, estado y eliminación de resultados retirados que RSFC. Las configuraciones disponibles se encuentran en `containers/resqui_container/resqui_runner/configurations/` y se seleccionan desde `containers/.env` con `RESQUI_CONF`, usando el nombre del fichero sin la extension `.json`.
 
 ### sw-metadata-bot
 
@@ -235,6 +235,7 @@ https://github.com/SoftwareUnderstanding/RsMetaCheck/releases
 
    - `RATE_LIMIT_RSFC_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers para peticiones a GitHubAPI
    - `RATE_LIMIT_RESQUI_ENABLED` poner true/false dependiendo de si se quiere activar el limiter para los workers RESQUI para peticiones a GitHubAPI
+   - `RESQUI_CONF` nombre de la configuracion RESQUI a usar desde `containers/resqui_container/resqui_runner/configurations/`, sin extension `.json`. Por ejemplo, `RESQUI_CONF=complete_no_rsfc_superlinter` cargara `complete_no_rsfc_superlinter.json`.
 
    - `OUTPUTS` la ruta de acceso al directorio a usar como volumen compartido (se debe llamar ``outputs`` y estar dentro del directorio `/containers`)
    - `PORTAL_PORT` puerto del host desde el que Nginx publica los portales SOCA (por defecto `8030`)

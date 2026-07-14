@@ -130,6 +130,13 @@ def dedupe_preserving_order(values: list[str]) -> list[str]:
 
 
 def repository_url_from_metadata_file(metadata_path: Path) -> str | None:
+    try:
+        repository_url = repository_url_from_metadata(load_metadata(metadata_path))
+        if repository_url:
+            return repository_url
+    except (OSError, json.JSONDecodeError, ValueError):
+        pass
+
     match = METADATA_FILE_PATTERN.match(metadata_path.name)
     if not match:
         return None
@@ -185,8 +192,19 @@ def find_metadata_file_for_repository(
 ) -> Path | None:
     owner, repository = parse_github_repository(repository_url)
     matches = sorted(metadata_dir.glob(f"{owner}_{repository}_*.json"))
+    if matches:
+        return matches[-1]
 
-    return matches[-1] if matches else None
+    expected_repository_url = normalize_repository_url(repository_url).lower()
+    for metadata_path in sorted(metadata_dir.glob(f"{owner}_*.json")):
+        candidate_repository_url = repository_url_from_metadata_file(metadata_path)
+        if candidate_repository_url is None:
+            continue
+
+        if normalize_repository_url(candidate_repository_url).lower() == expected_repository_url:
+            return metadata_path
+
+    return None
 
 
 def metadata_file_for_repository(metadata_dir: Path, repository_url: str) -> Path:
@@ -311,27 +329,69 @@ def first_metadata_value(
     return None
 
 
+def normalize_text_value(value: Any) -> str | None:
+    if value is None:
+        return None
+
+    if isinstance(value, list):
+        parts = [
+            normalized
+            for item in value
+            if (normalized := normalize_text_value(item))
+        ]
+        return "\n\n".join(parts) if parts else None
+
+    if isinstance(value, dict):
+        for nested_key in ("value", "text", "name"):
+            if nested_key not in value:
+                continue
+
+            normalized = normalize_text_value(value[nested_key])
+            if normalized:
+                return normalized
+        return None
+
+    text = str(value).strip()
+    return text or None
+
+
+def repository_url_from_metadata(metadata: dict[str, Any]) -> str | None:
+    repository_url = normalize_text_value(
+        first_metadata_value(metadata, "code_repository")
+    )
+    if not repository_url:
+        return None
+
+    return normalize_repository_url(repository_url)
+
+
 def linkeddata_tool_card_from_metadata(
     repository_url: str,
     metadata: dict[str, Any],
 ) -> dict[str, Any]:
     _, repository = parse_github_repository(repository_url)
 
-    name = first_metadata_value(
-        metadata,
-        "name",
-        preferred_technique="GitHub_API",
-    ) or repository
-    category = first_metadata_value(metadata, "application_domain") or "Tool"
-    description = (
+    name = (
+        normalize_text_value(
+            first_metadata_value(
+                metadata,
+                "name",
+                preferred_technique="GitHub_API",
+            )
+        )
+        or repository
+    )
+    category = normalize_text_value(
+        first_metadata_value(metadata, "application_domain")
+    ) or "Tool"
+    description = normalize_text_value(
         first_metadata_value(
             metadata,
             "description",
             preferred_technique="code_parser",
         )
         or first_metadata_value(metadata, "description")
-        or "No description available."
-    )
+    ) or "No description available."
 
     return {
         "id": repository_slug(repository),
