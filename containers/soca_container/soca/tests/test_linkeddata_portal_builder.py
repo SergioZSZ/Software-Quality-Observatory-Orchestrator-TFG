@@ -108,6 +108,142 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
         self.assertIn(".linkeddata-card-title", stylesheet)
         self.assertIn("overflow-wrap: anywhere", stylesheet)
 
+    def test_static_html_lead_and_description_are_rendered_as_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config_path = root / "linkeddata.base.yml"
+            templates_dir = root / "templates"
+            assets_dir = root / "assets"
+            output_dir = root / "generates"
+
+            templates_dir.mkdir()
+            assets_dir.mkdir()
+            (assets_dir / "starter-template.css").write_text("", encoding="utf-8")
+            (templates_dir / "cards_page.html").write_text(
+                (DEFAULT_TEMPLATES_DIR / "cards_page.html").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            (templates_dir / "base.html").write_text(
+                (DEFAULT_TEMPLATES_DIR / "base.html").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+
+            config_path.write_text(
+                yaml.safe_dump(
+                    {
+                        "site": {"title": "LinkedData", "description": "Test"},
+                        "navigation": [],
+                        "pages": {
+                            "index": {
+                                "title": "LinkedData",
+                                "output": "index.html",
+                                "heading": "LinkedData.es",
+                                "lead": 'See <a href="tools.html">tools</a>.',
+                                "collection": "initiatives",
+                            }
+                        },
+                        "initiatives": [
+                            {
+                                "id": "datos-ign",
+                                "name": "datos.ign.es",
+                                "category": "Geographical domain",
+                                "homepage": "https://datos.ign.es",
+                                "image": None,
+                                "description": "Plain fallback description.",
+                                "description_html": (
+                                    '<a href="https://datos.ign.es" target="_blank">'
+                                    "datos.ign.es</a> linked description."
+                                ),
+                            }
+                        ],
+                    },
+                    sort_keys=False,
+                ),
+                encoding="utf-8",
+            )
+
+            build(
+                output_dir=output_dir,
+                config_path=config_path,
+                templates_dir=templates_dir,
+                assets_dir=assets_dir,
+            )
+
+            html = (output_dir / "index.html").read_text(encoding="utf-8")
+
+            self.assertIn('<a href="tools.html">tools</a>', html)
+            self.assertIn(
+                '<a href="https://datos.ign.es" target="_blank">datos.ign.es</a>',
+                html,
+            )
+            self.assertNotIn("&lt;a href=", html)
+
+    def test_static_award_html_is_rendered_as_original_content(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            config_path = root / "linkeddata.base.yml"
+            templates_dir = root / "templates"
+            assets_dir = root / "assets"
+            output_dir = root / "generates"
+
+            templates_dir.mkdir()
+            assets_dir.mkdir()
+            (assets_dir / "starter-template.css").write_text("", encoding="utf-8")
+            (templates_dir / "awards.html").write_text(
+                (DEFAULT_TEMPLATES_DIR / "awards.html").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            (templates_dir / "base.html").write_text(
+                (DEFAULT_TEMPLATES_DIR / "base.html").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+
+            config_path.write_text(
+                yaml.safe_dump(
+                    {
+                        "site": {"title": "LinkedData", "description": "Test"},
+                        "navigation": [],
+                        "pages": {
+                            "awards": {
+                                "title": "Awards",
+                                "output": "awards.html",
+                                "heading": "Awards",
+                                "lead": "Award <b>lead</b>",
+                                "collection": "awards",
+                            }
+                        },
+                        "awards": [
+                            {
+                                "year": 2017,
+                                "text": "Fallback award.",
+                                "text_html": (
+                                    'Award in the <a href="https://example.org" '
+                                    'target="_blank">Aporta Challenge</a>.'
+                                ),
+                            }
+                        ],
+                    },
+                    sort_keys=False,
+                ),
+                encoding="utf-8",
+            )
+
+            build(
+                output_dir=output_dir,
+                config_path=config_path,
+                templates_dir=templates_dir,
+                assets_dir=assets_dir,
+            )
+
+            html = (output_dir / "awards.html").read_text(encoding="utf-8")
+
+            self.assertIn("Award <b>lead</b>", html)
+            self.assertIn(
+                '<a href="https://example.org" target="_blank">Aporta Challenge</a>',
+                html,
+            )
+            self.assertNotIn("Fallback award.", html)
+
     def test_org_discovery_preserves_repository_dots_from_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
