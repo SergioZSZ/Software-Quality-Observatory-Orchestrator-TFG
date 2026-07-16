@@ -770,10 +770,16 @@ class Metadata(object):
         elif repo_type == 'ontology':
             # ontologies = safe_dic(safe_dic(self.md,'ontologies'),'excerpt')
             ontologies = safe_dic(self.md, 'ontologies')
+            onto_list = "No ontology URL available."
             if ontologies:
-                onto_list = '\n'.join(list(dict.fromkeys(
-                    [f'* <{safe_dic(safe_dic(x, "result"), "value")}>' for x in ontologies if
-                    'http' in safe_dic(safe_dic(x, "result"), "value")])))
+                ontology_urls = [
+                    f'* <{value}>'
+                    for x in ontologies
+                    if (value := safe_dic(safe_dic(x, "result"), "value"))
+                    and 'http' in value
+                ]
+                if ontology_urls:
+                    onto_list = '\n'.join(list(dict.fromkeys(ontology_urls)))
                 # onto_list = '\n'.join([ f'* <{safe_dic(x,"file_url")}>' for x in ontologies])
             return self.icon_wrapper(
                 icon_html=f'<img src="{self.base}repo_icons/ontology.png" {self.add_tooltip("left", "Ontology")} alt="repo-type" class="repo-type" style="height: 1.3rem;">',
@@ -1643,31 +1649,87 @@ class Metadata(object):
 
     # TODO
     def repo_type(self):
-        
-        ######################
-        #print (self.md.keys())
         if "type" in self.md.keys():
             return self.md["type"]
 
-        # web and ontology
-        ######################
+        langs = self.languages()
+        lang_set = set(langs or [])
+        title = str(self.title() or "").lower()
+        description = str(self.description() or "").lower()
+        repo_url = str(self.repo_url() or "").lower()
+        searchable_text = f"{title} {description}"
 
-        if (safe_dic(self.md, 'ontologies') is not None):
+        software_languages = {
+            "python", "java", "c", "c++", "c#", "go", "rust", "ruby", "php",
+            "r", "scala", "kotlin", "swift", "typescript",
+        }
+        ontology_formats = {
+            "turtle", "rdf", "owl", "sparql", "json-ld", "jsonld",
+            "n-triples", "ntriples",
+        }
+        web_languages = {"html", "css", "javascript", "scss", "sass", "less"}
+        ontology_name_terms = (
+            "ontolog", "ontologi", "vocab", "vocabulary", "semantic-model",
+            "semanticmodel",
+        )
+        ontology_description_terms = (
+            "ontolog", "vocabular", "semantic model", "knowledge model", "domain model"
+        )
+        ontology_publication_terms = (
+            "w3id.org", "vocab.linkeddata.es", "lov.linkeddata.es", "purl.org"
+        )
+        web_name_terms = ("github.io", "website", "homepage", "portal", "site")
+        web_description_terms = (
+            "website", "web site", "homepage", "portal", "landing page",
+            "static site", "documentation site", "aplicación web",
+            "aplicacion web", "sitio web", "página web", "pagina web",
+            "web oficial",
+        )
+        software_terms = (
+            "tool", "library", "api", "service", "framework", "generator",
+            "extractor", "converter", "parser", "pipeline", "platform",
+        )
+        software_metadata_keys = (
+            "installation", "usage", "requirements", "has_build_file", "inspect4py",
+        )
+
+        software_score = 0
+        if lang_set.intersection(software_languages):
+            software_score += 3
+        if "shell" in lang_set:
+            software_score += 1
+        if any(safe_dic(self.md, key) for key in software_metadata_keys):
+            software_score += 2
+        if any(term in searchable_text for term in software_terms):
+            software_score += 2
+
+        ontology_score = 0
+        if safe_dic(self.md, "ontologies"):
+            ontology_score += 3
+        if any(term in title or term in repo_url for term in ontology_name_terms):
+            ontology_score += 3
+        if any(term in description for term in ontology_description_terms):
+            ontology_score += 2
+        if any(term in repo_url for term in ontology_publication_terms):
+            ontology_score += 2
+        if lang_set.intersection(ontology_formats):
+            ontology_score += 1 if software_score else 2
+
+        if ontology_score >= 4 and software_score <= 1:
             return 'ontology'
 
-        langs = self.languages()
-        is_web = (langs and 'html' in langs)
+        web_score = 0
+        if lang_set and lang_set.issubset(web_languages) and lang_set.intersection({"html", "css", "javascript"}):
+            web_score += 3
+        if any(term in title or term in repo_url for term in web_name_terms):
+            web_score += 3
+        if any(term in description for term in web_description_terms):
+            web_score += 2
 
-        if langs:
-            for lang in langs:
-                if lang not in ['html', 'css', 'javascript']:
-                    is_web = False
-                # if lang not in ['html','css','javascript']:
-                # is_ontology = False
-        if is_web:
+        if web_score >= 4 and software_score <= 1 and ontology_score < 4:
             return 'web'
 
-        return None
+        return 'software'
 
     def metadata_item_value(self, item):
         result = safe_dic(item, 'result')
