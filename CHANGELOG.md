@@ -27,7 +27,7 @@
 
 # SOCA
 - Añadida generación del portal linkeddata a partir del yaml base + orgs/repos que se metan desde conf en el workflow
-
+- Mejorada la heurística de detección de tipo de repositorio
 # RSFC
 
 

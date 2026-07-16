@@ -220,14 +220,6 @@ curl -s -X POST http://127.0.0.1:8000/api/auth/register \
   }' | jq
 ```
 
-curl -s -X POST http://127.0.0.1:8000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "Community-OEG",
-    "email": "oeg@example.com",
-    "password": "VsXHjF7j4MN0wARgzW6A"
-  }' | jq
-
 ### 7. Generar el token JWT
 
 DashVERSE 0.3.0 incluye un mandato rápido para generar el JWT:
