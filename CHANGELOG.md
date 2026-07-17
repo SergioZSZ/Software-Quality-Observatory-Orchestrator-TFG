@@ -1,7 +1,8 @@
 # General
+- Aumentados los MB de descarga de somef a 2000MB para soca y sw-metadata-bot
 - Actualizados scripts de creación de imágenes docker y de instalación de herramientas para DashVERSE
 - Añadida nueva variable entorno `RESQUI_CONF` para seleccionar la configuración querida para los worker_resqui
-- Cambio de configuración para añadir repos y orgs al portal linkeddata, ejemplo:
+- Cambio de configuración para generar el portal linkeddata usando un yaml propio de herramientas, ejemplo:
 ```json
 {
   "project": "sergio-soca-incremental",
@@ -13,27 +14,25 @@
   ],
   "extra_repositories": ["https://github.com/oeg-upm/soca"],
   "launch_issue": false,
-
-  
-  "linkeddata_portal": {
-    "organizations": ["SergioZSZ"],
-    "extra_repositories": ["https://github.com/oeg-upm/soca"]
-  }
+  "linkeddata_tools": "/app/outputs/linkeddata_tools.yml"
 }
 ```
+- `linkeddata_tools` apunta al yaml propio que sustituye las herramientas del yaml base de LinkedData.
+- Las tools nuevas se declaran en ese yaml; si una entrada tiene `url` y no existen metadatos previos de SOCA, se intentan extraer como fallback.
 
 # SW-METADATA-BOT
 
 
 # SOCA
-- Añadida generación del portal linkeddata a partir del yaml base + orgs/repos que se metan desde conf en el workflow
-- Mejorada la heurística de detección de tipo de repositorio
+- Añadida generación del portal linkeddata a partir del yaml base + yaml propio de herramientas (`linkeddata_tools`)
+- Mejorada la de detección de tipo de repositorio
+- Mejorada la obtención der descripciones a partir de metadatos de los repositorios
 # RSFC
 
 
 # RESQUI
 - Arreglados bugs de conexión timeout worker_resqui-rabbitmq
-
+- Mejorada la tolerancia a git clone en los worker_resqui
 # DashVERSE
 
 

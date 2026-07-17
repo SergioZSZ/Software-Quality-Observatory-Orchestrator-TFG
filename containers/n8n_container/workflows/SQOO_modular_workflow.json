@@ -549,7 +549,7 @@
     {
       "parameters": {
         "mode": "raw",
-        "jsonOutput": "{\n  \"project\": \"sergio-soca-incremental\",\n  \"organizations\": [\n    {\n      \"org\": \"SergioZSZ\",\n      \"type\": \"user\"\n    }\n  ],\n  \"extra_repositories\": [\"https://github.com/oeg-upm/soca\"],\n  \"launch_issue\": false,\n\n  \n  \"linkeddata_portal\": {\n    \"organizations\": [\"SergioZSZ\"],\n    \"extra_repositories\": [\"https://github.com/oeg-upm/soca\"]\n  }\n}",
+        "jsonOutput": "{\n  \"project\": \"sergio-soca-incremental\",\n  \"organizations\": [\n    {\n      \"org\": \"SergioZSZ\",\n      \"type\": \"user\"\n    }\n  ],\n  \"extra_repositories\": [\"https://github.com/oeg-upm/soca\"],\n  \"launch_issue\": false,\n  \"linkeddata_tools\": \"/app/outputs/linkeddata_tools.yml\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -563,7 +563,7 @@
     },
     {
       "parameters": {
-        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Conf\"].json.project}} \\\n-e LINKEDDATA_ORGS='{{ JSON.stringify(($node[\"Conf\"].json.linkeddata_portal && $node[\"Conf\"].json.linkeddata_portal.organizations) || []) }}' \\\n-e LINKEDDATA_EXTRA_REPOS='{{ JSON.stringify(($node[\"Conf\"].json.linkeddata_portal && $node[\"Conf\"].json.linkeddata_portal.extra_repositories) || []) }}' \\\nsoca-heavy:latest \\\nsoca linkeddata-portal build \\\n--metadata-dir \"/app/outputs/soca/$TARGET/metadata\" \\\n--linkeddata-orgs \"$LINKEDDATA_ORGS\" \\\n--linkeddata-extra-repos \"$LINKEDDATA_EXTRA_REPOS\""
+        "command": "=docker run --rm \\\n--network containers_net \\\n-v \"{{ $env.OUTPUTS }}:/app/outputs\" \\\n-e TARGET={{$node[\"Conf\"].json.project}} \\\nsoca-heavy:latest \\\nsoca linkeddata-portal \\\n--metadata-dir \"/app/outputs/soca/$TARGET/metadata\" \\\n--tools-file \"{{$node[\"Conf\"].json.linkeddata_tools}}\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,

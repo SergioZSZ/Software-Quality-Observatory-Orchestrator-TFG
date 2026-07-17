@@ -45,6 +45,25 @@ def load_config(config_path: Path) -> dict[str, Any]:
     return data
 
 
+def load_tools_file(tools_file: Path) -> list[dict[str, Any]]:
+    with tools_file.open(encoding="utf-8") as stream:
+        data = yaml.safe_load(stream)
+
+    if isinstance(data, dict):
+        tools = data.get("tools")
+    else:
+        tools = data
+
+    if not isinstance(tools, list):
+        raise ValueError(f"Expected a 'tools' list in {tools_file}")
+
+    for tool in tools:
+        if not isinstance(tool, dict):
+            raise ValueError(f"Expected every tool in {tools_file} to be a mapping")
+
+    return tools
+
+
 def normalize_repository_url(repository_url: str) -> str:
     repository_url = str(repository_url or "").strip().rstrip("/")
 
@@ -52,54 +71,6 @@ def normalize_repository_url(repository_url: str) -> str:
         repository_url = repository_url[:-4]
 
     return repository_url
-
-
-def parse_json_list(raw_values: str | list[str] | None, option_name: str) -> list[str]:
-    if raw_values is None:
-        return []
-
-    if isinstance(raw_values, list):
-        return [
-            str(value).strip()
-            for value in raw_values
-            if str(value).strip()
-        ]
-
-    raw_values = raw_values.strip()
-    if not raw_values:
-        return []
-
-    try:
-        values = json.loads(raw_values)
-    except json.JSONDecodeError:
-        values = [
-            value.strip().strip("\"'")
-            for value in raw_values.strip("[]").split(",")
-            if value.strip()
-        ]
-
-    if not isinstance(values, list):
-        raise ValueError(f"{option_name} must be a JSON array")
-
-    return [
-        str(value).strip()
-        for value in values
-        if str(value).strip()
-    ]
-
-
-def parse_linkeddata_repos(raw_repos: str | list[str] | None) -> list[str]:
-    return [
-        normalize_repository_url(repository)
-        for repository in parse_json_list(raw_repos, "--linkeddata-repos")
-    ]
-
-
-def parse_linkeddata_orgs(raw_orgs: str | list[str] | None) -> list[str]:
-    return [
-        organization.strip()
-        for organization in parse_json_list(raw_orgs, "--linkeddata-orgs")
-    ]
 
 
 def parse_github_repository(repository_url: str) -> tuple[str, str]:
@@ -147,45 +118,6 @@ def repository_url_from_metadata_file(metadata_path: Path) -> str | None:
     )
 
 
-def discover_repository_urls_from_metadata_org(
-    metadata_dir: Path,
-    organization: str,
-) -> list[str]:
-    metadata_paths_by_repository: dict[str, Path] = {}
-    for metadata_path in sorted(metadata_dir.glob(f"{organization}_*.json")):
-        repository_url = repository_url_from_metadata_file(metadata_path)
-        if repository_url is None:
-            continue
-        metadata_paths_by_repository[repository_url] = metadata_path
-
-    if not metadata_paths_by_repository:
-        raise FileNotFoundError(
-            "No SOCA metadata found for linkeddata organization "
-            f"'{organization}' in {metadata_dir}"
-        )
-
-    return sorted(metadata_paths_by_repository)
-
-
-def discover_repository_urls_from_metadata_orgs(
-    metadata_dir: Path | None,
-    linkeddata_orgs: list[str],
-) -> list[str]:
-    if not linkeddata_orgs:
-        return []
-
-    if metadata_dir is None:
-        raise ValueError("--metadata-dir is required when --linkeddata-orgs is not empty")
-
-    discovered_repositories: list[str] = []
-    for organization in linkeddata_orgs:
-        discovered_repositories.extend(
-            discover_repository_urls_from_metadata_org(metadata_dir, organization)
-        )
-
-    return dedupe_preserving_order(discovered_repositories)
-
-
 def find_metadata_file_for_repository(
     metadata_dir: Path,
     repository_url: str,
@@ -225,11 +157,31 @@ def extract_repository_metadata(repository_url: str, metadata_dir: Path) -> None
     from soca.commands import extract_metadata
 
     metadata_dir.mkdir(parents=True, exist_ok=True)
+    existing_paths = {path.resolve() for path in metadata_dir.iterdir()}
     extract_metadata.extract_1_repo(
         normalize_repository_url(repository_url),
         str(metadata_dir),
         verbose=False,
     )
+    metadata_path = find_metadata_file_for_repository(metadata_dir, repository_url)
+    cleanup_fallback_extraction_artifacts(metadata_dir, existing_paths, metadata_path)
+
+
+def cleanup_fallback_extraction_artifacts(
+    metadata_dir: Path,
+    existing_paths: set[Path],
+    metadata_path: Path | None,
+) -> None:
+    metadata_path = metadata_path.resolve() if metadata_path is not None else None
+    for path in metadata_dir.iterdir():
+        resolved_path = path.resolve()
+        if resolved_path in existing_paths or resolved_path == metadata_path:
+            continue
+
+        if path.is_dir():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
 
 
 def copy_project_metadata_to_linkeddata_metadata(
@@ -300,46 +252,16 @@ def load_metadata(metadata_path: Path) -> dict[str, Any]:
     return data
 
 
-def metadata_values(metadata: dict[str, Any], field_name: str) -> list[dict[str, Any]]:
-    values = metadata.get(field_name) or []
-    return values if isinstance(values, list) else []
-
-
-def first_metadata_value(
-    metadata: dict[str, Any],
-    field_name: str,
-    preferred_technique: str | None = None,
-) -> Any:
-    values = metadata_values(metadata, field_name)
-
-    if preferred_technique:
-        for value in values:
-            if value.get("technique") != preferred_technique:
-                continue
-
-            result = value.get("result") or {}
-            if result.get("value"):
-                return result["value"]
-
-    for value in values:
-        result = value.get("result") or {}
-        if result.get("value"):
-            return result["value"]
-
-    return None
-
-
 def normalize_text_value(value: Any) -> str | None:
     if value is None:
         return None
 
     if isinstance(value, list):
-        parts = [
-            normalized
-            for item in value
-            if (normalized := normalize_text_value(item))
-        ]
-        return "\n\n".join(parts) if parts else None
+        for item in value:
+            normalized = normalize_text_value(item)
+            if normalized:
+                return normalized
+        return None
 
     if isinstance(value, dict):
         for nested_key in ("value", "text", "name"):
@@ -356,9 +278,9 @@ def normalize_text_value(value: Any) -> str | None:
 
 
 def repository_url_from_metadata(metadata: dict[str, Any]) -> str | None:
-    repository_url = normalize_text_value(
-        first_metadata_value(metadata, "code_repository")
-    )
+    from soca.commands.portal.metadata import Metadata
+
+    repository_url = Metadata("", metadata).repo_url()
     if not repository_url:
         return None
 
@@ -369,51 +291,95 @@ def linkeddata_tool_card_from_metadata(
     repository_url: str,
     metadata: dict[str, Any],
 ) -> dict[str, Any]:
-    _, repository = parse_github_repository(repository_url)
+    from soca.commands.portal.metadata import Metadata
 
-    name = (
-        normalize_text_value(
-            first_metadata_value(
-                metadata,
-                "name",
-                preferred_technique="GitHub_API",
-            )
-        )
-        or repository
-    )
-    category = normalize_text_value(
-        first_metadata_value(metadata, "application_domain")
-    ) or "Tool"
-    description = normalize_text_value(
-        first_metadata_value(
-            metadata,
-            "description",
-            preferred_technique="code_parser",
-        )
-        or first_metadata_value(metadata, "description")
-    ) or "No description available."
+    _, repository = parse_github_repository(repository_url)
+    md = Metadata("", metadata)
 
     return {
         "id": repository_slug(repository),
-        "name": name,
-        "category": category,
-        "homepage": normalize_repository_url(repository_url),
-        "image": None,
-        "description": description,
+        "name": md.title() or repository,
+        "category": md.application_domain() or "Tool",
+        "homepage": md.homepage() or normalize_repository_url(repository_url),
+        "image": md.logo(),
+        "description": md.description(),
     }
 
 
-def load_dynamic_tool_cards(
-    metadata_dir: Path,
-    linkeddata_repos: list[str],
+def has_real_value(value: Any) -> bool:
+    if value is None:
+        return False
+
+    if isinstance(value, str):
+        return value.strip().lower() not in {"", "none", "null"}
+
+    if isinstance(value, (list, dict)):
+        return bool(value)
+
+    return True
+
+
+def merge_tool_override(
+    dynamic_tool: dict[str, Any],
+    tool_override: dict[str, Any],
+) -> dict[str, Any]:
+    merged_tool = dict(dynamic_tool)
+
+    for field_name, value in tool_override.items():
+        if field_name == "url":
+            if has_real_value(value):
+                merged_tool[field_name] = normalize_repository_url(str(value))
+            continue
+
+        if has_real_value(value):
+            merged_tool[field_name] = value
+
+    return merged_tool
+
+
+def tool_repository_url(tool: dict[str, Any]) -> str | None:
+    repository_url = tool.get("url")
+    if not has_real_value(repository_url):
+        return None
+
+    return normalize_repository_url(str(repository_url))
+
+
+def load_tools_file_cards(
+    tools_file: Path,
+    metadata_dir: Path | None,
+    linkeddata_metadata_dir: Path,
 ) -> list[dict[str, Any]]:
-    return [
-        linkeddata_tool_card_from_metadata(
-            repository_url,
-            load_metadata(metadata_file_for_repository(metadata_dir, repository_url)),
+    tools = load_tools_file(tools_file)
+    repository_urls = dedupe_preserving_order(
+        [
+            repository_url
+            for tool in tools
+            if (repository_url := tool_repository_url(tool))
+        ]
+    )
+
+    if repository_urls:
+        ensure_metadata_for_repositories(
+            metadata_dir,
+            linkeddata_metadata_dir,
+            repository_urls,
         )
-        for repository_url in linkeddata_repos
-    ]
+
+    resolved_tools: list[dict[str, Any]] = []
+    for tool in tools:
+        repository_url = tool_repository_url(tool)
+        if repository_url is None:
+            resolved_tools.append(dict(tool))
+            continue
+
+        dynamic_tool = linkeddata_tool_card_from_metadata(
+            repository_url,
+            load_metadata(metadata_file_for_repository(linkeddata_metadata_dir, repository_url)),
+        )
+        resolved_tools.append(merge_tool_override(dynamic_tool, tool))
+
+    return resolved_tools
 
 
 def reset_directory(directory: Path) -> Path:
@@ -444,34 +410,17 @@ def build_config_with_dynamic_tools(
     config_path: Path,
     metadata_dir: Path | None = None,
     linkeddata_metadata_dir: Path = DEFAULT_METADATA_DIR,
-    linkeddata_repos: list[str] | None = None,
-    linkeddata_orgs: list[str] | None = None,
-    linkeddata_extra_repos: list[str] | None = None,
+    tools_file: Path | None = None,
 ) -> dict[str, Any]:
     config = load_config(config_path)
-    discovered_repos = discover_repository_urls_from_metadata_orgs(
-        metadata_dir,
-        linkeddata_orgs or [],
-    )
-    linkeddata_repos = dedupe_preserving_order(
-        [
-            *discovered_repos,
-            *(linkeddata_repos or []),
-            *(linkeddata_extra_repos or []),
-        ]
-    )
 
-    if not linkeddata_repos:
-        return config
+    if tools_file is not None:
+        config["tools"] = load_tools_file_cards(
+            tools_file,
+            metadata_dir,
+            linkeddata_metadata_dir,
+        )
 
-    ensure_metadata_for_repositories(
-        metadata_dir,
-        linkeddata_metadata_dir,
-        linkeddata_repos,
-    )
-
-    dynamic_tools = load_dynamic_tool_cards(linkeddata_metadata_dir, linkeddata_repos)
-    config["tools"] = [*(config.get("tools") or []), *dynamic_tools]
     return config
 
 
@@ -525,9 +474,7 @@ def build(
     metadata_dir: Path | None = None,
     linkeddata_metadata_dir: Path = DEFAULT_METADATA_DIR,
     generated_config_path: Path = DEFAULT_GENERATED_CONFIG_PATH,
-    linkeddata_repos: list[str] | None = None,
-    linkeddata_orgs: list[str] | None = None,
-    linkeddata_extra_repos: list[str] | None = None,
+    tools_file: Path | None = None,
 ) -> list[Path]:
     ensure_distinct_metadata_dirs(metadata_dir, linkeddata_metadata_dir)
     output_dir = reset_directory(output_dir)
@@ -537,9 +484,7 @@ def build(
         config_path=config_path,
         metadata_dir=metadata_dir,
         linkeddata_metadata_dir=linkeddata_metadata_dir,
-        linkeddata_repos=linkeddata_repos,
-        linkeddata_orgs=linkeddata_orgs,
-        linkeddata_extra_repos=linkeddata_extra_repos,
+        tools_file=tools_file,
     )
     write_generated_config(config, generated_config_path)
     env = load_template_environment(templates_dir)
@@ -613,19 +558,10 @@ def parse_args() -> argparse.Namespace:
         help="Path where the resolved LinkedData YAML config will be written.",
     )
     parser.add_argument(
-        "--linkeddata-repos",
+        "--tools-file",
+        type=Path,
         default=None,
-        help="Legacy JSON array with GitHub repositories to append to the tools page.",
-    )
-    parser.add_argument(
-        "--linkeddata-orgs",
-        default=None,
-        help="JSON array with GitHub owners to discover from project SOCA metadata.",
-    )
-    parser.add_argument(
-        "--linkeddata-extra-repos",
-        default=None,
-        help="JSON array with extra GitHub repository URLs to append to the tools page.",
+        help="YAML file whose tools list replaces linkeddata.base.yml tools.",
     )
     return parser.parse_args()
 
@@ -641,9 +577,7 @@ def main() -> None:
         metadata_dir=args.metadata_dir,
         linkeddata_metadata_dir=args.linkeddata_metadata_dir,
         generated_config_path=args.generated_config_output,
-        linkeddata_repos=parse_linkeddata_repos(args.linkeddata_repos),
-        linkeddata_orgs=parse_linkeddata_orgs(args.linkeddata_orgs),
-        linkeddata_extra_repos=parse_linkeddata_repos(args.linkeddata_extra_repos),
+        tools_file=args.tools_file,
     )
     env = load_template_environment(args.templates_dir)
     available_templates = ", ".join(sorted(env.list_templates(extensions=["html"])))

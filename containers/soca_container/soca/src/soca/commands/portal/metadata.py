@@ -2046,25 +2046,138 @@ class Metadata(object):
     def title(self):
         return safe_dic(safe_dic(safe_list(safe_dic(self.md, 'name'), 0), 'result'), 'value')
 
+    def _metadata_confidence(self, item):
+        result = safe_dic(item, 'result') or {}
+        raw_confidence = safe_dic(result, 'confidence')
+        if raw_confidence is None:
+            raw_confidence = safe_dic(item, 'confidence')
+
+        try:
+            return float(raw_confidence)
+        except (TypeError, ValueError):
+            return None
+
+    def _technique_matches(self, item, expected_technique):
+        technique = str(safe_dic(item, 'technique') or '').lower().replace('_', ' ')
+        return technique == expected_technique.lower().replace('_', ' ')
+
+    def _normalize_description_value(self, value):
+        if value is None:
+            return None
+
+        if isinstance(value, list):
+            for item in value:
+                normalized = self._normalize_description_value(item)
+                if normalized:
+                    return normalized
+            return None
+
+        if isinstance(value, dict):
+            for nested_key in ('value', 'text', 'name'):
+                normalized = self._normalize_description_value(safe_dic(value, nested_key))
+                if normalized:
+                    return normalized
+            return None
+
+        text = str(value).strip()
+        return text or None
+
+    def _metadata_values(self, field_name):
+        values = safe_dic(self.md, field_name) or []
+        return values if isinstance(values, list) else []
+
+    def first_metadata_value(self, field_name, preferred_technique=None):
+        values = self._metadata_values(field_name)
+
+        if preferred_technique:
+            for value in values:
+                if not self._technique_matches(value, preferred_technique):
+                    continue
+
+                result = safe_dic(value, 'result') or {}
+                normalized = self._normalize_description_value(
+                    safe_dic(result, 'value')
+                )
+                if normalized:
+                    return normalized
+
+        for value in values:
+            result = safe_dic(value, 'result') or {}
+            normalized = self._normalize_description_value(
+                safe_dic(result, 'value')
+            )
+            if normalized:
+                return normalized
+
+        return None
+
+    def homepage(self):
+        candidates = []
+
+        for index, item in enumerate(self._metadata_values('homepage')):
+            result = safe_dic(item, 'result') or {}
+            homepage = self._normalize_description_value(
+                safe_dic(result, 'value')
+            )
+            if not homepage or not self._is_valid_url(homepage):
+                continue
+
+            candidates.append((
+                index,
+                homepage,
+                self._metadata_confidence(item),
+                0 if self._technique_matches(item, 'GitHub API') else 1,
+            ))
+
+        if not candidates:
+            return None
+
+        return min(
+            candidates,
+            key=lambda candidate: (
+                candidate[3],
+                -(candidate[2] if candidate[2] is not None else -1.0),
+                candidate[0],
+            ),
+        )[1]
+
+    def application_domain(self):
+        return self.first_metadata_value('application_domain')
+
     # TODO find new
     def description(self):
 
         all_descriptions = safe_dic(self.md, 'description')
+        candidates = []
 
-        description = None
         if all_descriptions:
-            for d in all_descriptions:
-                if safe_dic(d, 'technique') == 'GitHub API':
-                    description = safe_dic(safe_dic(d, 'result'), 'value')
-                    break
+            for index, item in enumerate(all_descriptions):
+                result = safe_dic(item, 'result') or {}
+                description = self._normalize_description_value(
+                    safe_dic(result, 'value')
+                )
+                if not description:
+                    continue
 
-        if not description:
-            description = safe_dic(
-                safe_dic(safe_list(all_descriptions, 0), 'result'), 'value')
-            if not description:
-                description = 'No description available yet.'
+                candidates.append((
+                    index,
+                    description,
+                    self._metadata_confidence(item),
+                    0 if self._technique_matches(item, 'GitHub API') else 1,
+                ))
 
-        return description
+        if not candidates:
+            return 'No description available yet.'
+
+        return min(
+            candidates,
+            key=lambda candidate: (
+                candidate[3],
+                -(candidate[2] if candidate[2] is not None else -1.0),
+                len(candidate[1]),
+                candidate[0],
+            ),
+        )[1]
 
     def license(self):
         license = safe_dic(

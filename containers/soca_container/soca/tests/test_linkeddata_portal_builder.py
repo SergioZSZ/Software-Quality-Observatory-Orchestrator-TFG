@@ -14,6 +14,7 @@ from linkeddata_portal.builder import build  # noqa: E402
 from linkeddata_portal.builder import DEFAULT_ASSETS_DIR, DEFAULT_TEMPLATES_DIR  # noqa: E402
 from linkeddata_portal.builder import build_config_with_dynamic_tools  # noqa: E402
 from linkeddata_portal.builder import linkeddata_tool_card_from_metadata  # noqa: E402
+from soca.__main__ import cli  # noqa: E402
 
 
 class TestLinkedDataPortalBuilder(unittest.TestCase):
@@ -27,6 +28,7 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
             project_metadata_dir = root / "project_metadata"
             linkeddata_metadata_dir = root / "linkeddata_metadata"
             generated_config_path = root / "linkeddata.generated.yml"
+            tools_file = root / "linkeddata_tools.yml"
 
             templates_dir.mkdir()
             assets_dir.mkdir()
@@ -49,7 +51,37 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
                                 "collection": "tools",
                             }
                         },
-                        "tools": [],
+                        "tools": [
+                            {
+                                "id": "base-only",
+                                "name": "Base only",
+                                "homepage": "https://example.org/base",
+                            }
+                        ],
+                    },
+                    sort_keys=False,
+                ),
+                encoding="utf-8",
+            )
+            tools_file.write_text(
+                yaml.safe_dump(
+                    {
+                        "tools": [
+                            {
+                                "id": "manual-only",
+                                "name": "Manual only",
+                                "homepage": "https://example.org/manual",
+                            },
+                            {
+                                "id": "soca-curated",
+                                "url": "https://github.com/SergioZSZ/soca",
+                                "name": "SOCA curated",
+                                "category": None,
+                                "homepage": None,
+                                "image": None,
+                                "description": None,
+                            },
+                        ]
                     },
                     sort_keys=False,
                 ),
@@ -70,6 +102,11 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
                                 "result": {"value": "Software catalog creator."},
                             }
                         ],
+                        "application_domain": [
+                            {
+                                "result": {"value": "Catalog generation"},
+                            }
+                        ],
                     }
                 ),
                 encoding="utf-8",
@@ -82,7 +119,7 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
                 assets_dir=assets_dir,
                 metadata_dir=project_metadata_dir,
                 linkeddata_metadata_dir=linkeddata_metadata_dir,
-                linkeddata_extra_repos=["https://github.com/SergioZSZ/soca"],
+                tools_file=tools_file,
                 generated_config_path=generated_config_path,
             )
 
@@ -90,9 +127,14 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
                 generated_config_path.read_text(encoding="utf-8")
             )
 
-            self.assertEqual(generated_config["tools"][0]["name"], "SOCA")
             self.assertEqual(
-                generated_config["tools"][0]["homepage"],
+                [tool["id"] for tool in generated_config["tools"]],
+                ["manual-only", "soca-curated"],
+            )
+            self.assertEqual(generated_config["tools"][1]["name"], "SOCA curated")
+            self.assertEqual(generated_config["tools"][1]["category"], "Catalog generation")
+            self.assertEqual(
+                generated_config["tools"][1]["homepage"],
                 "https://github.com/SergioZSZ/soca",
             )
 
@@ -244,12 +286,13 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
             )
             self.assertNotIn("Fallback award.", html)
 
-    def test_org_discovery_preserves_repository_dots_from_metadata(self):
+    def test_tools_file_repo_preserves_repository_dots_from_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             config_path = root / "linkeddata.base.yml"
             metadata_dir = root / "metadata"
             linkeddata_metadata_dir = root / "linkeddata_metadata"
+            tools_file = root / "linkeddata_tools.yml"
 
             metadata_dir.mkdir()
             config_path.write_text(
@@ -279,12 +322,25 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            tools_file.write_text(
+                yaml.safe_dump(
+                    {
+                        "tools": [
+                            {
+                                "url": "https://github.com/lincedu/lincedu.github.io",
+                            }
+                        ]
+                    },
+                    sort_keys=False,
+                ),
+                encoding="utf-8",
+            )
 
             config = build_config_with_dynamic_tools(
                 config_path=config_path,
                 metadata_dir=metadata_dir,
                 linkeddata_metadata_dir=linkeddata_metadata_dir,
-                linkeddata_orgs=["lincedu"],
+                tools_file=tools_file,
             )
 
             self.assertEqual(
@@ -292,12 +348,42 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
                 "https://github.com/lincedu/lincedu.github.io",
             )
 
-    def test_list_descriptions_are_rendered_as_text(self):
+    def test_dynamic_card_uses_description_and_logo_from_metadata(self):
         card = linkeddata_tool_card_from_metadata(
             "https://github.com/dgarijo/WIDOCO",
             {
+                "logo": [
+                    {
+                        "result": {
+                            "value": "https://example.org/widoco-logo.png",
+                        }
+                    }
+                ],
+                "homepage": [
+                    {
+                        "technique": "code_parser",
+                        "confidence": 1,
+                        "result": {
+                            "value": "https://low-priority.example.org/widoco",
+                        },
+                    },
+                    {
+                        "technique": "GitHub_API",
+                        "confidence": 0.5,
+                        "result": {
+                            "value": "https://official.example.org/widoco",
+                        },
+                    },
+                ],
                 "description": [
                     {
+                        "technique": "README",
+                        "result": {
+                            "value": "Long README description."
+                        },
+                    },
+                    {
+                        "technique": "GitHub API",
                         "result": {
                             "value": [
                                 "Short WIDOCO description.",
@@ -305,13 +391,40 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
                             ]
                         }
                     }
-                ]
+                ],
+                "application_domain": [
+                    {
+                        "result": {
+                            "value": "Ontology services",
+                        }
+                    }
+                ],
             },
         )
 
         self.assertEqual(
             card["description"],
-            "Short WIDOCO description.\n\nExtended WIDOCO description.",
+            "Short WIDOCO description.",
+        )
+        self.assertEqual(
+            card["category"],
+            "Ontology services",
+        )
+        self.assertEqual(
+            card["image"],
+            "https://example.org/widoco-logo.png",
+        )
+        fallback_card = linkeddata_tool_card_from_metadata(
+            "https://github.com/dgarijo/WIDOCO",
+            {},
+        )
+        self.assertEqual(
+            fallback_card["image"],
+            "img/github-default.svg",
+        )
+        self.assertEqual(
+            card["homepage"],
+            "https://official.example.org/widoco",
         )
 
     def test_metadata_lookup_uses_existing_file_when_repository_case_differs(self):
@@ -320,6 +433,7 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
             config_path = root / "linkeddata.base.yml"
             metadata_dir = root / "metadata"
             linkeddata_metadata_dir = root / "linkeddata_metadata"
+            tools_file = root / "linkeddata_tools.yml"
 
             metadata_dir.mkdir()
             config_path.write_text(
@@ -349,12 +463,25 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            tools_file.write_text(
+                yaml.safe_dump(
+                    {
+                        "tools": [
+                            {
+                                "url": "https://github.com/dgarijo/WIDOCO",
+                            }
+                        ]
+                    },
+                    sort_keys=False,
+                ),
+                encoding="utf-8",
+            )
 
             config = build_config_with_dynamic_tools(
                 config_path=config_path,
                 metadata_dir=metadata_dir,
                 linkeddata_metadata_dir=linkeddata_metadata_dir,
-                linkeddata_extra_repos=["https://github.com/dgarijo/WIDOCO"],
+                tools_file=tools_file,
             )
 
             self.assertEqual(
@@ -364,6 +491,18 @@ class TestLinkedDataPortalBuilder(unittest.TestCase):
             self.assertTrue(
                 (linkeddata_metadata_dir / "dgarijo_Widoco_2026-07-14.json").exists()
             )
+
+    def test_cli_exposes_tools_file_and_not_repo_or_org_discovery(self):
+        from click.testing import CliRunner
+
+        result = CliRunner().invoke(cli, ["linkeddata-portal", "--help"])
+
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("--tools-file", result.output)
+        self.assertNotIn("--add-repos", result.output)
+        self.assertNotIn("--linkeddata-orgs", result.output)
+        self.assertNotIn("--linkeddata-repos", result.output)
+        self.assertNotIn("--linkeddata-extra-repos", result.output)
 
 
 if __name__ == "__main__":

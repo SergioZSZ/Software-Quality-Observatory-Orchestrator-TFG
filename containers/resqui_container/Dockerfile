@@ -3,7 +3,15 @@ FROM python:3.11
 WORKDIR /app
 
 # dependencias
-RUN apt-get update && apt-get install -y --no-install-recommends docker-cli && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends docker-cli git && rm -rf /var/lib/apt/lists/*
+
+RUN git config --global http.version HTTP/1.1 \
+    && git config --global http.lowSpeedLimit 1000 \
+    && git config --global http.lowSpeedTime 600 \
+    && git config --global http.postBuffer 524288000 \
+    && git config --global core.compression 0 \
+    && git config --global advice.detachedHead false
+    
 RUN pip install poetry
 RUN poetry config virtualenvs.create false
 

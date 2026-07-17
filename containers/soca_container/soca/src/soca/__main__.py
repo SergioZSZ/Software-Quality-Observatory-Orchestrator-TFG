@@ -118,71 +118,15 @@ def summary(input,output,upload):
     create_summary.create_summary(input,output,upload)
 
 
-@cli.group("linkeddata-portal")
-def linkeddata_portal():
-    """Build the LinkedData.es static portal"""
-    pass
-
-
-@linkeddata_portal.command("build")
-@click.option(
-    "--config",
-    "config_path",
-    type=click.Path(path_type=Path, exists=True, dir_okay=False),
-    default=None,
-    help="Path to linkeddata.base.yml.",
-)
-@click.option(
-    "--templates-dir",
-    type=click.Path(path_type=Path, exists=True, file_okay=False),
-    default=None,
-    help="Directory containing Jinja templates.",
-)
-@click.option(
-    "--assets-dir",
-    type=click.Path(path_type=Path, exists=True, file_okay=False),
-    default=None,
-    help="Directory containing static assets.",
-)
-@click.option(
-    "--output-dir",
-    type=click.Path(path_type=Path, file_okay=False),
-    default=None,
-    help="Directory where generated HTML will be written.",
-)
-@click.option(
-    "--metadata-dir",
-    type=click.Path(path_type=Path, file_okay=False),
-    default=None,
-    help="Directory containing project SOCA metadata JSON files.",
-)
-@click.option(
-    "--linkeddata-metadata-dir",
-    type=click.Path(path_type=Path, file_okay=False),
-    default=None,
-    help="Directory where LinkedData portal metadata cache will be saved.",
-)
-@click.option(
-    "--generated-config-output",
-    type=click.Path(path_type=Path, dir_okay=False),
-    default=None,
-    help="Path where the resolved LinkedData YAML config will be written.",
-)
-@click.option(
-    "--linkeddata-repos",
-    default=None,
-    help="Legacy JSON array with GitHub repositories to append to the tools page.",
-)
-@click.option(
-    "--linkeddata-orgs",
-    default=None,
-    help="JSON array with GitHub owners to discover from project SOCA metadata.",
-)
-@click.option(
-    "--linkeddata-extra-repos",
-    default=None,
-    help="JSON array with extra GitHub repository URLs to append to the tools page.",
-)
+@cli.command("linkeddata-portal")
+@click.option("--config", "config_path", type=click.Path(path_type=Path, exists=True, dir_okay=False), default=None, help="Path to linkeddata.base.yml.")
+@click.option("--templates-dir", type=click.Path(path_type=Path, exists=True, file_okay=False), default=None, help="Directory containing Jinja templates.")
+@click.option("--assets-dir", type=click.Path(path_type=Path, exists=True, file_okay=False), default=None, help="Directory containing static assets.")
+@click.option("--output-dir", type=click.Path(path_type=Path, file_okay=False), default=None, help="Directory where generated HTML will be written.")
+@click.option("--metadata-dir", type=click.Path(path_type=Path, file_okay=False), default=None, help="Directory containing project SOCA metadata JSON files.")
+@click.option("--linkeddata-metadata-dir", type=click.Path(path_type=Path, file_okay=False), default=None, help="Directory where LinkedData portal metadata cache will be saved.")
+@click.option("--generated-config-output", type=click.Path(path_type=Path, dir_okay=False), default=None, help="Path where the resolved LinkedData YAML config will be written.")
+@click.option("--tools-file", type=click.Path(path_type=Path, exists=True, dir_okay=False), default=None, help="YAML file whose tools list replaces linkeddata.base.yml tools.")
 def build_linkeddata_portal(
     config_path,
     templates_dir,
@@ -191,9 +135,7 @@ def build_linkeddata_portal(
     metadata_dir,
     linkeddata_metadata_dir,
     generated_config_output,
-    linkeddata_repos,
-    linkeddata_orgs,
-    linkeddata_extra_repos,
+    tools_file,
 ):
     """Generate LinkedData.es HTML pages and copy static assets"""
     from linkeddata_portal.builder import (
@@ -204,8 +146,6 @@ def build_linkeddata_portal(
         DEFAULT_OUTPUT_DIR,
         DEFAULT_TEMPLATES_DIR,
         build,
-        parse_linkeddata_orgs,
-        parse_linkeddata_repos,
     )
 
     generated_pages = build(
@@ -216,9 +156,7 @@ def build_linkeddata_portal(
         metadata_dir=metadata_dir,
         linkeddata_metadata_dir=linkeddata_metadata_dir or DEFAULT_METADATA_DIR,
         generated_config_path=generated_config_output or DEFAULT_GENERATED_CONFIG_PATH,
-        linkeddata_repos=parse_linkeddata_repos(linkeddata_repos),
-        linkeddata_orgs=parse_linkeddata_orgs(linkeddata_orgs),
-        linkeddata_extra_repos=parse_linkeddata_repos(linkeddata_extra_repos),
+        tools_file=tools_file,
     )
 
     click.echo(
