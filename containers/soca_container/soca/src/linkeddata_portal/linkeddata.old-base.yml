@@ -163,7 +163,61 @@ initiatives:
     description_html: >
       <a href="http://rdflicense.linkeddata.es/" target="_blank">RDF License dataset</a> provides an RDF representation of different licenses for data, software or general works. Licenses served under http://purl.oclc.org/NET/rdflicense/ are understood by humans and machines alike.
 
-tools: []
+tools:
+  - id: oops
+    name: OOPS! - OntOlogy Pitfall Scanner!
+    category: Ontology services
+    homepage: http://oops.linkeddata.es
+    image: images/oops.png
+    description: >
+      Tool that detects common pitfalls in ontology development. Users enter a
+      URI or paste an OWL document, and OOPS! reports the pitfalls found.
+    description_html: >
+      <a href="http://oops.linkeddata.es" target="_blank">OOPS! (OntOlogy Pitfall Scanner!)</a> helps you to detect some of the most common pitfalls appearing when developing ontologies. To try it, enter a URI or paste an OWL document into the text field above. A list of pitfalls and the elements of your ontology where they appear will be displayed.
+
+  - id: ontoology
+    name: OnToology
+    category: Ontology services
+    homepage: http://ontoology.linkeddata.es/
+    image: images/ontoology.png
+    description: >
+      System to automate part of collaborative ontology development, producing
+      diagrams, documentation and validation from ontology repositories.
+    description_html: >
+      <a href="http://ontoology.linkeddata.es/" target="_blank">OnToology</a> is a system to automate part of the collaborative ontology development process. Given a repository with an owl file, OnToology will survey it and produce diagrams, a complete documentation and validation based on common pitfalls. OnToology can handle vocabularies OWL and RDFS in RDF+XML and Turtle serialization.
+
+  - id: loupe
+    name: Loupe - The Linked Data Explorer
+    category: Linked Data services
+    homepage: http://loupe.linkeddata.es/
+    image: images/loupe.png
+    description: >
+      Online tool for inspecting dataset structure, understanding data,
+      formulating queries and detecting quality issues.
+    description_html: >
+      <a href="http://loupe.linkeddata.es/" target="_blank">Loupe</a> is an online tool for inspecting the structure of datasets to understand the data, formulate effective queries, or detect quality issues. Starting from the high-level statistics, Loupe allows users to zoom into details down to the corresponding triples. Loupe includes 2+ billion triples from datasets including DBpedia (17 languages), Wikidata, Linked Brainz, Bio2RDF, etc.
+
+  - id: leire
+    name: Leire
+    category: Linguistic
+    homepage: http://lemonadetools.linkeddata.es/leire/
+    image: images/leire.png
+    description: >
+      Tool that reads lexicalizations and applies consistency checks for each
+      design pattern.
+    description_html: >
+      <a href="http://lemonadetools.linkeddata.es/leire/" target="_blank">Leire</a> reads created lexicalizations (created, for instance, by Lemon Assistant) and implements several consistency checks for each design pattern, such as checking for multiple plural forms for nouns.
+
+  - id: lemon-assistant
+    name: Lemon Assistant
+    category: Linguistic
+    homepage: http://lemonadetools.linkeddata.es/lemonAssistant/
+    image: images/lemonassistant.png
+    description: >
+      Tool to create Lemon Patterns and ontology lexicons for lexicalizing
+      ontologies.
+    description_html: >
+      <a href="http://lemonadetools.linkeddata.es/lemonAssistant/" target="_blank">Lemon Assistant</a> allows you to create <a href="https://github.com/jmccrae/lemon.patterns" target="_blank">Lemon Patterns</a>, the most typical patterns of the <a href="http://lemon-model.net/" target="_blank">Lemon model</a>. By using these patterns you create ontology 'lexicons', that is, lexicalizations of ontologies.
 
 no_longer_maintained:
   - id: rtve-linkeddata

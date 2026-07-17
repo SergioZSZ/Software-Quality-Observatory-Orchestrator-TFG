@@ -45,7 +45,7 @@ def load_config(config_path: Path) -> dict[str, Any]:
     return data
 
 
-def load_tools_file(tools_file: Path) -> list[dict[str, Any]]:
+def load_tools_file(tools_file: Path) -> list[str]:
     with tools_file.open(encoding="utf-8") as stream:
         data = yaml.safe_load(stream)
 
@@ -57,11 +57,18 @@ def load_tools_file(tools_file: Path) -> list[dict[str, Any]]:
     if not isinstance(tools, list):
         raise ValueError(f"Expected a 'tools' list in {tools_file}")
 
+    repository_urls = []
     for tool in tools:
-        if not isinstance(tool, dict):
-            raise ValueError(f"Expected every tool in {tools_file} to be a mapping")
+        if not isinstance(tool, str):
+            raise ValueError(
+                f"Expected every tool in {tools_file} to be a GitHub URL string"
+            )
 
-    return tools
+        repository_url = normalize_repository_url(tool)
+        parse_github_repository(repository_url)
+        repository_urls.append(repository_url)
+
+    return repository_urls
 
 
 def normalize_repository_url(repository_url: str) -> str:
@@ -298,6 +305,7 @@ def linkeddata_tool_card_from_metadata(
 
     return {
         "id": repository_slug(repository),
+        "url": normalize_repository_url(repository_url),
         "name": md.title() or repository,
         "category": md.application_domain() or "Tool",
         "homepage": md.homepage() or normalize_repository_url(repository_url),
@@ -306,58 +314,12 @@ def linkeddata_tool_card_from_metadata(
     }
 
 
-def has_real_value(value: Any) -> bool:
-    if value is None:
-        return False
-
-    if isinstance(value, str):
-        return value.strip().lower() not in {"", "none", "null"}
-
-    if isinstance(value, (list, dict)):
-        return bool(value)
-
-    return True
-
-
-def merge_tool_override(
-    dynamic_tool: dict[str, Any],
-    tool_override: dict[str, Any],
-) -> dict[str, Any]:
-    merged_tool = dict(dynamic_tool)
-
-    for field_name, value in tool_override.items():
-        if field_name == "url":
-            if has_real_value(value):
-                merged_tool[field_name] = normalize_repository_url(str(value))
-            continue
-
-        if has_real_value(value):
-            merged_tool[field_name] = value
-
-    return merged_tool
-
-
-def tool_repository_url(tool: dict[str, Any]) -> str | None:
-    repository_url = tool.get("url")
-    if not has_real_value(repository_url):
-        return None
-
-    return normalize_repository_url(str(repository_url))
-
-
 def load_tools_file_cards(
     tools_file: Path,
     metadata_dir: Path | None,
     linkeddata_metadata_dir: Path,
 ) -> list[dict[str, Any]]:
-    tools = load_tools_file(tools_file)
-    repository_urls = dedupe_preserving_order(
-        [
-            repository_url
-            for tool in tools
-            if (repository_url := tool_repository_url(tool))
-        ]
-    )
+    repository_urls = dedupe_preserving_order(load_tools_file(tools_file))
 
     if repository_urls:
         ensure_metadata_for_repositories(
@@ -367,17 +329,13 @@ def load_tools_file_cards(
         )
 
     resolved_tools: list[dict[str, Any]] = []
-    for tool in tools:
-        repository_url = tool_repository_url(tool)
-        if repository_url is None:
-            resolved_tools.append(dict(tool))
-            continue
-
-        dynamic_tool = linkeddata_tool_card_from_metadata(
-            repository_url,
-            load_metadata(metadata_file_for_repository(linkeddata_metadata_dir, repository_url)),
+    for repository_url in repository_urls:
+        resolved_tools.append(
+            linkeddata_tool_card_from_metadata(
+                repository_url,
+                load_metadata(metadata_file_for_repository(linkeddata_metadata_dir, repository_url)),
+            )
         )
-        resolved_tools.append(merge_tool_override(dynamic_tool, tool))
 
     return resolved_tools
 
@@ -561,7 +519,7 @@ def parse_args() -> argparse.Namespace:
         "--tools-file",
         type=Path,
         default=None,
-        help="YAML file whose tools list replaces linkeddata.base.yml tools.",
+        help="YAML file with a tools list of GitHub repository URLs.",
     )
     return parser.parse_args()
 

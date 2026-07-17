@@ -126,7 +126,7 @@ def summary(input,output,upload):
 @click.option("--metadata-dir", type=click.Path(path_type=Path, file_okay=False), default=None, help="Directory containing project SOCA metadata JSON files.")
 @click.option("--linkeddata-metadata-dir", type=click.Path(path_type=Path, file_okay=False), default=None, help="Directory where LinkedData portal metadata cache will be saved.")
 @click.option("--generated-config-output", type=click.Path(path_type=Path, dir_okay=False), default=None, help="Path where the resolved LinkedData YAML config will be written.")
-@click.option("--tools-file", type=click.Path(path_type=Path, exists=True, dir_okay=False), default=None, help="YAML file whose tools list replaces linkeddata.base.yml tools.")
+@click.option("--tools-file", type=click.Path(path_type=Path, exists=True, dir_okay=False), default=None, help="YAML file with a tools list of GitHub repository URLs.")
 def build_linkeddata_portal(
     config_path,
     templates_dir,
