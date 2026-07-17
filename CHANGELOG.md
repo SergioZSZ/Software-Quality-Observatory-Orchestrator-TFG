@@ -1,4 +1,5 @@
 # General
+- Ahora los failed_repos de anteriores iteraciones del workflow se intentan procesan en la siguiente para soca, rsfc y resqui
 - Aumentados los MB de descarga de somef a 2000MB para soca y sw-metadata-bot
 - Actualizados scripts de creación de imágenes docker y de instalación de herramientas para DashVERSE
 - Añadida nueva variable entorno `RESQUI_CONF` para seleccionar la configuración querida para los worker_resqui

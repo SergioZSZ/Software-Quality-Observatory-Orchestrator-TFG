@@ -183,6 +183,27 @@ def initialize_status(project, expected_repos):
     with acquire_status_lock(project) as status_file:
         write_status_atomic(status_file, status_data)
 
+# Lee los repositorios que quedaron fallidos en la ejecuciÃ³n anterior.
+def read_previous_failed_repositories(project) -> list[str]:
+    _, status_file, _ = get_status_paths(project)
+
+    if not os.path.isfile(status_file):
+        return []
+
+    with open(status_file, "r", encoding="utf-8") as file:
+        status_data = json.load(file)
+
+    failed_repos = status_data.get("failed_repos", [])
+    if not isinstance(failed_repos, list):
+        return []
+
+    return [
+        repository
+        for repository in failed_repos
+        if isinstance(repository, str) and repository.strip()
+    ]
+
+
 # Elimina únicamente los resultados SOCA de un repositorio retirado
 def remove_repository_metadata(
     metadata_dir: str | Path,
@@ -324,7 +345,19 @@ def main(
 
 
         # Procesar únicamente los repositorios nuevos o modificados.
-        repositories = changes.updated
+        previous_failed_repositories = read_previous_failed_repositories(project)
+        repositories = deduplicate_repositories(
+            [
+                *changes.updated,
+                *previous_failed_repositories,
+            ]
+        )
+
+        if previous_failed_repositories:
+            print(
+                f"**\nRetrying {len(previous_failed_repositories)} "
+                f"previously failed SOCA repositories\n"
+            )
 
         print(
         f"**\n{len(repositories)} repositories require processing "

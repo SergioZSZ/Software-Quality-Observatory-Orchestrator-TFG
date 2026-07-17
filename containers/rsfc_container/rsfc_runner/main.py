@@ -80,16 +80,84 @@ def initialize_status(target, expected_repos):
     )
 
 
+def normalize_repository(repository: str) -> str:
+    repository = repository.strip().rstrip("/")
+
+    if repository.endswith(".git"):
+        repository = repository[:-4]
+
+    return repository
+
+
+def deduplicate_repositories(repositories: list[str]) -> list[str]:
+    result = []
+    seen = set()
+
+    for repository in repositories:
+        if not isinstance(repository, str):
+            continue
+
+        normalized = normalize_repository(repository)
+
+        if not normalized:
+            continue
+
+        key = normalized.casefold()
+
+        if key in seen:
+            continue
+
+        seen.add(key)
+        result.append(normalized)
+
+    return result
+
+
+def read_previous_failed_repositories(target) -> list[str]:
+    status_file, _ = get_status_paths(target)
+
+    if not os.path.isfile(status_file):
+        return []
+
+    with open(status_file, "r", encoding="utf-8") as file:
+        status_data = json.load(file)
+
+    failed_repos = status_data.get("failed_repos", [])
+    if not isinstance(failed_repos, list):
+        return []
+
+    return [
+        repository
+        for repository in failed_repos
+        if isinstance(repository, str) and repository.strip()
+    ]
+
+
 
 def main(input: dict):
     
     repos = input.get("repos_url", [])
-    repos_count = len(repos)
     target = input.get("target")
     repos_removed = input.get("repos_removed", [])
 
     if not target:
         raise RuntimeError("Target name is required")
+
+    previous_failed_repositories = read_previous_failed_repositories(target)
+    repos = deduplicate_repositories(
+        [
+            *repos,
+            *previous_failed_repositories,
+        ]
+    )
+    repos_count = len(repos)
+
+    if previous_failed_repositories:
+        print(
+            f"**\nRetrying {len(previous_failed_repositories)} "
+            f"previously failed RSFC repositories\n",
+            flush=True,
+        )
 
     
     # truncado de indicadores obsoletos inicial
