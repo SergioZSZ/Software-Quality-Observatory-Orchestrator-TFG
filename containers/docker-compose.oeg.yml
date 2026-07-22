@@ -40,7 +40,8 @@ services:
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - RATE_LIMIT_RSFC_ENABLED=${RATE_LIMIT_RSFC_ENABLED}
-      
+    restart: unless-stopped
+
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -55,6 +56,7 @@ services:
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     networks:
     - net
+    restart: unless-stopped
 
 # *** SOCA ***
   worker_soca:
@@ -72,6 +74,7 @@ services:
       - DASHBOARD_ORG_EMBED_ID=${DASHBOARD_ORG_EMBED_ID}
       - DASHBOARD_REPO_EMBED_ID=${DASHBOARD_REPO_EMBED_ID}
       - SUPERSET_PUBLIC_DOMAIN=${SUPERSET_PUBLIC_DOMAIN:-http://host.docker.internal:8088}
+    restart: unless-stopped
 
 
   nginx:
@@ -84,7 +87,8 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - net
-      
+    restart: unless-stopped
+  
 # *** RSFC ***
 
   worker_rsfc:
@@ -99,6 +103,7 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+    restart: unless-stopped
 
 
   rate_limiter_rsfc:
@@ -111,7 +116,7 @@ services:
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - RATE_LIMIT_RSFC_ENABLED=${RATE_LIMIT_RSFC_ENABLED}
-
+    restart: unless-stopped
     networks:
       - net
 
@@ -128,7 +133,7 @@ services:
       - ./outputs:/app/outputs
       - resqui_work:/resqui-work
       - /var/run/docker.sock:/var/run/docker.sock
-
+    restart: unless-stopped
     environment:
       - GITHUB_TOKEN=${GITHUB_API_TOKEN}
       - RABBITMQ_HOST=rabbitmq
@@ -149,7 +154,7 @@ services:
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - RATE_LIMIT_RESQUI_ENABLED=${RATE_LIMIT_RESQUI_ENABLED}
-
+    restart: unless-stopped
     networks:
       - net
 
