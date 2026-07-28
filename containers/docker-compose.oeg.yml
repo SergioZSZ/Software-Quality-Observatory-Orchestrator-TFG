@@ -5,13 +5,13 @@ services:
 # *** Gestión del wokflow ***
   n8n:
     build: ./n8n_container
-    container_name: n8n
     user: root
     network_mode: host
     volumes:
       - ./n8n_container/n8n_data:/home/node/.n8n
       - /var/run/docker.sock:/var/run/docker.sock
-      - .//outputs:/root/.n8n-files
+      - ./dashverse_runner:/opt/dashverse_runner:ro
+      - ./outputs:/root/.n8n-files
     depends_on:
       - rabbitmq
     group_add:
@@ -45,7 +45,6 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
     ports:
     - "5672:5672"
     - "15672:15672"
@@ -79,7 +78,6 @@ services:
 
   nginx:
     image: nginx:1.27-alpine
-    container_name: sqoo_nginx
     ports:
       - "${PORTAL_PORT:-8030}:80"
     volumes:
@@ -103,6 +101,7 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_USER=${RABBITMQ_USER}
       - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - OUTPUTS=/app/outputs
     restart: unless-stopped
 
 

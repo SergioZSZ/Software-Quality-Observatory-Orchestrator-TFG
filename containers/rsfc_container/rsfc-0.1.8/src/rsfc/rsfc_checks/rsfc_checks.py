@@ -3,10 +3,12 @@ from rsfc.model import check as ch
 import regex as re
 import requests
 from rsfc.utils import rsfc_helpers
-
+from rsfc.utils.registry import test_registry
+from rsfc.harvesters.github_harvester import detect_repo_type
 
 ################################################### FRSM_01 ###################################################
 
+@test_registry.register_test("RSFC-01-1", args=["somef_data"])
 def test_id_presence_and_resolves(somef_data):
     
     if "identifier" not in somef_data:
@@ -56,6 +58,7 @@ def test_id_presence_and_resolves(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-01-3", args=["somef_data"])
 def test_id_common_schema(somef_data):
     output = "true"
     evidence = constants.EVIDENCE_ID_COMMON_SCHEMA
@@ -110,6 +113,7 @@ def test_id_common_schema(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-01-2", args=["somef_data"])
 def test_id_associated_with_software(somef_data):
     id_locations = {
         'codemeta.json': False,
@@ -168,6 +172,7 @@ def test_id_associated_with_software(somef_data):
 ################################################### FRSM_03 ###################################################
 
 
+@test_registry.register_test("RSFC-03-6", args=["somef_data"])
 def test_version_number_in_metadata(somef_data):
 
     if 'version' in somef_data:
@@ -197,6 +202,7 @@ def test_version_number_in_metadata(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-03-1", args=["somef_data"])
 def test_has_releases(somef_data):
     if 'releases' not in somef_data:
         output = "false"
@@ -215,7 +221,8 @@ def test_has_releases(somef_data):
 
     return check.convert()
     
-    
+
+@test_registry.register_test("RSFC-03-2", args=["somef_data"])
 def test_release_id_and_version(somef_data):
     if 'releases' not in somef_data:
         output = "false"
@@ -234,7 +241,7 @@ def test_release_id_and_version(somef_data):
                 if output != "false":
                     output = "false"
                     suggest = constants.SUGGEST_NO_RELEASE_ID_AND_VERSION
-                bad_releases += f"\t\n- {item['result']['html_url']}"
+                bad_releases += f'\t\n- {item["result"]["html_url"]}'
         
         if output == "false":
             evidence = constants.EVIDENCE_NO_RELEASE_ID_AND_VERSION + bad_releases
@@ -244,6 +251,7 @@ def test_release_id_and_version(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-03-3", args=["somef_data"])
 def test_semantic_versioning_standard(somef_data):
     if 'releases' not in somef_data or not isinstance(somef_data['releases'], list) or len(somef_data['releases']) == 0:
         output = "false"
@@ -289,7 +297,8 @@ def test_semantic_versioning_standard(somef_data):
     
     return check.convert()
         
-    
+
+@test_registry.register_test("RSFC-03-4", args=["somef_data"])
 def test_version_scheme(somef_data):
     if 'releases' not in somef_data:
         output = "false"
@@ -327,6 +336,7 @@ def test_version_scheme(somef_data):
 
 
 
+@test_registry.register_test("RSFC-03-5", args=["somef_data"])
 def test_latest_release_consistency(somef_data):
     latest_release = None
     version = None
@@ -361,6 +371,8 @@ def test_latest_release_consistency(somef_data):
 
 ################################################### FRSM_04 ###################################################
 
+
+@test_registry.register_test("RSFC-04-1", args=["somef_data", "gh_data"])
 def test_metadata_exists(somef_data, gh_data):
     metadata_files = {
         'CITATION.cff': False,
@@ -395,6 +407,7 @@ def test_metadata_exists(somef_data, gh_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-04-2", args=["somef_data"])
 def test_readme_exists(somef_data):
     if 'readme_url' in somef_data:
         output = "true"
@@ -410,6 +423,7 @@ def test_readme_exists(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-04-3", args=["somef_data"])
 def test_title_description(somef_data):
     title_evidence_part = None
     desc_evidence_part = None
@@ -470,6 +484,7 @@ def test_title_description(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-04-4", args=["somef_data"])
 def test_descriptive_metadata(somef_data):
     desc_sources = set()
     lang_sources = set()
@@ -534,6 +549,7 @@ def test_descriptive_metadata(somef_data):
         
         
 
+@test_registry.register_test("RSFC-04-5", args=["gh_data"])
 def test_codemeta_exists(gh_data):
     if gh_data.codemeta != None:
         output = "true"
@@ -550,6 +566,8 @@ def test_codemeta_exists(gh_data):
 
 ################################################### FRSM_05 ###################################################
 
+
+@test_registry.register_test("RSFC-05-1", args=["somef_data"])
 def test_repo_status(somef_data):
     unique_sources = set()
     
@@ -578,6 +596,7 @@ def test_repo_status(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-05-2", args=["somef_data"])
 def test_contact_support_documentation(somef_data):
     unique_sources = set()
     
@@ -609,6 +628,7 @@ def test_contact_support_documentation(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-05-3", args=["somef_data"])
 def test_software_documentation(somef_data):
     rtd = False
     readme = False
@@ -655,6 +675,8 @@ def test_software_documentation(somef_data):
 
 ################################################### FRSM_06 ###################################################
 
+
+@test_registry.register_test("RSFC-06-1", args=["somef_data"])
 def test_authors(somef_data):
     unique_sources = set()
     
@@ -693,6 +715,8 @@ def test_authors(somef_data):
     return check.convert()
 
 
+
+@test_registry.register_test("RSFC-06-2", args=["somef_data"])
 def test_contributors(somef_data):
     unique_sources = set()
     
@@ -721,6 +745,7 @@ def test_contributors(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-06-3", args=["somef_data"])
 def test_authors_orcids(somef_data):
     missing_orcid_sources = set()
     
@@ -811,6 +836,8 @@ def test_authors_orcids(somef_data):
 
 ################################################### FRSM_07 ###################################################
 
+
+@test_registry.register_test("RSFC-07-1", args=["somef_data"])
 def test_identifier_in_readme_citation(somef_data):
     readme_ids = []
     citation_ids = []
@@ -868,6 +895,7 @@ def test_identifier_in_readme_citation(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-07-2", args=["somef_data", "repo_url"])
 def test_identifier_resolves_to_software(somef_data, repo_url):
     output = "false"
     evidence = constants.EVIDENCE_NO_IDENTIFIER_FOUND
@@ -925,6 +953,8 @@ def test_identifier_resolves_to_software(somef_data, repo_url):
 
 ################################################### FRSM_08 ###################################################
 
+
+@test_registry.register_test("RSFC-08-1", args=["somef_data"])
 def test_metadata_record_in_zenodo_or_software_heritage(somef_data):
     zenodo_identifiers = []
     swh_identifiers = []
@@ -972,33 +1002,44 @@ def test_metadata_record_in_zenodo_or_software_heritage(somef_data):
 
 ################################################### FRSM_09 ###################################################
 
-def test_is_github_repository(repo_url):
 
-    if 'github.com' in repo_url or 'gitlab.com' in repo_url:
-        response = requests.head(repo_url, allow_redirects=True, timeout=5)
-        if response.status_code == 200:
-            output = "true"
-            evidence = constants.EVIDENCE_IS_IN_GITHUB_OR_GITLAB
-            suggest = "N/A"
-        elif response.status_code == 404:
-            output = "false"
-            evidence = constants.EVIDENCE_NO_RESOLVE_GITHUB_OR_GITLAB_URL
-            suggest = "N/A"
+@test_registry.register_test("RSFC-09-1", args=["repo_url"])
+def test_is_github_repository(repo_url):
+    # TODO: change the name of the function?
+
+        try:
+            detect_repo_type(repo_url)      
+            supported = True
+        except ValueError:
+            supported = False
+
+        if supported:
+            response = requests.head(repo_url, allow_redirects=True, timeout=5)
+            if response.status_code == 200:
+                output = "true"
+                evidence = constants.EVIDENCE_IS_IN_GITHUB_OR_GITLAB
+                suggest = "N/A"
+            elif response.status_code == 404:
+                output = "false"
+                evidence = constants.EVIDENCE_NO_RESOLVE_GITHUB_OR_GITLAB_URL
+                suggest = "N/A"
+            else:
+                output = "error"
+                evidence = 'Connection error'
+                suggest = "N/A"
         else:
-            output = "error"
-            evidence = 'Connection error'
+            output = "false"
+            evidence = constants.EVIDENCE_NO_GITHUB_OR_GITLAB_URL
             suggest = "N/A"
-    else:
-        output = "false"
-        evidence = constants.EVIDENCE_NO_GITHUB_OR_GITLAB_URL
-        suggest = "N/A"
+            
+        check = ch.Check(constants.INDICATORS_DICT['version_control_use'], 'RSFC-09-1', "Repository is from Github/Gitlab", constants.PROCESS_IS_GITHUB_OR_GITLAB_REPOSITORY, output, evidence, suggest)
     
-    check = ch.Check(constants.INDICATORS_DICT['version_control_use'], 'RSFC-09-1', "Repository is from Github/Gitlab", constants.PROCESS_IS_GITHUB_OR_GITLAB_REPOSITORY, output, evidence, suggest)
-    
-    return check.convert()
+        return check.convert()
 
 ################################################### FRSM_12 ###################################################
 
+
+@test_registry.register_test("RSFC-12-1", args=["somef_data"])
 def test_reference_publication(somef_data):
     ref_pub_found = []
     article_citations_found = []
@@ -1058,6 +1099,8 @@ def test_reference_publication(somef_data):
 
 ################################################### FRSM_13 ###################################################
 
+
+@test_registry.register_test("RSFC-13-1", args=["somef_data"])
 def test_dependencies_declared(somef_data):
     if 'requirements' not in somef_data:
         output = "false"
@@ -1082,6 +1125,7 @@ def test_dependencies_declared(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-13-2", args=["somef_data"])
 def test_installation_instructions(somef_data):
     if 'installation' in somef_data and somef_data['installation']:
         output = "false"
@@ -1115,6 +1159,7 @@ def test_installation_instructions(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-13-3", args=["somef_data"])
 def test_dependencies_have_version(somef_data):
     if 'requirements' not in somef_data:
         output = "false"
@@ -1153,6 +1198,7 @@ def test_dependencies_have_version(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-13-4", args=["somef_data"])
 def test_dependencies_in_machine_readable_file(somef_data):
     if 'requirements' not in somef_data:
         output = "false"
@@ -1194,8 +1240,10 @@ def test_dependencies_in_machine_readable_file(somef_data):
 
 ################################################### FRSM_14 ###################################################
 
-def test_presence_of_tests(gh):
-    test_evidences = gh.tests
+
+@test_registry.register_test("RSFC-14-1", args=["gh_data"])
+def test_presence_of_tests(gh_data):
+    test_evidences = gh_data.tests
 
     if test_evidences:
         rx = re.compile(r'tests?', re.IGNORECASE)
@@ -1227,6 +1275,7 @@ def test_presence_of_tests(gh):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-14-2", args=["somef_data"])
 def test_github_action_tests(somef_data):
     sources = ''
     
@@ -1272,6 +1321,8 @@ def test_github_action_tests(somef_data):
 
 ################################################### FRSM_15 ###################################################
 
+
+@test_registry.register_test("RSFC-15-1", args=["somef_data"])
 def test_has_license(somef_data):
     if 'license' not in somef_data:
         output = "false"
@@ -1296,6 +1347,7 @@ def test_has_license(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-15-2", args=["somef_data"])
 def test_license_spdx_compliant(somef_data):
     output = "false"
     evidence = None
@@ -1360,6 +1412,8 @@ def test_license_spdx_compliant(somef_data):
 
 ################################################### FRSM_16 ###################################################
 
+
+@test_registry.register_test("RSFC-16-1", args=["somef_data"])
 def test_license_info_in_metadata_files(somef_data):
     license_info = {
         'codemeta': None,
@@ -1448,9 +1502,10 @@ def test_license_info_in_metadata_files(somef_data):
     return check.convert()'''
 
 
-def test_commit_history(gh):
+@test_registry.register_test("RSFC-17-2", args=["gh_data"])
+def test_commit_history(gh_data):
 
-    commits = gh.commits
+    commits = gh_data.commits
     
     if commits[1] != []:
         output = "true"
@@ -1465,9 +1520,12 @@ def test_commit_history(gh):
     
     return check.convert()
 
-def test_commits_linked_issues(gh):
-    commits = gh.commits
-    issues = gh.issues
+
+
+@test_registry.register_test("RSFC-17-3", args=["gh_data"])
+def test_commits_linked_issues(gh_data):
+    commits = gh_data.commits
+    issues = gh_data.issues
     commits_list = commits[1]
 
     if commits_list == [] or issues == []:
@@ -1497,6 +1555,7 @@ def test_commits_linked_issues(gh):
 ################################################### MISC ###################################################
 
 
+@test_registry.register_test("RSFC-18-1", args=["somef_data"])
 def test_has_citation(somef_data):
 
     if 'citation' not in somef_data:
@@ -1528,6 +1587,7 @@ def test_has_citation(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-19-1", args=["somef_data"])
 def test_repository_workflows(somef_data):
 
     if 'continuous_integration' not in somef_data:
@@ -1547,6 +1607,7 @@ def test_repository_workflows(somef_data):
     return check.convert()
 
 
+@test_registry.register_test("RSFC-20-1", args=["somef_data"])
 def test_has_issue_tracker(somef_data):
     
     if "issue_tracker" not in somef_data:
@@ -1557,7 +1618,7 @@ def test_has_issue_tracker(somef_data):
         for item in somef_data["issue_tracker"]:
             sources = ""
             if "source" in item:
-                sources += f"\n\t- {item['source']}"
+                sources += f'\n\t- {item["source"]}'
                 
         if sources:
             evidence = constants.EVIDENCE_ISSUE_TRACKER_SOURCE + sources
@@ -1572,6 +1633,8 @@ def test_has_issue_tracker(somef_data):
     return check.convert()
 
 
+
+@test_registry.register_test("RSFC-21-1", args=["somef_data"])
 def test_has_contribution_guidelines(somef_data):
     if "contributing_guidelines" not in somef_data:
         output = "false"
@@ -1597,6 +1660,9 @@ def test_has_contribution_guidelines(somef_data):
     
     return check.convert()
 
+
+
+@test_registry.register_test("RSFC-22-1", args=["somef_data"])
 def test_containerized(somef_data):
     
     unique_sources = set()

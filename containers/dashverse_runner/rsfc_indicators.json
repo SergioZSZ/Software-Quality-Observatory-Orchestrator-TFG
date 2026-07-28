@@ -1,0 +1,35 @@
+{
+  "indicators": [
+      { "name": "archived_in_software_heritage", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/archived_in_software_heritage", "checks": [
+          "Searches for Zenodo and Software Heritage badges in the README file of the repository"
+      ] },
+      { "name": "descriptive_metadata", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/descriptive_metadata", "checks": [
+          "Searches for description, programming languages, date of creation and keywords in the repository"
+      ] },
+      { "name": "has_releases", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/has_releases", "checks": [
+          "Searches for release tags in the repository"
+      ] },
+      { "name": "persistent_and_unique_identifier", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/persistent_and_unique_identifier", "checks": [
+          "Searches for an identifier in the README or CITATION.cff files of the repository"
+      ] },
+      { "name": "repository_workflows", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/repository_workflows", "checks": [
+          "Searches for workflows in the repository"
+      ] },
+      { "name": "requirements_specified", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/requirements_specified", "checks": [
+          "Searches for dependencies in project configuration files, README and dependencies files such as requirements.txt"
+      ] },
+      { "name": "software_has_citation", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/software_has_citation", "checks": [
+          "Searches for an article citation or a reference publication in the codemeta and citation files"
+      ] },
+      { "name": "software_has_documentation", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/software_has_documentation", "checks": [
+          "Searches for a README file in the root repository and other forms of documentation such as a Read The Docs badge or url"
+      ] },
+      { "name": "software_has_license", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/software_has_license", "operator": "OR", "checks": [
+          "Searches for a file named 'LICENSE' or 'LICENSE.md' in the root of the repository.",
+          "Searches for licensing information in the codemeta, CITATION.cff and package files if they exist"
+      ] },
+      { "name": "version_control_use", "plugin": "RSFC", "@id": "https://w3id.org/everse/i/indicators/version_control_use", "checks": [
+          "Checks if the URL provided is indeed a Github or Gitlab repository"
+      ] }
+  ]
+}

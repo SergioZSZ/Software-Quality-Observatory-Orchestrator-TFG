@@ -2980,7 +2980,7 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<8)"]
 
 [[package]]
 name = "resqui"
-version = "0.2.1.dev11+g70f583858.d20260707"
+version = "0.2.1.dev11+g70f583858.d20260716"
 description = "EVERSE Research Software Quality Indicators"
 optional = false
 python-versions = ">=3.9"
@@ -3128,7 +3128,7 @@ files = [
 
 [[package]]
 name = "rsfc"
-version = "0.1.7"
+version = "0.1.8"
 description = "EVERSE Research Software Fairness Checks"
 optional = false
 python-versions = ">=3.11,<3.13"
@@ -3167,7 +3167,7 @@ jsonschema = "4.24.0"
 jsonschema-specifications = "2025.4.1"
 jupyter-core = "5.8.1"
 kiwisolver = "1.4.8"
-lxml = "^6.1.0"
+lxml = ">=6.1.1,<7.0.0"
 markdown = "3.8.1"
 markupsafe = "3.0.2"
 matplotlib = "3.11.0"
@@ -3220,7 +3220,7 @@ xgboost = "2.1.4"
 
 [package.source]
 type = "directory"
-url = "containers/rsfc_container/rsfc-0.1.7"
+url = "containers/rsfc_container/rsfc-0.1.8"
 
 [[package]]
 name = "ruamel-yaml"
@@ -4111,4 +4111,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.13"
-content-hash = "768b260df986a0f7eaed0d160e056ca6c48feabe96eddcb761919799d16e6e86"
+content-hash = "b92dad475d70f98aec0b679acbfa3d4919ff964ad9466eff3c064073d7cb3e7c"

@@ -16,7 +16,7 @@ Al final, `soca_runner.genportal` combina los metadatos con los resultados de ca
 
 ## RSFC
 
-La imagen `rsfc-heavy` utiliza RSFC 0.1.7 y reutiliza los metadatos SOCA cuando están disponibles. El launcher publica los repositorios actualizados en `rsfc_jobs` y elimina las salidas de los repositorios retirados.
+La imagen `rsfc-heavy` utiliza RSFC 0.1.8 y reutiliza los metadatos SOCA cuando están disponibles. El worker busca el JSON de `outputs/soca/<project>/metadata/<owner>_<repo>_*.json`, lo pasa a RSFC con `--metadata` y, si no existe, ejecuta RSFC con el análisis normal del repositorio. El launcher publica los repositorios actualizados en `rsfc_jobs` y elimina las salidas de los repositorios retirados.
 
 Cada worker:
 

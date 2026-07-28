@@ -22,6 +22,9 @@
 - Las tools nuevas se declaran solo como URLs de GitHub en ese YAML; los campos de la card se rellenan desde metadatos SOCA/SOMEF.
 - Si no existen metadatos previos de SOCA para una URL, se intentan extraer como fallback.
 
+- Implementado sqoo_assessment, fusionando los assessments de rsfc y resqui para subir a DashVERSE un unico assessment por repo. De RSFC debido a que hay indicadores con más de un check, se decidió usar esta configuración relación indicador/checks: 
+[conf](containers/dashverse_runner/rsfc_indicators.json)
+
 # SW-METADATA-BOT
 
 
@@ -30,11 +33,12 @@
 - Mejorada la de detección de tipo de repositorio
 - Mejorada la obtención der descripciones a partir de metadatos de los repositorios
 # RSFC
-
+- Actualizado a versión RSFC 0.1.8
 
 # RESQUI
 - Arreglados bugs de conexión timeout worker_resqui-rabbitmq
 - Mejorada la tolerancia a git clone en los worker_resqui
+
 # DashVERSE
 
 

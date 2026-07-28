@@ -19,8 +19,8 @@ RUN python -m nltk.downloader wordnet
 RUN python -m nltk.downloader omw-1.4
 
 # rsfc 
-COPY rsfc-0.1.7 ./rsfc-0.1.7
-RUN pip install -e ./rsfc-0.1.7
+COPY rsfc-0.1.8 ./rsfc-0.1.8
+RUN pip install -e ./rsfc-0.1.8
 
 
 # resto del runner

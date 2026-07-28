@@ -1,0 +1,6 @@
+python containers\dashverse_runner\build_sqoo_assessment.py `
+  --rsfc path\to\rsfc_assessment.json `
+  --resqui path\to\resqui_summary.json `
+  --rsfc-indicators containers\dashverse_runner\rsfc_indicators.json `
+  --output-dir containers\outputs\sqoo_assessments `
+  --project sergio-soca-incremental

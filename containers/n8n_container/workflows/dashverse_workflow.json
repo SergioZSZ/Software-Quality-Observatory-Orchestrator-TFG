@@ -3,32 +3,16 @@
   "nodes": [
     {
       "parameters": {
-        "fileSelector": "=/root/.n8n-files/rsfc/{{$json.project}}/{{$json.repository_key}}/rsfc_output/rsfc_assessment.json",
-        "options": {
-          "fileExtension": ".json"
-        }
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1.1,
-      "position": [
-        -320,
-        -192
-      ],
-      "id": "9ccb28a9-ad02-4791-b3fd-e93bb92e0535",
-      "name": "read assessments RSFC"
-    },
-    {
-      "parameters": {
         "inputSource": "jsonExample",
         "jsonExample": "  \n{\n\"repos_url\": [],\n\"repo_count\": 123,\n\"project\": \"a string\"\n}"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1056,
-        -16
+        -1472,
+        224
       ],
-      "id": "d27d1175-ff9a-48c9-8ccd-1999952149ad",
+      "id": "57e5c3d0-a10b-4385-a921-aab09f3a26b5",
       "name": "Trigger"
     },
     {
@@ -38,15 +22,43 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -576,
-        -16
+        -992,
+        224
       ],
-      "id": "c1b0d818-aaec-474f-b4e7-2c4beff7583d",
+      "id": "e73ac9a7-2e86-4c64-b2e6-562fc39c88cc",
       "name": "Code url->target-name"
     },
     {
       "parameters": {
-        "fileSelector": "=/root/.n8n-files/resqui/{{$json.project}}/{{$json.repository_key}}/resqui_summary.json",
+        "fieldToSplitOut": "repos_url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        224
+      ],
+      "id": "b3a0901a-67b8-472c-84d2-8fd1c8753477",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=python3 /opt/dashverse_runner/build_sqoo_assessment.py \\\n  --rsfc /root/.n8n-files/rsfc/{{$json.project}}/{{$json.repository_key}}/rsfc_output/rsfc_assessment.json \\\n  --resqui /root/.n8n-files/resqui/{{$json.project}}/{{$json.repository_key}}/resqui_summary.json \\\n  --rsfc-indicators /opt/dashverse_runner/rsfc_indicators.json \\\n  --output /root/.n8n-files/sqoo_assessments/{{$json.repository_key}}_assessment.json"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        224
+      ],
+      "id": "dce2ce82-f09e-4bd9-9e73-ec49d91c02a3",
+      "name": "build sqoo_assessment"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/root/.n8n-files/sqoo_assessments/{{$json.repository_key}}_assessment.json",
         "options": {
           "fileExtension": ".json"
         }
@@ -55,10 +67,23 @@
       "typeVersion": 1.1,
       "position": [
         -320,
-        48
+        32
       ],
-      "id": "8c4b6dcc-7998-4033-af1e-dc3896950db7",
-      "name": "read assessments RESQUI"
+      "id": "2e40002b-808a-4159-9bf2-0b97848ba29f",
+      "name": "read assessments"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -544,
+        32
+      ],
+      "id": "a7f63004-b048-4a31-bf92-09a79c259586",
+      "name": "Merge"
     },
     {
       "parameters": {
@@ -70,64 +95,10 @@
       "typeVersion": 1.1,
       "position": [
         -96,
-        48
+        16
       ],
       "id": "57da385a-2015-4f18-89a0-4f977fe50560",
-      "name": "Extract assessments RESQUI"
-    },
-    {
-      "parameters": {
-        "operation": "fromJson",
-        "destinationKey": "assessment",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1.1,
-      "position": [
-        -96,
-        -192
-      ],
-      "id": "c13bd484-2751-4793-8535-f7a0b92c7b68",
-      "name": "Extract assessments RSFC"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://host.docker.internal:3000/assessment_raw",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $env.DASHVERSE_JWT }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ { payload: $json.assessment } }}",
-        "options": {
-          "batching": {
-            "batch": {
-              "batchSize": 200,
-              "batchInterval": 1000
-            }
-          },
-          "redirect": {}
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        304,
-        -192
-      ],
-      "id": "89531b09-5c59-40a8-8431-c4232df33b7f",
-      "name": "Post assessments_raw RSFC"
+      "name": "Extract assessments"
     },
     {
       "parameters": {
@@ -162,53 +133,15 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        304,
-        48
+        128,
+        16
       ],
       "id": "7d656500-4c34-4de1-bf79-cc968dcb420d",
-      "name": "Post assessments_raw RESQUI"
-    },
-    {
-      "parameters": {
-        "fieldToSplitOut": "repos_url",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitOut",
-      "typeVersion": 1,
-      "position": [
-        -832,
-        -16
-      ],
-      "id": "2fec1d9f-debe-4c08-96dc-881fd278b971",
-      "name": "Split Out"
-    },
-    {
-      "parameters": {
-        "jsCode": "const assessmentSource = \"rsfc\";\n\nreturn $input.all().map(item => {\n  const assessment = item.json.assessment ?? item.json;\n  const repoUrl = assessment.assessedSoftware?.url ?? null;\n\n  const match = repoUrl?.match(\n    /^https?:\\/\\/github\\.com\\/([^/]+)\\/([^/?#]+)\\/?$/i\n  );\n\n  const owner = match?.[1] ?? null;\n  const repo = match?.[2] ?? null;\n\n  const generatedId =\n    repoUrl && assessment.dateCreated\n      ? `${repoUrl}/assessment/${assessmentSource}/${encodeURIComponent(assessment.dateCreated)}`\n      : null;\n\n  const existingCreatorName =\n    typeof assessment.creator === \"object\"\n      ? assessment.creator?.name\n      : assessment.creator;\n\n  const existingAuthorName =\n    typeof assessment.author === \"object\"\n      ? assessment.author?.name\n      : assessment.author;\n\n  // Prioridad: owner real del repo > creator existente > author existente > fallback\n  const creatorName =\n    owner ??\n    existingCreatorName ??\n    existingAuthorName ??\n    \"Unknown\";\n\n  item.json.assessment = {\n    ...assessment,\n\n    \"@id\": assessment[\"@id\"] || generatedId,\n\n    creator: {\n      ...(typeof assessment.creator === \"object\" ? assessment.creator : {}),\n      name: creatorName,\n    },\n\n    // Compatibilidad con validadores antiguos de DashVERSE\n    author: {\n      name: creatorName,\n    },\n\n    assessedSoftware: {\n      ...assessment.assessedSoftware,\n      name: assessment.assessedSoftware?.name || repo,\n      url: repoUrl,\n    },\n  };\n\n  return item;\n});"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        96,
-        -192
-      ],
-      "id": "6cdca9cb-b8e4-4508-b496-f4869ef6eb2e",
-      "name": "Code input @id + author in json-ld RSFC"
+      "name": "Post assessments"
     }
   ],
   "pinData": {},
   "connections": {
-    "read assessments RSFC": {
-      "main": [
-        [
-          {
-            "node": "Extract assessments RSFC",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Trigger": {
       "main": [
         [
@@ -224,45 +157,12 @@
       "main": [
         [
           {
-            "node": "read assessments RSFC",
+            "node": "build sqoo_assessment",
             "type": "main",
             "index": 0
           },
           {
-            "node": "read assessments RESQUI",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "read assessments RESQUI": {
-      "main": [
-        [
-          {
-            "node": "Extract assessments RESQUI",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract assessments RESQUI": {
-      "main": [
-        [
-          {
-            "node": "Post assessments_raw RESQUI",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract assessments RSFC": {
-      "main": [
-        [
-          {
-            "node": "Code input @id + author in json-ld RSFC",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -280,11 +180,44 @@
         ]
       ]
     },
-    "Code input @id + author in json-ld RSFC": {
+    "build sqoo_assessment": {
       "main": [
         [
           {
-            "node": "Post assessments_raw RSFC",
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "read assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract assessments": {
+      "main": [
+        [
+          {
+            "node": "Post assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read assessments": {
+      "main": [
+        [
+          {
+            "node": "Extract assessments",
             "type": "main",
             "index": 0
           }
@@ -297,7 +230,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "45ffd8fe-9059-4318-9a70-734f894122cc",
+  "versionId": "de81265d-955d-4c35-9f46-f73c721ef680",
   "meta": {
     "instanceId": "6177bb2190c233fe58db666087bf366235934ab541d37ef1876770361a8041d0"
   },

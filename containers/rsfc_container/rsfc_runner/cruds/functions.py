@@ -1,8 +1,9 @@
 from pathlib import Path
 import subprocess, os
 from ..models import RunResponse
+from ..repository_state import parse_github_repository_url
 from ..safe_logging import sanitize_data, sanitize_text
-from rsfc_runner.config import RSFC_COMMAND_TIMEOUT_SECONDS, RETRYABLE_ERRORS
+from ..config import OUTPUTS_ROOT, RSFC_COMMAND_TIMEOUT_SECONDS, RETRYABLE_ERRORS
 
 # funcion para ejecutar subprocessos
 def run_command(personal_dir: str,cmd: list[str], input: str | None = None, env: dict | None = None)-> dict:
@@ -61,14 +62,51 @@ def run_command(personal_dir: str,cmd: list[str], input: str | None = None, env:
     
 
 
-    
-    
-    
-def rfsc_runner(output_dir: str, repo_url: str, token: str | None = None, target: str | None = None) -> RunResponse:
+def find_soca_metadata(
+    repo_url: str,
+    target: str | None,
+    outputs_root: str | Path | None = None,
+) -> Path | None:
+    if not target:
+        return None
 
-    cmd = ["rsfc","--repo",f"{repo_url}"]
+    repository = parse_github_repository_url(repo_url)
+    base_outputs = Path(outputs_root) if outputs_root is not None else OUTPUTS_ROOT
+    metadata_dir = base_outputs / "soca" / target / "metadata"
+
+    if not metadata_dir.exists():
+        return None
+
+    metadata_files = sorted(
+        metadata_dir.glob(f"{repository.file_key}_*.json"),
+        key=lambda metadata_path: metadata_path.stat().st_mtime,
+    )
+    if not metadata_files:
+        return None
+
+    return metadata_files[-1]
+
+
+def build_rsfc_command(
+    repo_url: str,
+    token: str | None = None,
+    target: str | None = None,
+    outputs_root: str | Path | None = None,
+) -> list[str]:
+    cmd = ["rsfc", "--repo", repo_url]
+    metadata_path = find_soca_metadata(repo_url, target, outputs_root)
+
+    if metadata_path:
+        cmd.extend(["--metadata", str(metadata_path)])
+
     if token:
-        cmd.extend(["-t", token])    
+        cmd.extend(["-t", token])
+
+    return cmd
+
+
+def rfsc_runner(output_dir: str, repo_url: str, token: str | None = None, target: str | None = None) -> RunResponse:
+    cmd = build_rsfc_command(repo_url, token, target)
         
 
     personal_dir = Path(output_dir)

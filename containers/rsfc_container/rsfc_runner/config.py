@@ -1,9 +1,11 @@
 import os
+from pathlib import Path
 
 INPUT = os.getenv("INPUT")
 
 FILE_DIR = os.path.dirname(__file__)
 BASE_DIR = os.path.abspath(os.path.join(FILE_DIR, ".."))
+OUTPUTS_ROOT = Path(os.getenv("OUTPUTS", str(Path(BASE_DIR) / "outputs")))
 
 TOKEN = os.getenv("GITHUB_TOKEN")
 
