@@ -26,6 +26,13 @@ def load_json(path: str | Path) -> dict[str, Any]:
         return json.load(file)
 
 
+def load_optional_json(path: str | Path) -> dict[str, Any] | None:
+    input_path = Path(path)
+    if not input_path.exists():
+        return None
+    return load_json(input_path)
+
+
 def write_json(path: str | Path, payload: dict[str, Any]) -> None:
     output_path = Path(path)
     remove_existing_assessment_outputs(output_path)
@@ -72,6 +79,28 @@ def build_assessment(
     )
     assessment["checks"] = resqui_checks + rsfc_checks
     return assessment
+
+
+def build_assessment_from_available(
+    rsfc_assessment: dict[str, Any] | None,
+    resqui_summary: dict[str, Any] | None,
+    rsfc_indicators: dict[str, Any],
+) -> dict[str, Any] | None:
+    if resqui_summary and rsfc_assessment:
+        return build_assessment(rsfc_assessment, resqui_summary, rsfc_indicators)
+
+    if resqui_summary:
+        return copy.deepcopy(resqui_summary)
+
+    if rsfc_assessment:
+        assessment = copy.deepcopy(rsfc_assessment)
+        assessment["checks"] = _select_rsfc_checks(
+            rsfc_assessment.get("checks") or [],
+            rsfc_indicators.get("indicators") or [],
+        )
+        return assessment
+
+    return None
 
 
 def _select_rsfc_checks(
@@ -185,11 +214,23 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    assessment = build_assessment(
-        rsfc_assessment=load_json(args.rsfc),
-        resqui_summary=load_json(args.resqui),
+    assessment = build_assessment_from_available(
+        rsfc_assessment=load_optional_json(args.rsfc),
+        resqui_summary=load_optional_json(args.resqui),
         rsfc_indicators=load_json(args.rsfc_indicators),
     )
+    if assessment is None:
+        if args.output:
+            write_json(
+                args.output,
+                {
+                    "skip": True,
+                    "reason": "No RSFC or RESQUI assessment found.",
+                },
+            )
+        print("No RSFC or RESQUI assessment found. Skipping repository.", flush=True)
+        return
+
     output_path = args.output or output_path_for_assessment(
         args.output_dir,
         assessment,

@@ -102,6 +102,19 @@
     },
     {
       "parameters": {
+        "jsCode": "return $input.all().filter(item => !item.json.assessment?.skip);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        16
+      ],
+      "id": "333fd584-a296-49f0-8d88-caa07fb0a7bf",
+      "name": "Skip missing assessments"
+    },
+    {
+      "parameters": {
         "method": "POST",
         "url": "http://host.docker.internal:3000/assessment",
         "sendHeaders": true,
@@ -133,7 +146,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        128,
+        352,
         16
       ],
       "id": "7d656500-4c34-4de1-bf79-cc968dcb420d",
@@ -203,6 +216,17 @@
       ]
     },
     "Extract assessments": {
+      "main": [
+        [
+          {
+            "node": "Skip missing assessments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip missing assessments": {
       "main": [
         [
           {
