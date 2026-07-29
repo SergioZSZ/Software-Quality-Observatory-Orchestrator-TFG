@@ -19,6 +19,8 @@ ARCHIVED_SCHOLARLY_REPOSITORY = (
 )
 
 PASS_OUTPUTS = {"true", "valid", "pass", "passed"}
+RESQUI_AUTHOR = {"@type": "Person", "name": "Quality Pipeline"}
+RESQUI_LICENSE = "CC0-1.0"
 
 
 def load_json(path: str | Path) -> dict[str, Any]:
@@ -93,14 +95,34 @@ def build_assessment_from_available(
         return copy.deepcopy(resqui_summary)
 
     if rsfc_assessment:
-        assessment = copy.deepcopy(rsfc_assessment)
-        assessment["checks"] = _select_rsfc_checks(
-            rsfc_assessment.get("checks") or [],
-            rsfc_indicators.get("indicators") or [],
+        return _build_resqui_style_assessment_from_rsfc(
+            rsfc_assessment,
+            _select_rsfc_checks(
+                rsfc_assessment.get("checks") or [],
+                rsfc_indicators.get("indicators") or [],
+            ),
         )
-        return assessment
 
     return None
+
+
+def _build_resqui_style_assessment_from_rsfc(
+    rsfc_assessment: dict[str, Any],
+    checks: list[dict[str, Any]],
+) -> dict[str, Any]:
+    assessed_software = copy.deepcopy(rsfc_assessment.get("assessedSoftware") or {})
+    if assessed_software:
+        assessed_software["@type"] = "SoftwareApplication"
+
+    return {
+        "@context": rsfc_assessment.get("@context", "https://w3id.org/everse/rsqa/0.0.1/"),
+        "@type": rsfc_assessment.get("@type", "SoftwareQualityAssessment"),
+        "assessedSoftware": assessed_software,
+        "author": copy.deepcopy(rsfc_assessment.get("author") or RESQUI_AUTHOR),
+        "checks": checks,
+        "dateCreated": rsfc_assessment.get("dateCreated"),
+        "license": _normalize_assessment_license(rsfc_assessment.get("license")),
+    }
 
 
 def _select_rsfc_checks(
@@ -117,12 +139,12 @@ def _select_rsfc_checks(
             continue
 
         if str(indicator.get("operator", "")).upper() == "OR":
-            selected.append(_merge_or_check(indicator_id, matches))
+            selected.append(_normalize_rsfc_check(_merge_or_check(indicator_id, matches)))
         else:
-            selected.extend(copy.deepcopy(matches))
+            selected.extend(_normalize_rsfc_check(check) for check in matches)
 
         if indicator_id == ARCHIVED_SOFTWARE_HERITAGE:
-            selected.append(_derive_scholarly_repository_check(matches[0]))
+            selected.append(_derive_scholarly_repository_check(selected[-1]))
 
     return selected
 
@@ -153,6 +175,39 @@ def _merge_or_check(indicator_id: str | None, checks: list[dict[str, Any]]) -> d
     merged.pop("test_name", None)
     merged.pop("suggestions", None)
     return merged
+
+
+def _normalize_rsfc_check(check: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "@type": check.get("@type", "CheckResult"),
+        "assessesIndicator": copy.deepcopy(check.get("assessesIndicator") or {}),
+        "checkingSoftware": _normalize_checking_software(
+            check.get("checkingSoftware") or {}
+        ),
+        "process": check.get("process", ""),
+        "status": copy.deepcopy(check.get("status") or {}),
+        "output": check.get("output", ""),
+        "evidence": check.get("evidence", "N/A"),
+    }
+
+
+def _normalize_checking_software(checking_software: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "name": checking_software.get("name", "RSFC"),
+        "version": checking_software.get("version")
+        or checking_software.get("softwareVersion", "unknown"),
+    }
+
+
+def _normalize_assessment_license(license_value: Any) -> str:
+    if isinstance(license_value, str):
+        return license_value
+    if isinstance(license_value, dict):
+        license_id = str(license_value.get("@id") or "").rstrip("/")
+        if license_id == "https://creativecommons.org/publicdomain/zero/1.0":
+            return RESQUI_LICENSE
+        return str(license_value.get("name") or license_value.get("@id") or RESQUI_LICENSE)
+    return RESQUI_LICENSE
 
 
 def _derive_scholarly_repository_check(check: dict[str, Any]) -> dict[str, Any]:
